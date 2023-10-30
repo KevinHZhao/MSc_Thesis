@@ -1,3 +1,15 @@
+#' Mating Asymmetry Likelihood Ratio Test
+#'
+#' `MaSlrt()` runs a Likelihood Ratio Test for a trios model with Mating Asymmetry.
+#'
+#' @param dat A dataframe formatted with the same columns as [example_dat4R]
+#' Note that PED files can be converted into this format using the [planned()] function.
+#'
+#' @return A p-value for the Likelihood Ratio Test.
+#' @export
+#'
+#' @examples
+#' MaSlrt(example_dat4R)
 MaSlrt <- function(dat) {
   subdat <- dat[c(2:7, 11:14), ]
   subdat <- aggregate(subdat$count, by = list(M = subdat$M, F = subdat$F), sum)

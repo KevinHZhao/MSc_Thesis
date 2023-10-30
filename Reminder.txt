@@ -2,3 +2,5 @@ check 2005 weinberg unbach for hypothesis testing MS vs MaS
 can compare BIC
 power gets ruined by PS test, can include in testing
 R package, return likelihood (loglik), get BIC
+
+Peter-Morand epidemiology building (meets roger guindon)
