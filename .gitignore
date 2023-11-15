@@ -49,4 +49,9 @@ po/*~
 rsconnect/
 
 .pversion
-plink.log
+
+*.aux
+*.bbl
+*.blg
+*.synctex.gz
+*.log

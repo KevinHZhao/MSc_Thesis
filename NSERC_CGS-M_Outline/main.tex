@@ -1,0 +1,19 @@
+\documentclass[12pt]{article}
+\usepackage{mathptmx}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{natbib}
+\usepackage{graphicx} % Required for inserting images
+
+\begin{document}
+
+In analyses of genetic predictors for health outcomes such as disease status, two study designs have emerged.  Population-based designs, such as case-control studies, and family-based designs, such as case-parents studies.  Both have distinct weaknesses, mainly through unaddressed confounders which may impact potential inferences.  \cite{Wein05} proposed a hybrid design addressing weaknesses of both designs, where trio data of cases and their biological parents could be compared to control trios to draw inferences using a log-linear generalized linear model (GLM).  With this model, the effect sizes of potential confounders like maternal genetic factors on relative risk can easily be considered and quantified.
+
+In our research project, we will create an R package allowing anyone to analyze trio data with the hybrid model.  This includes the basic code to fit the model as a GLM object in R, which will allow users to construct confidence intervals and perform significance tests on covariates using functions in base R.  The model will be designed to be robust, allowing users to input data with or without controls and account for missing data.  We will also conduct several simulation studies to assess the model's accuracy and power in simulated datasets, which could help elucidate strengths and weaknesses of our model.  As a GLM, the model in our package can have a wide variety of cofactors added to it by advanced users.  By default, we will consider a few common confounders, highlighted below, both in our documentation and as helper functions in our code.
+
+When studying diseases like spina bifida which are known to be dependent on one's gestational environment \citep{Hobb14}, we must include maternal genetic factors, which would typically not be collected in a case-control study.  Maternal gene-environment interactions, such as the extent smoking impacts a mother's child in her womb being dependent on the mother's genotype, are another potential confounder. We also have mating asymmetry (MA), where mothers and fathers do not have the same distribution of alleles among the population.  This in turn can cause us to falsely conclude that maternal effects are present should we assume the two distributions are the same, when it is really due to population structures.  Although this subject has not been thoroughly studied, \cite{Bour+11} have shown that MA can be observed in human populations, to the extent of creating significant effects in models that do not consider MA.  Lastly, we have parent-of-origin effects (imprinting), where a child's outcome is dependent not only on their allele status, but also on the parent that contributed said allele \citep{Ains11}.
+
+\newpage
+\bibliographystyle{chicago}
+\bibliography{Bibliography}
+
+\end{document}
