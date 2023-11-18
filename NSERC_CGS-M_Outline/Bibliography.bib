@@ -1,3 +1,46 @@
+@ARTICLE{Wein98,
+  title     = "A log-linear approach to case-parent-triad data: assessing
+               effects of disease genes that act either directly or through
+               maternal effects and that may be subject to parental imprinting",
+  author    = "Weinberg, C R and Wilcox, A J and Lie, R T",
+  abstract  = "We describe a log-linear method for analysis of
+               case-parent-triad data, based on maximum likelihood with
+               stratification on parental mating type. The method leads to
+               estimates of association parameters, such as relative risks, for
+               a single allele, and also to likelihood ratio chi2 tests (LRTs)
+               of linkage disequilibrium. Hardy-Weinberg equilibrium need not
+               be assumed. Our simulations suggest that the LRT has power
+               similar to that of the chi2 ``score'' test proposed by Schaid
+               and Sommer and that both can outperform the
+               transmission/disequilibrium test (TDT), although the TDT can
+               perform better under an additive model of inheritance. Because a
+               restricted version of the LRT is asymptotically equivalent to
+               the TDT, the proposed test can be regarded as a generalization
+               of the TDT. The method that we describe generalizes easily to
+               accommodate maternal effects on risk and, in fact, produces
+               powerful and orthogonal tests of the contribution of fetal
+               versus maternal genetic factors. We further generalize the model
+               to allow for effects of parental imprinting. Imprinting effects
+               can be fitted by a simple, iterative procedure that relies on
+               the expectation-maximization algorithm and that uses standard
+               statistical software for the maximization steps. Simulations
+               reveal that LRT tests for detection of imprinting have very good
+               operating characteristics. When a single allele is under study,
+               the proposed method can yield powerful tests for detection of
+               linkage disequilibrium and is applicable to a broader array of
+               causal scenarios than is the TDT.",
+  journal   = "Am. J. Hum. Genet.",
+  publisher = "Elsevier BV",
+  volume    =  62,
+  number    =  4,
+  pages     = "969--978",
+  month     =  apr,
+  year      =  1998,
+  copyright = "https://www.elsevier.com/open-access/userlicense/1.0/",
+  language  = "en"
+}
+
+
 @ARTICLE{Ains11,
   title    = "Investigation of maternal effects, maternal-fetal interactions
               and parent-of-origin effects (imprinting), using mothers and
@@ -108,6 +151,106 @@ year = {2011}
   language  = "en"
 }
 
+@ARTICLE{Gjer19,
+  title     = "Haplin power analysis: a software module for power and sample
+               size calculations in genetic association analyses of family
+               triads and unrelated controls",
+  author    = "Gjerdevik, Miriam and Jugessur, Astanand and Haaland, {\O}ystein
+               A and Romanowska, Julia and Lie, Rolv T and Cordell, Heather J
+               and Gjessing, H{\aa}kon K",
+  abstract  = "BACKGROUND: Log-linear and multinomial modeling offer a flexible
+               framework for genetic association analyses of offspring (child),
+               parent-of-origin and maternal effects, based on genotype data
+               from a variety of child-parent configurations. Although the
+               calculation of statistical power or sample size is an important
+               first step in the planning of any scientific study, there is
+               currently a lack of software for genetic power calculations in
+               family-based study designs. Here, we address this shortcoming
+               through new implementations of power calculations in the R
+               package Haplin, which is a flexible and robust software for
+               genetic epidemiological analyses. Power calculations in Haplin
+               can be performed analytically using the asymptotic
+               variance-covariance structure of the parameter estimator, or
+               else by a straightforward simulation approach. Haplin performs
+               power calculations for child, parent-of-origin and maternal
+               effects, as well as for gene-environment interactions. The power
+               can be calculated for both single SNPs and haplotypes, either
+               autosomal or X-linked. Moreover, Haplin enables power
+               calculations for different child-parent configurations,
+               including (but not limited to) case-parent triads, case-mother
+               dyads, and case-parent triads in combination with unrelated
+               control-parent triads. RESULTS: We compared the asymptotic power
+               approximations to the power of analysis attained with Haplin.
+               For external validation, the results were further compared to
+               the power of analysis attained by the EMIM software using data
+               simulations from Haplin. Consistency observed between Haplin and
+               EMIM across various genetic scenarios confirms the computational
+               accuracy of the inference methods used in both programs. The
+               results also demonstrate that power calculations in Haplin are
+               applicable to genetic association studies using either
+               log-linear or multinomial modeling approaches. CONCLUSIONS:
+               Haplin provides a robust and reliable framework for power
+               calculations in genetic association analyses for a wide range of
+               genetic effects and etiologic scenarios, based on genotype data
+               from a variety of child-parent configurations.",
+  journal   = "BMC Bioinformatics",
+  publisher = "Springer Science and Business Media LLC",
+  volume    =  20,
+  number    =  1,
+  pages     = "165",
+  month     =  apr,
+  year      =  2019,
+  keywords  = "EMIM; Genome-wide association studies (GWAS); Haplin; Log-linear
+               and multinomial models; Sample size estimation; Statistical
+               power estimation",
+  language  = "en"
+}
+
+
+@ARTICLE{Howe12,
+  title     = "{PREMIM} and {EMIM}: tools for estimation of maternal,
+               imprinting and interaction effects using multinomial modelling",
+  author    = "Howey, Richard and Cordell, Heather J",
+  abstract  = "BACKGROUND: Here we present two new computer tools, PREMIM and
+               EMIM, for the estimation of parental and child genetic effects,
+               based on genotype data from a variety of different child-parent
+               configurations. PREMIM allows the extraction of child-parent
+               genotype data from standard-format pedigree data files, while
+               EMIM uses the extracted genotype data to perform subsequent
+               statistical analysis. The use of genotype data from the parents
+               as well as from the child in question allows the estimation of
+               complex genetic effects such as maternal genotype effects,
+               maternal-foetal interactions and parent-of-origin (imprinting)
+               effects. These effects are estimated by EMIM, incorporating
+               chosen assumptions such as Hardy-Weinberg equilibrium or
+               exchangeability of parental matings as required. RESULTS: In
+               application to simulated data, we show that the inference
+               provided by EMIM is essentially equivalent to that provided by
+               alternative (competing) software packages such as MENDEL and
+               LEM. However, PREMIM and EMIM (used in combination) considerably
+               outperform MENDEL and LEM in terms of speed and ease of
+               execution. CONCLUSIONS: Together, EMIM and PREMIM provide
+               easy-to-use command-line tools for the analysis of pedigree
+               data, giving unbiased estimates of parental and child genotype
+               relative risks.",
+  journal   = "BMC Bioinformatics",
+  publisher = "Springer Nature",
+  volume    =  13,
+  number    =  1,
+  pages     = "149",
+  month     =  jun,
+  year      =  2012,
+  language  = "en"
+}
+
+
+@article{Verm97,
+author = {Vermunt, Jeroen},
+year = {1997},
+month = jan,
+pages = {},
+title = {LEM: A General Program for the Analysis of Categorical Data}
+}
 
 @ARTICLE{Wein05,
   title     = "A hybrid design for studying genetic influences on risk of

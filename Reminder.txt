@@ -4,3 +4,21 @@ power gets ruined by PS test, can include in testing
 R package, return likelihood (loglik), get BIC
 
 Peter-Morand epidemiology building (meets roger guindon)
+
+A weakness of the case-control study would be that of population stratification, which
+mention MA immediately
+Umbach, reference original trio paper and most are extensions, mention all
+Mention lack of software, mention haplin and emim dont let us do MA and population strat as motivation
+Finish with IMPACT statement, what results, can be short
+
+maternal genetic factor is moms genes, imprinting is moms genes going to child
+example
+
+ainsworth summarizes all
+Include undergrad thesis to CV
+
+OGS "Contributions", look into, maybe could mention past USRA stuff
+
+Try to avoid genetic jargon, ex no "allele", use "genetic factor"
+Try to use stats, Pr definition
+Imprinting is a missing data problem, mention that, mention EM algorithm
