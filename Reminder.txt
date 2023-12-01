@@ -22,3 +22,7 @@ OGS "Contributions", look into, maybe could mention past USRA stuff
 Try to avoid genetic jargon, ex no "allele", use "genetic factor"
 Try to use stats, Pr definition
 Imprinting is a missing data problem, mention that, mention EM algorithm
+
+HWE assumed for mating asymmetry for the test stat in the paper
+maybe? randomization for small samples, lrt for large, could test
+simulate under null (HWE) for small samples
