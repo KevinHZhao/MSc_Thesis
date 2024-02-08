@@ -26,3 +26,21 @@ Imprinting is a missing data problem, mention that, mention EM algorithm
 HWE assumed for mating asymmetry for the test stat in the paper
 maybe? randomization for small samples, lrt for large, could test
 simulate under null (HWE) for small samples
+
+PED most common, MAP file is a list of variants (location, alleles)
+input PED (packages can read bedbimfam files)
+EMIM has PREMIM function (ped to counts)
+
+"Printing" data could search for redundant columns and make a subclass to remove them.
+
+Higher dimensional data analysis - MAT 5314 B00
+Also maybe stat machine learning, check in with fraser about requirements
+Email burkett after new years for meeting time
+
+Try asking graduate office about not for gpa
+
+Mention tables are reproduced and cite
+loglinear is used so we can use GLM frameworks, EMIM multinomial is tough since adding new effects is really tough
+can meet earlier if necessary
+
+typo in UOthesis.cls (line 371, \setUOtgoal -> \setUOgoal)

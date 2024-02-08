@@ -55,3 +55,17 @@ rsconnect/
 *.blg
 *.synctex.gz
 *.log
+*.xmpi
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.lot
+*.nlo
+*.out
+*.pdf
+*.synctex(busy)
+*.toc
+*.xmpdata

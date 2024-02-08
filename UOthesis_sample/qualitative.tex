@@ -1,0 +1,106 @@
+\chapter{Qualitative Study}
+
+\section{Introduction}
+
+Consider the discrete dynamical system
+\begin{equation} \label{DDS}
+x_{i+1} = f(x_i) \ .
+\end{equation}
+For a qualitative study of this system, we would like to find all the
+fixed points, periodic orbits, \ldots.  We would also like to find the
+sets of points forward asymptotic to these objects.
+
+We first study the fixed points of (\ref{DDS}).
+
+\begin{defn}
+Let $p$ be a fixed point of $f$.  $p$ is {\bfseries
+hyperbolic}\index{Fixed point!Hyperbolic fixed point} if
+$\left|f'(p)\right| \neq 1$.
+\end{defn}
+
+A proof similar to the proof of the Fixed Point Theorem shows that:
+
+\begin{prop} \label{fp_stability}
+Let $p$ be an hyperbolic fixed point of $f$.  If
+$\left|f'(p)\right|<1$, then there exists an open interval $I$
+containing $p$ and such that
+\[
+\lim_{j\rightarrow \infty} f^j(x) = p
+\]
+for all $x \in I$.
+However, if $\left|f'(p)\right|>1$, then there exists an open
+interval $I$ containing $p$ such that for each $x$ in $I$,
+$x \neq p$, one can find $j \in \NN$ such that $f^j(x) \not\in I$.
+\end{prop}
+
+\section{Logistic Equation}\index{Logistic equation}
+
+This section is about the logistic equation
+\[
+x_{i+1} = f_\mu(x_i) = \mu x_i (1-x_i) \ .
+\]
+However, most of the observations about the logistic map are true for
+similarly shaped mappings of $I=[0,1]$ into $I$.
+
+For $\mu<3$, all iterations converge to the sink at $p_\mu$.   For
+$\mu$ slightly bigger than $3$, the fixed point $p_\mu$ becomes a
+source and there appears an attracting  periodic orbit of period $2$
+--- All orbits eventually ``bounce back and for'' between the two
+points of the orbit.    We say that there is a
+{\bfseries bifurcation point}\index{Bifurcation point} at $\mu=3$.
+
+When $\mu \approx 3.236\ldots$, the periodic orbit of period $2$
+becomes unstable and there appears an attracting periodic orbit of
+period $4$.  Then, there is a bifurcation from a attracting periodic
+orbit of period $4$ to an attracting periodic orbit of period $8$,
+And so on.  This is the best known example of a
+{\bfseries period doubling cascade}\index{Period doubling}.
+
+Period doubling accumulates to $\mu = 3.5699456\ldots$.  This number
+is known as the {\em Feigenbaum point}.  Moreover, let $\mu_0=3$,
+$\mu_1=3.236\ldots$, $\mu_2$, $\mu_3$, \ldots be the values of $\mu$
+for which the logistic mapping undergoes period doubling and let
+$d_j = \mu_{j+1}-\mu_j$.  It has been showed that
+\[
+\lim_{j\rightarrow \infty} \frac{d_j}{d_{j+1}} =
+4.6692016091029\ldots
+\]
+This number is called the
+{\em Feigenbaum constant}\index{Feigenbawm number}.  Feigenbaum
+discovered this number in 1975.  This constance is universal in the
+sense that it is the same for a whole class of iterative systems of
+the form $x_{n+1} = g_\mu(x_n)$ where the graph of $g_\mu(x)$ looks
+like the graph of $f_\mu(x)$.
+
+Period doubling is far from being the must complex type of
+bifurcation. To understand the complex behaviour of the orbits of
+$f_\mu$, we need the following theorem.
+
+\begin{theo}[Sarkovskii]\index{Sarkovskii's Theorem}
+Consider the order on the positive integers
+\nomenclature{$\gg$}{Sarkovskii's ordering} defined by
+\begin{multline*}
+3 \gg 5 \gg 7 \gg \ldots
+\gg 3\times 2 \gg 5\times 2 \gg \ldots \\
+\gg 3\times 2^2 \gg 5\times 2^2 \gg \ldots
+\gg 3\times 2^3 \gg 5\times 2^3 \gg \ldots
+2^4 \gg 2^3 \gg 2^2 \gg 2 \gg 1 \quad .
+\end{multline*}
+Let $f:\RR \rightarrow \RR$ be a continuous function and $k$ be a
+(prime) number.  If $f$ has a periodic point of period $k$, then $f$ has
+a periodic point of period $m$ for all $m \ll k$.
+\end{theo}
+
+\begin{proof}
+A proof of this theorem is given in \cite[page 60]{D}.
+\end{proof}
+
+This theorem is often stated as period three leads to chaos.
+A definition of chaos is given in \cite[Definition 8.5]{D}
+The definition given in \cite{D} is not the most economic, a simpler
+definition is given in \cite{BBCDS, AG} 
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "template"
+%%% End: 

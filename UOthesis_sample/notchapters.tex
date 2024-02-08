@@ -1,0 +1,51 @@
+\nonumchapter{Bad Listed Chapter}
+
+\begin{equation}
+  \frac{\partial f}{\partial x} (x,y) = x^2 y \ .
+\end{equation}
+
+\begin{defn}
+  A definition\index{No Number!Definition}
+\end{defn}
+
+The numbering refers to the previous chapter and section.    That is
+certainly not what we should have.
+
+\clearpage
+
+\setcounter{chapter}{0}
+\stepcounter{chapter}   % To ensure that the section and subsection
+                        % counters be reset to 0.
+\renewcommand{\thechapter}{\Alph{chapter}}
+
+\nonumchapter{Acceptable Listed Chapter}
+
+\begin{equation}
+  \frac{\partial f}{\partial x} (x,y) = x^2 y \ .
+\end{equation}
+
+\begin{defn}
+  A definition\index{No Number!Definition}
+\end{defn}
+
+The following code was used just before the command \verb=\nonumchapter=.
+
+\begin{verbatim}
+\setcounter{chapter}{0}
+\stepcounter{chapter}   % To ensure that the section and subsection
+                        % counters be reset to 0.
+\renewcommand{\thechapter}{\Alph{chapter}}
+\end{verbatim}
+
+If you have numbered chapters that follow this one, you have to
+manually reset the counter and the definition of the chapter number as
+we did above.
+
+To be honest, there is no reason to include numbered equations,
+definitions, ... in a chapter without a number.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "template"
+%%% End:

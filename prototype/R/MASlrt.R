@@ -10,8 +10,6 @@
 #'
 #' @examples
 #' MaSlrt(example_dat4R)
-#'
-#' @source
 MaSlrt <- function(dat) {
   subdat <- dat[c(2:7, 11:14), ]
   subdat <- aggregate(subdat$count, by = list(M = subdat$M, F = subdat$F), sum)

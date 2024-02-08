@@ -1,0 +1,406 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Define the following variables.  They are use for the PDF/A format
+% of your PDF document.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{filecontents*}{\jobname.xmpdata}
+  \Title{the title of the thesis}
+  \Author{your name}
+  \Org{University of Ottawa}
+  \Language{en-CA}
+  \Subject{a short description}
+  \Keywords{keyword1 \sep keyword2 \sep keyword3}
+  \Copyright{a statement}
+  \Copyrighted=False    % True if there is a real copyright to enforce
+\end{filecontents*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                   GENERAL INFORMATION
+%
+% All the option for the style report can be used (e.g. twoside, ...)
+% Moreover, the following options are also available: french, Nomencl,
+% Makeindex, NoLofF and NoLofT.
+%
+% The options french does not need any explanation.
+%
+% Avec l'option  french , il est possible de compiler un texte qui
+% possede des accents, ... sans avoir a recourir aux symboles \'e,
+% \"u, etc.  En plus de permettre l'utilisation d'un editeur de texte
+% normal, vous pouvez aussi utiliser votre "spell checker" prefere.
+%
+% With the option Nomencl, you can construct a list of symbols using
+% the command
+%   \nomenclature[prefix]{symbol}{description⟩}
+% prefix is optional and use as a prefix before sorting.  It does not
+% appear in the list.  Here are some examples.
+%   \nomenclature{$\alpha$}{the travelling speed of a wave}
+%   \nomenclature{$\Gamma$}{the Gamma function}
+%   \nomenclature{$\delta_{i,j}$}{The Kronecker's delta function}
+% A NOMENCLATURE IS NOT REQUIRED
+%
+% With the option Makeindex, you can create an index at the end of the
+% thesis using the command
+%    \index{main_entry[!sub_entry][!subsub_entry]}
+%    The text between [...] is optional.
+% An INDEX IS NOT REQUIRED
+% 
+% With the options NoLofF and NoLofT, you can remove the list of
+% figures and the list of tables.  You should use these options if
+% there is no table or figure in your thesis.  If there are some, the
+% list of tables and the list of figures are still required.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% To compile the template, one has to do something like
+%
+% pdflatex template.tex
+% pdflatex template.tex
+% pdflatex template.tex         % optional
+% makeindex template.idx        % If you use the option Makeindex
+% makeindex template.nlo -s nomencl.ist -o template.nls
+%                               % If you use the option Nomencl
+% bibtex template               % If you use bibtex for your references
+% pdflatex template.tex
+% makeindex template.idx                                   % optional
+% makeindex template.nlo -s nomencl.ist -o template.nls    % optional
+% bibtex template                                          % optional
+% pdflatex template.tex                                    % optional
+%
+% The items marked "optional" are "usually" not required.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Always use  \cleardoublepage  at the end of a chapter, appendix,
+% , ...  This set up the next page on a odd numbered page if the
+% document is in twoside mode.  Use  \clearpage  and  \newpage
+% elsewhere.
+%
+%  The following environment are already defined:
+%   theo    <-- Theorem
+%   lem     <-- Lemma
+%   defn    <-- Definition
+%   cor     <-- Corollary
+%   prop    <-- Proposition
+%
+% To add your own environment and have them properly numbered, use
+% the command
+% \newtheorem{ label }[theo]{ name of the environment }
+%
+% You can also change the style of the theorems, propositions,
+% ... definitions, ...  with the following command in the pramble
+%    \theoremstyle{new_style}
+% where new_style is one of plain, definition or remark.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% There is an environment "proof".  There is also a command \qed
+% if you decide to write a proof outside the environment "proof".
+%
+% You may modify the symbol at the end of the proofs with a command
+% like the following one in the preamble.
+%   \renewcommand{\qedsymbol}{$\blacksquare$}
+%
+% If your proof ends with an equation or a list of items, you
+% should  write  \qedhere  at the end of the equation or at the end of
+% the last item of the list.  Note that this does not work with
+% eqnarray of $$ ... $$.
+%
+% Moreover, if you end your proof with an equation with a reference
+% number, you should note use \qedhere because all the equation is
+% shifted to the left.  That does not look good.   There are also
+% several issues with multi-line equations and split equation.  So,
+% try to end your proof with a word of wisdom.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% New commands for chapter without number.
+%
+% \nonumchapter{chapter_name}
+% to produce the header of a chapter without a number;
+% the chapter is still listed in the table of contents.
+%
+% \notachapter{chapter_name}
+% to produce the header of a chapter without a number;
+% the chapter is not listed in the table of contents.
+%
+% Note that the numbering of equations, ... in a chapter with no
+% chapter number will be based on the previous chapter and section
+% numbers.  This is certainly not what we should have.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% For those you will write a thesis that include research papers.
+% First, note that the papers must be included has they have been
+% submitted or published.  You cannot modify them.
+%
+% The command to include a paper in pdf format looks like this.
+%
+%   \includepdf[pages=-,noautoscale=true,scale=0.9,
+%      pagecommand={\thispagestyle{plain}}]{file_name.pdf}
+%
+% Depending on the format of the journal where your paper has been
+% published, you may have to change the scale in the command above to
+% ensure that the pages of the paper fit inside the pages of the
+% thesis.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt,Nomencl,Makeindex]{UOthesis}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Load the packages that you may need and that have not been loaded yet.
+%
+% The following packages have already been loaded:
+% ifthen, amsmath, amsthm, amssymb, amscd, graphicx, rotating, color,
+% filecontents, inputenc, colorprofiles, fontenc, pdfx, hyperref,
+% geometry, fancyhdr,
+%
+% nomencl if the option Nomencl is selected.
+% makeidx if the option Makeindex is selected,
+% babel and ucs if the option french is selected.
+%
+% WARNING: Some packages may be incompatible.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{fancybox}
+\usepackage{shadow}
+\usepackage[all]{xy}
+\usepackage{url}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Table of contents, list of figures, list of tables, and list of
+% symbols.
+% If your thesis has section numbers larger than 9, many tables or
+% many figures, a lot of pages, ..., then some of the items on a line
+% of the table of contents, the list of tables, the list of figures or
+% the list of symbols may overlap.  The following commands should
+% solve these problems.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\addSpaceContents{1em}         % add space for the section number in
+                                % the table of contents
+%\addSpaceRightMargin{1em}      % add space between the title, description,
+                                % ... and the right margin
+%\addSpacePageNumber{1em}       % add space for the page number in the
+                                % table of contents 
+%\addSpaceFigure{1em}           % add space for the figure number
+%\addSpaceTable{1em}            % add space for the table number
+%\addSpaceLabelSymbols{1em}     % add space for the label of the symbol
+%\addSpacePageSymbols{1em}      % add space for the page number of the symbol
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is the command to define the style of the bibliography if
+% BibTeX is used.  The available style in the standard TeX/LaTeX
+% installation are  plain, unsrt, alpha and abbrv
+% plain: The items in the bibliography are in alphabetical order, and
+%        refered to with a number.
+% unsrt: The items in the bibliography are ordered according to their
+%        first appearance in the text, and refered to with a number.
+% alpha: The items in the bibliography are in alphabetical order, and
+%        refered to with an abreviation of the author name plus the
+%        year.
+% abbrv: The items in the bibliography are in alphabetical order, and
+%        refered to with a number.  Moreover, the items in the
+%        bibliography are listed using an abreviation of first names,
+%        months and journal names.
+%
+% The default is plain.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{plain}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Comment out one of the following option
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\phd                % Comment out for the Ph.D. thesis
+%\msc               % Comment out for the M.Sc. thesis
+%\project           % Comment out for the M.Sc. project
+%\uproject          % Comment out for the B.Sc. project
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Variables that must be redefined.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setUOname{Benoit Dionne}                              % Name of the candidate
+\setUOcpryear{2018}                                    % Year of graduation
+\setUOtitle{Discrete Dynamical Systems: a First Look}  % Title of the thesis
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Some of the variables that you may need to redefine.  Comment out
+% the variables that you need to define.  These variables have a
+% default value that is appropriate in most cases. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\setUO{ }                    % Name of the university
+%\setUOprogrfac{ }            % Name of the faculty giving the program
+%\setUOdept{ }                % Name of the department giving the program
+%\setUOfdegree{ }             % Full name of the degree (e.g. Doctorate
+                              % in ...)  See \msc and \phd below.
+%\setUOdegree{ }              % Abbreviation for the name of the degree
+                              % (e.g. Ph.D. )  See \msc and \phd below.
+%\setUOtitlefootnote{ }       % Abbreviation for the name of the degree
+                              % for the footnote about the institute.
+                              % See \msc and \phd below.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Your own macros, environments, ...
+% Be careful not to over write the macros and environments of the
+% University style.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+{
+  \theoremstyle{definition}
+  \newtheorem{rmk}[theo]{Remark}
+  \newtheorem{egg}[theo]{Example}
+}
+
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\OO}{\mathcal{O}}
+
+\DeclareMathOperator{\Per}{Per}
+\DeclareMathOperator{\IM}{Im}
+\DeclareMathOperator{\KER}{Ker}
+\DeclareMathOperator{\Fix}{Fix}
+
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% We suggest to include your chapters, ... as illustrated below      %
+% and leave this file with as Little of the contents of the thesis   %
+% as it is possible.                                                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Write your abstract in a file called abstract.tex.  It will
+% automatically be included.
+%
+% The abstract for a M.Sc. must have AT MOST 150 WORDS.
+% The abstract for a Ph.D. must have AT MOST 350 WORDS.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Pour ajouter un resume en francais a votre these, il suffit
+% d'inclure le text de votre resume dans un fichier appele
+% resume.tex.  Il sera automatiquement inclus.
+%
+% Le resume pour une these de maitrise a au plus 150 mots.
+% Le resume pour une these de doctorat a au plus 350 mots.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% You may include dedications.  Write your dedications in a file
+% called dedications.tex.  It will automatically be included.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% You may include acknowledgements.  Write your acknowledgements in a
+% file called acknowledgements.tex.  It will automatically be
+% included.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Some people like to have a short preface at the beginning of their
+% thesis.  Write your acknowledgements in a file called preface.tex.
+% It will automatically be included.
+%
+% Note that for this chapter, the pages will be numbered in roman
+% numbers as the previous pages.  The size of this chapter should be
+% very small.  If you have more then two pages, equations, and so on,
+% you should instead have a normal chapter later. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% From now on, you can let your genius out.
+% Don't remove the next line
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\include{intro}
+\clearpage
+
+\include{discrete_dyn}
+\clearpage
+
+\include{qualitative}
+\clearpage
+
+\include{bifurcation}
+\clearpage
+
+\include{notchapters}
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If the following line of code is uncomment, then
+% the following chapters will be numbered A, B, ...
+% 
+% If there are no section in your appendix, your theorems, ..., and
+% equations will be numbered Theorem A.0.1, ...  To eliminate the
+% extra 0 in the numbering, you should modify the numbering as
+% follows.  Add
+%
+% \newtheorem{Atheo}{Theorem}[chapter]
+% \newtheorem{Alem}[Atheo]{Lemma}
+% \newtheorem{Adefn}[Atheo]{Definition}
+% \newtheorem{Acor}[Atheo]{Corollary}
+% \newtheorem{Aprop}[Atheo]{Proposition}
+%
+% in the preamble and use
+%
+% \begin{Atheo}
+% This is a theorem.
+% \end{Atheo}
+%
+% \begin{Alem}
+% This is a lemma.
+% \end{Alem}
+%
+% etc. in the appendix.   You should also add
+%
+% \numberwithin{equation}{chapter}
+%
+% at the beginning of the appendix to get the right numbering for the
+% equations.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+
+\include{appendix_A}
+\clearpage
+
+\include{appendix_B}
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% We provide two methods to introduce your bibliography.
+%
+% The hand made bibliography:
+% The basic method used the file biblio.tex.  It makes used of
+% the standard LaTeX environment \begin{thebibliography}{} and
+% \end{thebibliography}.
+%
+% The bibliography made with BibTeX:
+% The second method used the file biblio.bib.  It makes used of
+% BibTeX with the commands \bibliography{} and \bibliographystyle{}
+% \bibliographystyle{} is defined in the preamble.
+%
+% For the citations, use the command  \cite[]{} in the text
+% to refer to items of the bibliography.  The optional argument [] can
+% refer to a page number, a theorem, ... in the citation.  For
+% instance  \cite[page 68]{D} or \cite[Theorem 2.5]{D}
+% Instead of \cite[]{}, one can use \citet[]{}  and  \citep[]{}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Hand made bibliography
+% \begin{BasicBibliography}
+% \input{biblio.tex}
+% \end{BasicBibliography}
+
+% Default style for BibTeX
+% The bibliography made with this command will include only references
+% in the bib file which are cited in the text.
+\bibTexBibliography{biblio}
+
+% The bibliography made with this command will include all references
+% in the bib file even if they are not cited in the text.
+% \bibTexBibliography*{biblio}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
+

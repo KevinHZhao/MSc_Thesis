@@ -175,6 +175,9 @@ stackCounts <- function(dat1, dat2) {
   return(list(dat4R = alltriodat, dat4haplin = allhaplindat))
 }
 
+# Make a Paternal origin & Maternal origin boolean column
+# Can limit things (ex imprinting only for cases no controls)
+# can't really have both Im and If in simulating (overparameterized, Ainsworth)
 
 # This function creates a full dataset possibly with
 # - control trios
@@ -184,6 +187,7 @@ stackCounts <- function(dat1, dat2) {
 simulateData <- function(ntrios = 1000, maf = 0.3,
                          R = c(1, 1, 1), S = c(1, 1, 1), V = c(1, 1, 1),
                          mtCoef = c(1, 1, 1), mtmodel = "MS",
+                         impM = 1, impF = 1,
                          includeE = FALSE, envint = "Mother", prE = 0,
                          includeControl = FALSE, prControl = 0, prE.control = prE,
                          includePopStrat = FALSE, numPop = 1, Fst = 0.005,
