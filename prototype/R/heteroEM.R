@@ -2,59 +2,39 @@
 ## mtmodel = "HW", "MS", "MaS"
 ## effects = "C", "M", "E:M", ... could examine environment child effects
 ## For EM start with 50/50 M/F, could also have sensitivity analysis
-runLoglin <- function(mtmodel, effects = c("C", "M"), dat, PStest = FALSE) {
+## Minit from 0 to 1, initial "guess" for proportion of maternal origin in 1,1,1
+## MatImp can be true/false based on if we assume maternal/paternal imprinting
+## respectively (for now assuming can't be both)
+heteroEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
+                     Minit = 0.5, MatImp = TRUE, max.iter = 12) {
+  effects <- c(effects, ifelse(MatImp, "matOrgInf", "patOrgInf"))
+
   # Portion of model equation and offset depends on mating type model
-  dat$offset <- rep(NA, nrow(dat))
+  heteroInds <- with(dat, which((M == 1) & (F == 1) & (C == 1)))
+  origDat <- add_PoO_data(dat, Mprop = Minit)
+
+  # Portion of model equation depends on mating type model
+  # No offset as we split the (1,1,1) case
   if (mtmodel == "HW") {
-    dat$HWgeno <- dat[, "M"] + dat[, "F"]
+    origDat$HWgeno <- origDat$M + origDat$F
     mteffect <- "HWgeno"
-
-    if (sum(dat$E == 1) > 0) { # E variable in dataset
-
-      # Assumes order type=1:15 and controls children are in dataset
-      dat$offset[dat$E == 0] <- c(rep(1, 8), 2, rep(1, 6))
-      dat$offset[dat$E == 1] <- c(rep(1, 8), 2, rep(1, 6))
-    } else {
-      # Assumes order type=1:15 and controls children are in dataset
-      dat$offset <- c(rep(1, 8), 2, rep(1, 6))
-    }
-
     modelformula <- "count~" # Must include intercept for HW model because of log(1-p) term
   } else if (mtmodel == "MS") {
     mteffect <- "as.factor(mt_MS)"
-
-    if (sum(dat$E == 1) > 0) { # Includes E in dataset
-      # Assumes order type=1:15 and controls children are in dataset
-      dat$offset[dat$E == 1] <- c(rep(1, 8), 2, rep(1, 6))
-      dat$offset[dat$E == 0] <- c(rep(1, 8), 2, rep(1, 6))
-    } else {
-      # Assumes order type=1:15 and controls children are in dataset
-      dat$offset <- c(rep(1, 8), 2, rep(1, 6))
-    }
-
     modelformula <- "count~-1+" # I think I can remove the intercept for MS model
   } else if (mtmodel == "MaS") {
-    if (length(unique(dat$D)) == 1) {
+    if (length(unique(origDat$D)) == 1) {
       stop("Only 1 phenotype in the phenotype column. Mating asymmetry models require \n
             both cases and controls\n")
     }
     mteffect <- "as.factor(mt_MaS)"
-
-    if (sum(dat$E == 1) > 0) { # Includes environmental variable
-      dat$offset[dat$E == 0] <- c(rep(1, 8), 2, rep(1, 6))
-      dat$offset[dat$E == 1] <- c(rep(1, 8), 2, rep(1, 6))
-    } else { # No environmental variable
-      # Assumes order type=1:15 (D=1)
-      dat$offset <- c(rep(1, 8), 2, rep(1, 6))
-    }
-
     modelformula <- "count~-1+" # I think I can remove intercept
   }
 
   if (is.element("E:M", effects)) { # check gene-environment paper on adding other effects ex E:C
-    if (sum(dat$D == 0) > 0) { # There are controls; include environmental interaction
-      dat$C <- dat$C * dat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 OW
-      dat$M <- dat$M * dat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 OW
+    if (sum(origDat$D == 0) > 0) { # There are controls; include environmental interaction
+      origDat$C <- origDat$C * origDat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 OW
+      origDat$M <- origDat$M * origDat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 OW
       # (Note that the E:M term in model will be from crossing this
       # variable with E=1, which is exactly what is needed.
       if (mtmodel == "HW") { # Include main effect of E to give different intercept for HW+E case
@@ -72,16 +52,17 @@ runLoglin <- function(mtmodel, effects = c("C", "M"), dat, PStest = FALSE) {
     }
   } else { # No E:M effect
 
-    if (sum(dat$D == 0) > 0) {
-      dat$C <- dat$C * dat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 OW
-      dat$M <- dat$M * dat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 O
+    if (sum(origDat$D == 0) > 0) {
+      origDat$C <- origDat$C * origDat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 OW
+      origDat$M <- origDat$M * origDat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 O
       modeleffects <- c(mteffect, effects, "D")
     } else {
       modeleffects <- c(mteffect, effects)
     }
   }
 
-  linpred <- paste(modeleffects, collapse = "+")
+  linpred <- paste(modeleffects,
+                   collapse = "+")
   modelformula <- paste0(modelformula, linpred)
 
   # Setup results objects
@@ -99,7 +80,7 @@ runLoglin <- function(mtmodel, effects = c("C", "M"), dat, PStest = FALSE) {
     pvalVecPS <- vector(length = length(effects))
     names(pvalVecPS) <- effects
 
-    if (sum(dat$D == 0) == 0) {
+    if (sum(origDat$D == 0) == 0) {
       stop("Can only test for population stratification if there are control trios\n")
     } else {
       PSeffect <- paste0(mteffect, ":D")
@@ -109,7 +90,38 @@ runLoglin <- function(mtmodel, effects = c("C", "M"), dat, PStest = FALSE) {
 
 
   # Run model and save results
-  res <- glm(as.formula(modelformula), data = dat, offset = log(dat$offset), family = poisson())
+  prev_Ihat <- -1
+  counter <- 0
+  message(paste0("Initial proportion for maternal inheritance cell = ", Minit))
+  repeat{
+    counter <- counter + 1
+    res <- glm(as.formula(modelformula), data = origDat, family = poisson())
+    Ihat <- ifelse(MatImp, exp(res$coefficients["matOrgInf"]), exp(res$coefficients["patOrgInf"]))
+
+    message(paste0("\nIteration ", counter, " of EM algorithm.
+                   \nI", ifelse(MatImp,"m","f"), " hat = ", Ihat,
+                   "\nProportion for maternal inheritance cell = ", ifelse(MatImp,
+                                                                        Ihat/(1 + Ihat),
+                                                                        1/(1 + Ihat))))
+
+    origDat <- add_PoO_data(dat,
+                            Mprop = ifelse(MatImp,
+                                           Ihat/(1 + Ihat),
+                                           1/(1 + Ihat)
+                                           )
+                            ) %>%
+      dplyr::mutate(HWgeno = M + F)
+    if(Ihat == prev_Ihat){
+      message("Convergence achieved.")
+      break
+    }
+    else if(counter == max.iter){
+      warning("Max iterations reached without convergence.")
+      break
+    }
+    prev_Ihat <- Ihat
+  }
+
 
   # R is not consistent about how interaction is specified. Even though it
   # is fit as E:M, sometimes R flips it to M:E in the output of results.
@@ -124,7 +136,7 @@ runLoglin <- function(mtmodel, effects = c("C", "M"), dat, PStest = FALSE) {
 
   test.res <- NULL
   if (PStest == TRUE) {
-    res.PS <- glm(as.formula(modelformula.PS), data = dat, offset = log(dat$offset), family = poisson())
+    res.PS <- glm(as.formula(modelformula.PS), data = origDat, family = poisson())
     test.res <- anova(res, res.PS, test = "LRT")
 
     for (j in 1:length(effects)) {
@@ -133,8 +145,5 @@ runLoglin <- function(mtmodel, effects = c("C", "M"), dat, PStest = FALSE) {
     }
   }
 
-  return(list(
-    effects = resVec, pvals = pvalVec, PS.test = test.res$`Pr(>Chi)`[2],
-    effectsPS = resVecPS, pvalsPS = pvalVecPS
-  ))
+  return(res)
 }

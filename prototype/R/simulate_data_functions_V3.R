@@ -1,16 +1,23 @@
 ## Functions needed for maternal effect analyses in R
 
+## For (1,1,1), stick to one row and return the "missing" part (return "full" and "collapsed")
+## Create df with rows for every possible trio
 createGenoMat <- function() {
-  M <- c(rep(0, 3), rep(1, 2), 0, 2, rep(1, 5), rep(2, 3))
-  F <- c(0, rep(1, 2), rep(0, 2), 2, 0, rep(1, 3), rep(2, 2), rep(1, 2), 2)
-  C <- c(rep(0, 2), 1, 0, rep(1, 3), 0, 1, 2, 1, 2, 1, rep(2, 2))
-  return(data.frame(M, F, C))
+  M <- c(rep(0, 3), rep(1, 2), 0, 2, rep(1, 6), rep(2, 3))
+  F <- c(0, rep(1, 2), rep(0, 2), 2, 0, rep(1, 4), rep(2, 2), rep(1, 2), 2)
+  C <- c(rep(0, 2), 1, 0, rep(1, 3), 0, rep(1, 2), 2, 1, 2, 1, rep(2, 2))
+
+  ## Indicator variables for parent-of-origin
+  matOrg <- c(rep(0, 4), 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1)
+  patOrg <- c(rep(0, 2), 1, rep(0, 2), 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1)
+
+  return(data.frame(M, F, C, matOrg, patOrg))
 }
 
 createHaplinGeno <- function() {
-  M <- c(rep("1;1", 3), rep("1;2", 2), "1;1", "2;2", rep("1;2", 5), rep("2;2", 3))
-  F <- c("1;1", rep("1;2", 2), rep("1;1", 2), "2;2", "1;1", rep("1;2", 3), rep("2;2", 2), rep("1;2", 2), "2;2")
-  C <- c(rep("1;1", 2), "1;2", "1;1", rep("1;2", 3), "1;1", "1;2", "2;2", "1;2", "2;2", "1;2", rep("2;2", 2))
+  M <- c(rep("1;1", 3), rep("1;2", 2), "1;1", "2;2", rep("1;2", 6), rep("2;2", 3))
+  F <- c("1;1", rep("1;2", 2), rep("1;1", 2), "2;2", "1;1", rep("1;2", 4), rep("2;2", 2), rep("1;2", 2), "2;2")
+  C <- c(rep("1;1", 2), "1;2", "1;1", rep("1;2", 3), "1;1", rep("1;2", 2), "2;2", "1;2", "2;2", "1;2", rep("2;2", 2))
   return(data.frame(M, F, C))
 }
 
@@ -21,23 +28,37 @@ mtmat <- function(maf = 0.4, C = c(1, 1, 1)) {
   Mprobs <- dbinom(mts[, 1], 2, prob = maf)
   Fprobs <- dbinom(mts[, 2], 2, prob = maf)
 
-  asymfactor <- c(1, C[1], 2 - C[1], C[2], 2 - C[2], 1, C[3], 2 - C[3], 1)
+  asymfactor <- c(1, C[1], 2 - C[1],
+                  C[2], 2 - C[2], 1,
+                  C[3], 2 - C[3], 1)
   mts <- cbind(mts, prMF = Mprobs * Fprobs * asymfactor)
+  ## First three mating pairs: can make 0 or 1
+  ## Middle three mating pairs: can make 0, 1, or 2
+  ## Last three mating pairs: Can make 1 or 2
 
   mt_MS <- c(1, 2, 2, 3, 3, 4, 5, 5, 6)
   mt_MaS <- 1:9
 
   mts <- cbind(mt_MS, mt_MaS, mts)
 
-  prCGivenMF <- c(1, rep(1 / 2, 4), 1, 1, 1 / 4, 1 / 2, 1 / 4, rep(1 / 2, 4), 1)
+  prCGivenMFOrg <-
+           c(1,
+             rep(1 / 2, 2),
+             rep(1 / 2, 2),
+             1,
+             1,
+             rep(1 / 4, 4),
+             rep(1 / 2, 2),
+             rep(1 / 2, 2),
+             1)
 
-  genocat <- cbind(genocat, prCGivenMF)
+  genocat <- cbind(genocat, prCGivenMFOrg)
   temp <- merge(genocat, mts)
-  temp$prMFC <- temp$prMF * temp$prCGivenMF
+  temp$prMFCOrg <- temp$prMF * temp$prCGivenMFOrg
 
   return(temp[
     order(temp$mt_MaS),
-    c("mt_MS", "mt_MaS", "M", "F", "C", "prMF", "prCGivenMF", "prMFC")
+    c("mt_MS", "mt_MaS", "M", "F", "C", "matOrg", "patOrg", "prMF", "prCGivenMFOrg", "prMFCOrg")
   ])
 }
 
@@ -45,22 +66,37 @@ mtmat <- function(maf = 0.4, C = c(1, 1, 1)) {
 
 # A simplified function for simulating a subset of the full data
 # under particular conditions
+# mtCoef = C1, C2, C4 in paper, used like this since it preserves HWE for tests
+# Shoud work for imprinting & controls/environment (controls are not affected by imprinting)
 # - Case Trios
 # - Control Trios
 # - With E or without
 # - With MaS or not
+# - With Imprinting or not (controls not required, for now only consider no controls or no MaS)
 simulateDataSubset <- function(ntrios = 1000, maf = 0.3,
                                R = c(1, 1, 1), S = c(1, 1, 1),
                                mtCoef = c(1, 1, 1),
                                V = c(1, 1, 1), includeE = FALSE, envint = "Mother",
-                               includeControl = FALSE) {
+                               includeControl = FALSE, includeIm = FALSE, Im,
+                               includeIf = FALSE, If) {
   genomat <- mtmat(maf, C = mtCoef)
-
   # Compute the values proportional to P(D|M,F,C,E) for the
   # selected model.
 
   # Add main genetic effects
   diseasefactor <- R[(genomat$C + 1)] * S[(genomat$M + 1)]
+
+  # Add imprinting effects
+  if(includeIm && includeIf){
+    stop("Cannot have both paternal and maternal imprinting.")
+  } else if(includeIm){
+    impFactor <- ifelse(genomat$matOrg, Im, 1)
+  } else if(includeIf){
+    impFactor <- ifelse(genomat$patOrg, If, 1)
+  } else {
+    impFactor <- 1
+  }
+  diseasefactor <- diseasefactor * impFactor
 
   # Add environmental effects for trios that will have E=1
   if (envint == "Mother") {
@@ -78,11 +114,11 @@ simulateDataSubset <- function(ntrios = 1000, maf = 0.3,
   # Sample the trios
   triocounts <- sample(1:length(diseaseprob), ntrios, prob = diseaseprob, replace = TRUE)
   counts <- data.frame(table(triocounts))
-  colnames(counts) <- c("type", "count")
+  colnames(counts) <- c("typeOrig", "count")
 
   # Prepare data for R log-linear
-  genomat <- data.frame(type = 1:length(diseaseprob), genomat, PrCMFEgivenD = diseaseprob)
-  triodat <- merge(genomat, counts, all = TRUE, by = "type")
+  genomat <- data.frame(typeOrig = 1:length(diseaseprob), genomat, PrCMFEgivenD = diseaseprob)
+  triodat <- merge(genomat, counts, all = TRUE, by = "typeOrig")
   triodat[is.na(triodat[, "count"]), "count"] <- 0
 
   if (includeE == TRUE) {
@@ -98,8 +134,13 @@ simulateDataSubset <- function(ntrios = 1000, maf = 0.3,
   }
 
   triodat <- data.frame(triodat[, 1:6], E = E, D = D, triodat[, 7:ncol(triodat)])
-  subdat <- data.frame(triodat[, c(1:8)], count = triodat$count)
-
+  subdat <- data.frame(triodat[, c(1:8)], count = triodat$count) %>%
+    dplyr::group_by(mt_MS, mt_MaS, M, F, C, E, D) %>%
+    dplyr::summarise_at(dplyr::vars(count), sum) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(type = 1:15) %>%
+    dplyr::relocate(type) %>%
+    as.data.frame()
 
   # Prepare data for Haplin. Haplin has 1 row per trio, with the row
   # consisting of M,F,C genotype columns in format 1;1, 1;2 or 2;2
@@ -111,10 +152,15 @@ simulateDataSubset <- function(ntrios = 1000, maf = 0.3,
   #  MF=unique(haplingeno[,1:2])
   #  haplingeno=data.frame(type=1:nrow(MF),MF,C=rep(NA,nrow(MF)))
   # } else{
-  haplingeno <- data.frame(type = 1:15, haplingeno)
+  haplingeno <- data.frame(typeOrig = 1:16, haplingeno)
   # }
-  haplindat <- merge(haplingeno, triodat, by = "type")
-
+  haplindat <- merge(haplingeno, triodat, by = "typeOrig") %>%
+    dplyr::group_by(M.x, F.x, C.x, mt_MS, mt_MaS, E, D, prMF) %>%
+    dplyr::summarise_at(dplyr::vars(count), sum) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(type = 1:15) %>%
+    dplyr::relocate(type) %>%
+    as.data.frame()
 
   finaldat <- NULL
   for (j in 1:nrow(haplindat)) {
@@ -187,7 +233,7 @@ stackCounts <- function(dat1, dat2) {
 simulateData <- function(ntrios = 1000, maf = 0.3,
                          R = c(1, 1, 1), S = c(1, 1, 1), V = c(1, 1, 1),
                          mtCoef = c(1, 1, 1), mtmodel = "MS",
-                         impM = 1, impF = 1,
+                         includeIm = FALSE, Im, includeIf = FALSE, If,
                          includeE = FALSE, envint = "Mother", prE = 0,
                          includeControl = FALSE, prControl = 0, prE.control = prE,
                          includePopStrat = FALSE, numPop = 1, Fst = 0.005,
@@ -274,7 +320,7 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
     # Simulate "case" trios,
     caseE0 <- simulateDataSubset(
       ntrios = ntrios.pop.notE.case, maf = q[i], R = R, S = S, mtCoef = mtCoef,
-      includeE = FALSE
+      includeE = FALSE, includeIm = includeIm, Im = Im, includeIf = includeIf, If = If
     )
     if (i == 1) {
       caseE0.all <- caseE0
@@ -290,7 +336,8 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
     if (includeE == TRUE) {
       caseE1 <- simulateDataSubset(
         ntrios = ntrios.pop.E.case, maf = q[i], R = R, S = S, mtCoef = mtCoef,
-        V = V, includeE = TRUE, envint = envint
+        V = V, includeE = TRUE, envint = envint, includeIm = includeIm, Im = Im,
+        includeIf = includeIf, If = If
       )
       if (i == 1) {
         caseE1.all <- caseE1
@@ -308,7 +355,8 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
       controlE0 <- simulateDataSubset(
         ntrios = ntrios.pop.notE.control, maf = q[i],
         R = c(1, 1, 1), S = c(1, 1, 1),
-        mtCoef = mtCoef, includeE = FALSE, includeControl = TRUE
+        mtCoef = mtCoef, includeE = FALSE, includeControl = TRUE,
+        includeIm = FALSE, includeIf = FALSE
       )
       if (i == 1) {
         controlE0.all <- controlE0
@@ -325,7 +373,7 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
           ntrios = ntrios.pop.E.control, maf = q[i],
           R = c(1, 1, 1), S = c(1, 1, 1), mtCoef = mtCoef,
           V = c(1, 1, 1), includeE = TRUE, envint = envint,
-          includeControl = TRUE
+          includeControl = TRUE, includeIm = FALSE, includeIf = FALSE
         )
         if (i == 1) {
           controlE1.all <- controlE1

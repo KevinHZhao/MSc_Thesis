@@ -1,17 +1,20 @@
 \chapter{Background to gene-disease associations}
 
+% In this chapter, etc.  For more detailed explanations, see TEXTBOOK CHAPTER CITATION
+%% in template, set to 1.5 spacing
+
 \section{Foundations of genetics}
 
 As the work in this thesis is based on genetics, we first give a brief summary of the assumptions in genetics we use to make conclusions.  As discovered by Oswald Avery in 1944, genetic information is transmitted from parent to offspring via deoxyribonucleic acid (DNA).  This DNA is composed of billions of nucleotides, as was shown by Watson and Crick in 1953, which make up the entire genetic code/genome in all organisms \cite{Port14}.  The mother and father each contribute copies of half of their genome to the offspring's genome, with genetic information being ``paired,'' as information on the father's contribution has a counterpart on the mother's contribution.
 
-Variations in nucleotides between individuals are used to explain differences in biology; sections of the genome coding for particular traits, such as eye colour or synthesis of a specific protein in a cell, are referred to as genes, with one's combined information about a particular gene being called their genotype.  We refer to different variants of a gene as an allele, which for the sake of this paper, we represent by counting how many alleles of interest an individual has (0, 1, or 2).
+Variations in nucleotides between individuals are used to explain differences in biology; sections of the genome coding for particular traits, such as blood type or synthesis of a specific protein in a cell, are referred to as genes, with one's combined information about a particular gene being called their genotype.  We refer to different variants of a gene as an allele, which for the sake of this paper, we represent by counting how many alleles of interest an individual has (0, 1, or 2). % Clarify gene as a locus in the genome for correctness
 
 \subsection{Inheritance}
 
 As mentioned before, one's mother and father both contribute to half of the genome, which forms the basis of inheritance.  We may further quantify this with the assumption of Mendelian inheritance, based on the research of Gregor Mendel in 1865.  To summarize Mendelian inheritance, since each parent has two copies of each gene but only contributes one to each offspring, we assume both copies are equally likely to be transmitted to the offspring \cite{Stra99}.  With this information, we may construct a probability distribution for a gene of an offspring based solely on the alleles of said gene in both parents.
 
 For example, letting $\MM$, $\FF$, and $\CC$ represent the number of copies of an allele of interest a mother, father, and child have, respectively, we can represent the marginal distribution of $\CC$ based on $(\MM, \FF)$ in Table~\ref{tab:Mendel}.  For the remainder of this paper, we will employ similar notation for $\MM$, $\FF$, and $\CC$.
-
+%%
 \begin{table}[h]
     \caption{Marginal distribution of a child's genotype ($\CC$) based on the genotype of their mother ($\MM$) and father ($\FF$).  Probabilities are symmetric over $\MM$ and $\FF$, hence redundant rows are removed.\label{tab:Mendel}}
     \begin{center}
@@ -26,14 +29,14 @@ For example, letting $\MM$, $\FF$, and $\CC$ represent the number of copies of a
     \end{tabular}
 \end{center}
 \end{table}
-
+%%
 \subsection{The Hardy-Weinberg equilibrium}
 
-Since each generation passes on their alleles to the next generation, we would expect that asymptotically, the population would converge to a specific distribution in genotypes based on the prevalence of an allele of interest, which we call the variant allele.  Letting $p$ represent the prevalence of the variant allele, we define $q=1-p$ as the prevalence of non-variant alleles.  Then we say the Hardy-Weinberg equilibrium (HWE) of this population has prevalence $q^2$, $2pq$, and $p^2$ for individuals with $0$, $1$, and $2$ copies of the variant allele.
+Since each generation passes on their alleles to the next generation, we would expect that asymptotically, the population would converge to a specific distribution in genotypes based on the prevalence of an allele of interest, which we call the variant allele.  Letting $p$ represent the prevalence of the variant allele, we define $q=1-p$ as the prevalence of non-variant alleles.  Then we say the Hardy-Weinberg equilibrium (HWE) of this population has prevalence $q^2$, $2pq$, and $p^2$ for individuals with $0$, $1$, and $2$ copies of the variant allele. % Mention independence
 
 With these assumptions, we now have a very simple model for modelling the distribution of genotypes in a genetically similar (homogeneous) population.  This gives us a basis to analyze observations on individuals' genotype and disease status to make statistical conclusions on whether the two are related.
 
-\section{Studies on gene-disease associations}
+\section{Studies on gene-disease associations} % no need to talk too much about population based studies, case-control study briefly mention 
 
 \vfill
 
