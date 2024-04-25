@@ -1,5 +1,17 @@
 ## Run a haplin analysis with the specified model
-runEMIM <- function(mtmodel, effects, peddat, emimpath = "~/StatGenTools/emim-v3.22-code/") {
+runEMIM <- function(mtmodel = "MS", effects = c("C", "M"), peddat,
+                    emimpath = "C:/Users/Kevin/emim-v3.22-windows-x86_64/",
+                    includeI = FALSE, MatImp = TRUE, Minit = 0.5, max.iter = 12,
+                    weinberg = FALSE) {
+  ## Set up temp wd so EMIM files don't show up
+  wd <- getwd()
+  td <- tempfile()
+  dir.create(td, showWarnings = FALSE)
+  setwd(td)
+
+  ## This is for ensuring EMIM knows to use "2" as the risk allele (otherwise it
+  ## will default to the least common allele)
+  write(c("1", "A", "2"), "emim_rfile", ncol = 3)
   # Setup results objects
   if (is.element("E:M", effects)) {
     neweffects <- c(setdiff(effects, c("E:M", "M")), "M[E=0]", "M[E=1]", "M[E=1]/M[E=0]")
@@ -16,7 +28,7 @@ runEMIM <- function(mtmodel, effects, peddat, emimpath = "~/StatGenTools/emim-v3
 
 
   # Set up options for the parameter file
-  options <- " -a -so"
+  options <- " -a -so -rfile emim_rfile"
 
   if (is.element("C", effects)) { # Multiplicative allele model for C effect
     options <- c(options, "-ct")
@@ -24,6 +36,12 @@ runEMIM <- function(mtmodel, effects, peddat, emimpath = "~/StatGenTools/emim-v3
 
   if (is.element("M", effects) || is.element("E:M", effects)) { # Multiplicative allele model for M effect
     options <- c(options, "-mt")
+  }
+  if(includeI){
+    options <- c(options,
+                  ifelse(MatImp,
+                         "-im",
+                         "-ip"))
   }
   options <- paste0(options, " ", collapse = " ")
 
@@ -70,7 +88,12 @@ runEMIM <- function(mtmodel, effects, peddat, emimpath = "~/StatGenTools/emim-v3
       }
 
       # run EMIM and rename results
-      command <- paste0(emimpath, "emim")
+      command <- paste0(emimpath,
+                        "emim",
+                        ifelse(.Platform$OS.type == "unix",
+                               "",
+                               ".exe")
+                        )
       system(command, intern = TRUE)
       system(paste0("mv emimsummary.out emimsummary_", i, ".out"))
     }
@@ -101,7 +124,14 @@ runEMIM <- function(mtmodel, effects, peddat, emimpath = "~/StatGenTools/emim-v3
 
 
     # Run PREMIM
-    command <- paste0(emimpath, "premim", options, "temp_pedigree.ped temp_pedigree.map")
+    command <- paste0(emimpath,
+                      "premim",
+                      ifelse(.Platform$OS.type == "unix",
+                             "",
+                             ".exe"
+                             ),
+                      options,
+                      "temp_pedigree.ped temp_pedigree.map")
     system(command, intern = TRUE)
 
     # Change parameter for mating symmetry
@@ -118,22 +148,38 @@ runEMIM <- function(mtmodel, effects, peddat, emimpath = "~/StatGenTools/emim-v3
     }
 
     # RUN EMIM
-    command <- paste0(emimpath, "emim")
+    command <- paste0(emimpath,
+                      "emim",
+                      ifelse(.Platform$OS.type == "unix",
+                             "",
+                             ".exe")
+                      )
     system(command, intern = TRUE)
 
     # Read in results
     res <- read.table("emimsummary.out", header = T)
 
-    if (is.element("M", effects)) {
-      resVec["M"] <- exp(res$lnS1)
-      pvalVec["M"] <- 2 * pnorm(abs(res$lnS1 / res$sd_lnS1), lower = F)
-    }
-    if (is.element("C", effects)) {
-      resVec["C"] <- exp(res$lnR1)
-      pvalVec["C"] <- 2 * pnorm(abs(res$lnR1 / res$sd_lnR1), lower = F)
-    }
+    # if (is.element("M", effects)) {
+    #   resVec["M"] <- exp(res$lnS1)
+    #   pvalVec["M"] <- 2 * pnorm(abs(res$lnS1 / res$sd_lnS1), lower = F)
+    # }
+    # if (is.element("C", effects)) {
+    #   resVec["C"] <- exp(res$lnR1)
+    #   pvalVec["C"] <- 2 * pnorm(abs(res$lnR1 / res$sd_lnR1), lower = F)
+    # }
+    # if(includeI){
+    #   if(MatImp){
+    #     resVec["Im"] <- exp(res$lnIm)
+    #     pvalVec["Im"] <- 2 * pnorm(abs(res$lnIm / res$sd_lnIm), lower = F)
+    #   } else {
+    #     resVec["Ip"] <- exp(res$lnIp)
+    #     pvalVec["Ip"] <- 2 * pnorm(abs(res$lnIp / res$sd_lnIp), lower = F)
+    #   }
+    # }
   }
-
-  system("rm temp_pedigree*")
-  return(list(effects = resVec, pvals = pvalVec))
+  setwd(wd)
+  unlink(td, recursive = TRUE)
+  #system("rm temp_pedigree*")
+  return(res)
+  #return(list(effects = resVec, pvals = pvalVec))
 }

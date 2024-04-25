@@ -77,8 +77,7 @@ simulateDataSubset <- function(ntrios = 1000, maf = 0.3,
                                R = c(1, 1, 1), S = c(1, 1, 1),
                                mtCoef = c(1, 1, 1),
                                V = c(1, 1, 1), includeE = FALSE, envint = "Mother",
-                               includeControl = FALSE, includeIm = FALSE, Im,
-                               includeIf = FALSE, If) {
+                               includeControl = FALSE, Im = 1, If = 1) {
   genomat <- mtmat(maf, C = mtCoef)
   # Compute the values proportional to P(D|M,F,C,E) for the
   # selected model.
@@ -87,16 +86,9 @@ simulateDataSubset <- function(ntrios = 1000, maf = 0.3,
   diseasefactor <- R[(genomat$C + 1)] * S[(genomat$M + 1)]
 
   # Add imprinting effects
-  if(includeIm && includeIf){
-    stop("Cannot have both paternal and maternal imprinting.")
-  } else if(includeIm){
-    impFactor <- ifelse(genomat$matOrg, Im, 1)
-  } else if(includeIf){
-    impFactor <- ifelse(genomat$patOrg, If, 1)
-  } else {
-    impFactor <- 1
-  }
-  diseasefactor <- diseasefactor * impFactor
+  impFactorm <- ifelse(genomat$matOrg, Im, 1)
+  impFactorf <- ifelse(genomat$patOrg, If, 1)
+  diseasefactor <- diseasefactor * impFactorm * impFactorf
 
   # Add environmental effects for trios that will have E=1
   if (envint == "Mother") {
@@ -225,6 +217,7 @@ stackCounts <- function(dat1, dat2) {
 # Can limit things (ex imprinting only for cases no controls)
 # can't really have both Im and If in simulating (overparameterized, Ainsworth)
 
+# MAF = Major Allele Frequency
 # This function creates a full dataset possibly with
 # - control trios
 # - case trios
@@ -233,11 +226,16 @@ stackCounts <- function(dat1, dat2) {
 simulateData <- function(ntrios = 1000, maf = 0.3,
                          R = c(1, 1, 1), S = c(1, 1, 1), V = c(1, 1, 1),
                          mtCoef = c(1, 1, 1), mtmodel = "MS",
-                         includeIm = FALSE, Im, includeIf = FALSE, If,
+                         Im = 1, If = 1,
                          includeE = FALSE, envint = "Mother", prE = 0,
                          includeControl = FALSE, prControl = 0, prE.control = prE,
                          includePopStrat = FALSE, numPop = 1, Fst = 0.005,
                          prCase.byPop = NULL, prControl.byPop = NULL) {
+  if(Im != 1 && If != 1 && !identical(R, c(1,1,1))){
+    warning("Maternal and paternal imprinting included with child effects,
+            resulting data cannot have all parameters simultaneously modelled.")
+  }
+
   if (includePopStrat == TRUE) {
     # Ensure that the proportion of the cases from each population is provided.
     if (round(sum(prCase.byPop), 8) != 1) {
@@ -320,7 +318,7 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
     # Simulate "case" trios,
     caseE0 <- simulateDataSubset(
       ntrios = ntrios.pop.notE.case, maf = q[i], R = R, S = S, mtCoef = mtCoef,
-      includeE = FALSE, includeIm = includeIm, Im = Im, includeIf = includeIf, If = If
+      includeE = FALSE, Im = Im, If = If
     )
     if (i == 1) {
       caseE0.all <- caseE0
@@ -336,8 +334,7 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
     if (includeE == TRUE) {
       caseE1 <- simulateDataSubset(
         ntrios = ntrios.pop.E.case, maf = q[i], R = R, S = S, mtCoef = mtCoef,
-        V = V, includeE = TRUE, envint = envint, includeIm = includeIm, Im = Im,
-        includeIf = includeIf, If = If
+        V = V, includeE = TRUE, envint = envint, Im = Im, If = If
       )
       if (i == 1) {
         caseE1.all <- caseE1
@@ -355,8 +352,7 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
       controlE0 <- simulateDataSubset(
         ntrios = ntrios.pop.notE.control, maf = q[i],
         R = c(1, 1, 1), S = c(1, 1, 1),
-        mtCoef = mtCoef, includeE = FALSE, includeControl = TRUE,
-        includeIm = FALSE, includeIf = FALSE
+        mtCoef = mtCoef, includeE = FALSE, includeControl = TRUE
       )
       if (i == 1) {
         controlE0.all <- controlE0
@@ -373,7 +369,7 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
           ntrios = ntrios.pop.E.control, maf = q[i],
           R = c(1, 1, 1), S = c(1, 1, 1), mtCoef = mtCoef,
           V = c(1, 1, 1), includeE = TRUE, envint = envint,
-          includeControl = TRUE, includeIm = FALSE, includeIf = FALSE
+          includeControl = TRUE
         )
         if (i == 1) {
           controlE1.all <- controlE1
@@ -455,7 +451,8 @@ createPed <- function(dat) {
       # genotype1[genotype1==-8]=0
       # genotype2[genotype2==-8]=0
 
-      tempdat <- data.frame(E, D = phenotype, genotype1, genotype2)
+      #tempdat <- data.frame(E, D = phenotype, genotype1, genotype2)
+      tempdat <- data.frame(D = phenotype, genotype1, genotype2)
 
       finaldat <- rbind(finaldat, tempdat)
     }

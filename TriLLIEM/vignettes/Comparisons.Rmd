@@ -1,0 +1,68 @@
+---
+title: "Comparisons"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Comparisons}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(TriLLIEM)
+library(dplyr)
+library(Haplin)
+```
+
+Basic case (already verified)
+```{r}
+dat_no_imp <- simulateData(R = c(1,2,4), S = c(1,2,4), mtmodel = "HWE")
+TriLLIEM(mtmodel = "HW", dat = dat_no_imp$dat4R) %>% summ_trill(effects = c("C", "M"))
+runEMIM(mtmodel = "HW", peddat = dat_no_imp$dat4EMIM) %>% summ_emim()
+f = file()
+sink(file=f)
+hap_res_no_imp <- suppressWarnings(
+  suppressMessages(
+    runHaplin(effects = c("C", "M"), dat = dat_no_imp$dat4haplin)
+  )
+)
+sink()
+close(f)
+summ_haplin(hap_res_no_imp)
+```
+
+Imprinting case
+```{r} 
+## For Haplin, might need to consider both Im and If simultaneously to compare
+## Ask Joseph and Mohan about Haplin imprinting
+## Possible that EMIM uses a different missing data filling alg
+## Could look over source code for EMIM
+## Try simulating too
+## for simulations, save the p-values and find proportion of rejections
+## Save standard error
+## Test both parameterizations for emim, 1999 weinberg is a diff parameterization
+
+## FIX TriLLIEM(mtmodel = "HW", dat = dat_imp$dat4R, includeI = TRUE, effects = "")
+## DD = double dose
+## ref = mult for multiplicative
+dat_imp <- simulateData(mtmodel = "HWE", includeIm = TRUE, Im = 2)
+TriLLIEM(mtmodel = "HW", dat = dat_imp$dat4R, includeI = TRUE) %>% summ_trill(effects = c("C", "M", "Im"))
+runEMIM(mtmodel = "HW", peddat = dat_imp$dat4EMIM,includeI = TRUE) %>% summ_emim(emim_res)
+f = file()
+sink(file=f)
+hap_res <- suppressWarnings(
+  suppressMessages(
+    runHaplin(effects = c("C", "M"), dat = dat_no_imp$dat4haplin)
+  )
+)
+sink()
+close(f)
+hap_res
+```
+

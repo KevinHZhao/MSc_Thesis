@@ -44,3 +44,20 @@ loglinear is used so we can use GLM frameworks, EMIM multinomial is tough since 
 can meet earlier if necessary
 
 typo in UOthesis.cls (line 371, \setUOtgoal -> \setUOgoal)
+
+Ask graduate office about switching to project if necessary
+
+add_PoO_data should be "invisible"
+user shouldn't need to know about EM, abstract it a bit
+
+compare with haplin, pure cases should be the same, environmental probably different, cases+controls should be same but might not be
+additive model is best (justified), recessive dominant and codominant don't touch for now.
+sasieni talks about how additive model captures the dominant model
+
+do a comparison of recessive data with haplin, make a markdown
+
+focus on comparing to haplin and emim (what can each do)
+make everything make sense to anyone
+analyze real data set for thesis
+
+write like a JSS paper, bioinformatics application notes, read them to get a sense of structure
