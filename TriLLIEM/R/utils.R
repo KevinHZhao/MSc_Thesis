@@ -21,12 +21,14 @@ add_PoO_data <- function(dat, Mprop) {
 
 summ_trill <- function(res, effects){
   resVec <- c()
+  sdVec <- c()
   pvalVec <- c()
   for (j in effects) {
     resVec[j] <- exp(summary(res)$coef[j, 1])
+    sdVec[j] <- summary(res)$coef[j, 2]
     pvalVec[j] <- summary(res)$coef[j, 4]
   }
-  return(list(effects = resVec, pvals = pvalVec))
+  return(list(effects = resVec, se = sdVec, pvals = pvalVec))
 }
 
 summ_haplin <- function(res, PoO = FALSE){
@@ -51,14 +53,19 @@ summ_haplin <- function(res, PoO = FALSE){
 
 summ_emim <- function(res){
   resVec <- c()
+  sdVec <- c()
   pvalVec <- c()
   resVec["C"] <- exp(res$lnR1)
+  sdVec["C"] <- res$sd_lnR1
   pvalVec["C"] <- 2 * pnorm(abs(res$lnR1 / res$sd_lnR1), lower = F)
   resVec["M"] <- exp(res$lnS1)
+  sdVec["M"] <- res$sd_lnS1
   pvalVec["M"] <- 2 * pnorm(abs(res$lnS1 / res$sd_lnS1), lower = F)
   resVec["Im"] <- exp(res$lnIm)
+  sdVec["Im"] <- res$sd_lnIm
   pvalVec["Im"] <- 2 * pnorm(abs(res$lnIm / res$sd_lnIm), lower = F)
   resVec["Ip"] <- exp(res$lnIp)
+  sdVec["Im"] <- res$sd_lnIp
   pvalVec["Ip"] <- 2 * pnorm(abs(res$lnIp / res$sd_lnIp), lower = F)
-  return(list(effects = resVec, pvals = pvalVec))
+  return(list(effects = resVec, se = sdVec, pvals = pvalVec))
 }

@@ -1,5 +1,5 @@
 ## Run a loglinear analysis with the specified model
-## mtmodel = "HW", "MS", "MaS"
+## mtmodel = "HWE", "MS", "MaS"
 ## effects = "C", "M", "E:M", ... could examine environment child effects
 ## For EM start with 50/50 M/F, could also have sensitivity analysis
 ## Minit from 0 to 1, initial "guess" for proportion of maternal origin in 1,1,1
@@ -26,7 +26,7 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
 
   # Portion of model equation depends on mating type model
   # No offset as we split the (1,1,1) case
-  if (mtmodel == "HW") {
+  if (mtmodel == "HWE") {
     origDat$HWgeno <- origDat$M + origDat$F
     mteffect <- "HWgeno"
     modelformula <- "count~" # Must include intercept for HW model because of log(1-p) term
@@ -48,14 +48,14 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
       origDat$M <- origDat$M * origDat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 OW
       # (Note that the E:M term in model will be from crossing this
       # variable with E=1, which is exactly what is needed.
-      if (mtmodel == "HW") { # Include main effect of E to give different intercept for HW+E case
+      if (mtmodel == "HWE") { # Include main effect of E to give different intercept for HW+E case
         modeleffects <- c(mteffect, paste0(mteffect, ":E"), effects, "E", "D", "E:D")
       } else {
         modeleffects <- c(mteffect, paste0(mteffect, ":E"), effects, "D", "E:D")
       }
     } else { # No controls
 
-      if (mtmodel == "HW") { # Include main effect of E to give different intercept for HW+E case
+      if (mtmodel == "HWE") { # Include main effect of E to give different intercept for HW+E case
         modeleffects <- c(mteffect, paste0(mteffect, ":E"), effects, "E")
       } else {
         modeleffects <- c(mteffect, paste0(mteffect, ":E"), effects)

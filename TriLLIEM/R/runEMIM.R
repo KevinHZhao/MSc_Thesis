@@ -1,8 +1,19 @@
 ## Run a haplin analysis with the specified model
 runEMIM <- function(mtmodel = "MS", effects = c("C", "M"), peddat,
                     emimpath = "C:/Users/Kevin/emim-v3.22-windows-x86_64/",
-                    includeI = FALSE, MatImp = TRUE, Minit = 0.5, max.iter = 12,
-                    weinberg = FALSE) {
+                    includeIm = FALSE, includeIf = FALSE, weinberg = FALSE) {
+
+  if(includeIm){
+    effects <- c(effects, "Im")
+  }
+  if(includeIf){
+    effects <- c(effects, "If")
+  }
+
+  if (all(c("C", "Im", "If") %in% effects)){
+    stop("Cannot include maternal and paternal imprinting with child effects.")
+  }
+
   ## Set up temp wd so EMIM files don't show up
   wd <- getwd()
   td <- tempfile()
@@ -12,6 +23,7 @@ runEMIM <- function(mtmodel = "MS", effects = c("C", "M"), peddat,
   ## This is for ensuring EMIM knows to use "2" as the risk allele (otherwise it
   ## will default to the least common allele)
   write(c("1", "A", "2"), "emim_rfile", ncol = 3)
+
   # Setup results objects
   if (is.element("E:M", effects)) {
     neweffects <- c(setdiff(effects, c("E:M", "M")), "M[E=0]", "M[E=1]", "M[E=1]/M[E=0]")
@@ -33,15 +45,15 @@ runEMIM <- function(mtmodel = "MS", effects = c("C", "M"), peddat,
   if (is.element("C", effects)) { # Multiplicative allele model for C effect
     options <- c(options, "-ct")
   }
+  if (is.element("Im", effects)) { # Multiplicative allele model for C effect
+    options <- c(options, "-im")
+  }
+  if (is.element("If", effects)) { # Multiplicative allele model for C effect
+    options <- c(options, "-ip")
+  }
 
   if (is.element("M", effects) || is.element("E:M", effects)) { # Multiplicative allele model for M effect
     options <- c(options, "-mt")
-  }
-  if(includeI){
-    options <- c(options,
-                  ifelse(MatImp,
-                         "-im",
-                         "-ip"))
   }
   options <- paste0(options, " ", collapse = " ")
 
