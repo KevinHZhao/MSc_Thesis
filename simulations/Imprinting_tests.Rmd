@@ -10,7 +10,7 @@ First, will the parameterization be the Haplin parameterization for PoO (i.e. us
 includeHaplin = TRUE # TRUE for Haplin, FALSE for no Haplin
 includeParallel = TRUE # TRUE for parallelization, FALSE for no parallelization
 cores <- 10 # Number of cores to use if includeParallel is TRUE
-EMIM_path <- "./EMIM" ## CHANGE THIS TO THE PATH FOR THE EMIM DIRECTORY
+EMIM_path <- "./EMIM/" ## CHANGE THIS TO THE PATH FOR THE EMIM DIRECTORY
 ```
 
 What type of data should we simulate?
@@ -98,7 +98,7 @@ EMIM_analysis <- function(dat, effects){
       library(tidyverse)
     })
       
-    clusterExport(my.cluster, c("effects", "mtmodel", "EMIM_PATH"))
+    clusterExport(my.cluster, c("effects", "mtmodel", "EMIM_path"))
       
     startT <- Sys.time()
     
