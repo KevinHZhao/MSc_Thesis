@@ -134,7 +134,7 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
           break
         }
         else if(counter == max.iter){
-          warning("Max iterations reached without convergence.")
+          stop("Max iterations reached without convergence.")
           break
         }
         prev_Imhat <- Imhat
@@ -147,11 +147,11 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
         counter <- counter + 1
         res <- glm(as.formula(modelformula), data = origDat, family = poisson())
 
-        Ihat <- ifelse(includeIm, exp(res$coefficients["Im"]), exp(res$coefficients["Ip"]))
+        Ihat <- ifelse("Im" %in% effects, exp(res$coefficients["Im"]), exp(res$coefficients["Ip"]))
 
         if(EM.diag){
           message(paste0("\nIteration ", counter, " of EM algorithm.
-                       \nI", ifelse(MatImp,"m","f"), " hat = ", Ihat,
+                       \nI", ifelse("Im" %in% effects,"m","f"), " hat = ", Ihat,
                          "\nProportion for maternal inheritance cell = ", ifelse("Im" %in% effects,
                                                                                  Ihat/(1 + Ihat),
                                                                                  1/(1 + Ihat))))

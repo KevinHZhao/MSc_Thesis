@@ -8,7 +8,7 @@ createGenoMat <- function() {
   C <- c(rep(0, 2), 1, 0, rep(1, 3), 0, rep(1, 2), 2, 1, 2, 1, rep(2, 2))
 
   ## Indicator variables for parent-of-origin
-  matOrg <- c(rep(0, 4), 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1)
+  matOrg <- c(rep(0, 4), 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1)
   patOrg <- c(rep(0, 2), 1, rep(0, 2), 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1)
 
   return(data.frame(M, F, C, matOrg, patOrg))

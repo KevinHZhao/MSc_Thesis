@@ -10,7 +10,7 @@ First, will the parameterization be the Haplin parameterization for PoO (i.e. us
 includeHaplin = TRUE # TRUE for Haplin, FALSE for no Haplin
 includeParallel = TRUE # TRUE for parallelization, FALSE for no parallelization
 cores <- 10 # Number of cores to use if includeParallel is TRUE
-EMIM_path <- "./EMIM/" ## CHANGE THIS TO THE PATH FOR THE EMIM DIRECTORY
+EMIM_path <- paste0(getwd(),"/EMIM/") ## CHANGE THIS TO THE PATH FOR THE EMIM DIRECTORY
 ```
 
 What type of data should we simulate?
@@ -18,14 +18,14 @@ What type of data should we simulate?
 ```{r}
 ## Parameters we're focusing on now
 R <- c(1,1,1) # Child effects, should be all 1's if including Haplin
-S <- c(1,1,1) # Maternal effects
+S <- c(1,2,4) # Maternal effects
 Im <- 1 # Maternal imprinting parameter/Cm parameter for Haplin
-If <- 1 # Paternal imprinting parameter/Cf parameter for Haplin
+If <- 2 # Paternal imprinting parameter/Cf parameter for Haplin
 
 ## Parameters that could be useful to look at
 mtmodel <- "HWE" # Hardy-Weinberg = HWE, Mating Symmetry = MS, Mating Asymmetry = MaS
 maf <- 0.3 # Minor allele frequency
-nsim <- 100 # Number of iid data sets to be generated
+nsim <- 50 # Number of iid data sets to be generated
 ntrios <- 1000 # Number of trios to include in each data set
 
 ## Parameters we'll be looking at later
@@ -267,5 +267,6 @@ p-values for EMIM are calculated ourselves using the formula:
 
 or as example code,
 ```{r, eval = FALSE}
+# Try out Haplin's simulate data function
 2 * pnorm(abs(res$lnR1 / res$sd_lnR1), lower = F)
 ```

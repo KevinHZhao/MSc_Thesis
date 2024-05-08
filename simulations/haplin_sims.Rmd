@@ -1,0 +1,139 @@
+```{r setup, include = FALSE}
+library(tidyverse); theme_set(theme_bw())
+library(TriLLIEM)
+library(parallel)
+library(Haplin)
+```
+
+```{r}
+cores <- 10
+nsim <- 1000
+## Generate data with Haplin, 1 = "major", 2 = "minor"
+hapSim(nall = 2, cases = c(mfc = nsim), haplo.freq = c(0.7, 0.3), RRcm = c(1,2), RRcf = c(1,1), RRstar = c(1,1), cpus = 10)
+EMIM_path <- paste0(getwd(),"/EMIM/")
+```
+
+```{r}
+hap2trill <- function(hapdat){
+  trill_format <- simulateData(ntrios = 1)$dat4R %>% select(-count)
+  
+  trilldat <- hapdat %>% 
+    mutate(M = .[[1]] + .[[2]] - 2,
+           F = .[[3]] + .[[4]] - 2,
+           C = .[[5]] + .[[6]] - 2) %>%
+    select(M, F, C) %>%
+    group_by_all() %>%
+    summarise(count = n()) %>%
+    as.data.frame() %>% 
+    left_join(x = trill_format) %>%
+    select(unique(c(names(trill_format), "count")))
+  return(trilldat)
+}
+
+my.cluster <- makeCluster(cores)
+clusterEvalQ(my.cluster, {
+  library(TriLLIEM)
+  library(tidyverse)
+})
+clusterExport(my.cluster, c("hap2trill", "EMIM_path"))
+
+startT <- Sys.time()
+
+dat_list <- parLapply(
+      cl = my.cluster,
+      X = 1:nsim, 
+      fun = function(i) 
+        read.table(file = paste0("simfiles/sim",i,".dat")) %>%
+        hap2trill()
+              )
+
+trill_res <- parLapply(
+      cl = my.cluster,
+      X = dat_list, 
+      fun = function(x) 
+        x %>%
+        TriLLIEM(mtmodel = "HWE",
+                 effects = c("M", "Im", "If"), 
+                 dat = .) %>% 
+        summ_trill(effects = c("M", "Im", "If")) %>%
+        unlist()
+              ) %>%
+      do.call(rbind, .)
+
+emim_res <- parLapply(
+      cl = my.cluster,
+      X = dat_list,
+      function(x){
+        createPed(x) %>%
+        runEMIM(mtmodel = "HWE",
+                peddat = ., 
+                effects = c("M", "Im", "If"),
+                emimpath = EMIM_path) %>% 
+          summ_emim() %>%
+          unlist()
+      }
+    ) %>%
+      do.call(rbind, .)
+
+endT <- Sys.time()
+print(endT - startT)
+stopCluster(cl = my.cluster)
+
+```
+```{r}
+haplingeno <- createHaplinGeno()[-9,]
+# if (includeControl==TRUE){ # Only parents so make child genotype NA
+#  MF=unique(haplingeno[,1:2])
+#  haplingeno=data.frame(type=1:nrow(MF),MF,C=rep(NA,nrow(MF)))
+# } else{
+haplingeno <- data.frame(typeOrig = 1:15, haplingeno)
+# }
+haplindat <- merge(haplingeno, dat_list[[1]] %>% mutate(typeOrig = 1:15), by = "typeOrig") %>%
+  dplyr::group_by(M.x, F.x, C.x) %>%
+  dplyr::summarise_at(dplyr::vars(count), sum) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(type = 1:15) %>%
+  dplyr::relocate(type) %>%
+  as.data.frame()
+
+finaldat <- NULL
+for (j in 1:nrow(haplindat)) {
+  if (haplindat[j, "count"] > 0) {
+    genos <- matrix(unlist(rep(haplindat[j, 2:4], haplindat[j, "count"])), ncol = 3, byrow = TRUE)
+    genos <- cbind(
+      rep(0, length = haplindat[j, "count"]),
+      rep(1, length = haplindat[j, "count"]),
+      genos
+    )
+    finaldat <- rbind(finaldat, genos)
+  }
+}
+finaldat <- as.data.frame(finaldat)
+
+runHaplin(effects = "M", dat = finaldat,  PoO = TRUE) %>% summ_haplin(PoO = TRUE)
+```
+```{r}
+dat.raw <- genDataRead(file.in = paste0("simfiles/sim",1,".dat"),
+            format = "haplin",
+            n.vars = 0,
+            allele.sep = " ",
+            overwrite = TRUE)
+
+dat.processed <- genDataPreprocess(
+        data.in = dat.raw, design = "triad",
+        overwrite = TRUE
+      )
+
+res <- haplin(dat.processed,
+        response = "mult", verbose = FALSE,
+        printout = FALSE, reference = "ref.cat", maternal = TRUE,
+        poo = TRUE
+      ) %>%
+  haptable(.) %>%
+  .[2,]
+
+## Odd that almost identical but still a bit diff...
+```
+
+THERE IS FOR SURE AN ISSUE WITH HOW I DID IMPRINTING...
+

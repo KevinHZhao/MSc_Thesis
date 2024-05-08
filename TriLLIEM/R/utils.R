@@ -1,20 +1,21 @@
 add_PoO_data <- function(dat, Mprop) {
   # Portion of model equation and offset depends on mating type model
-  heteroInds <- with(dat, which((M == 1) & (F == 1) & (C == 1)))
+  heteroInds <- with(dat, which(type == 9))
+  M.count <- round(Mprop * dat$count[heteroInds])
   PoO_dat <- dat %>%
     dplyr::left_join(PoO_df, by = c("M", "F", "C")) %>%
-    dplyr::mutate(count = ifelse(is.na(patOrg), ceiling(Mprop * count), count),
-                  patOrg = ifelse(is.na(patOrg), 0, patOrg),
-                  matOrg = ifelse(is.na(matOrg), 1, matOrg)) %>%
+    dplyr::mutate(count = replace(count, is.na(patOrg), M.count),
+                  matOrg = replace(matOrg, is.na(matOrg), 1),
+                  patOrg = replace(patOrg, is.na(patOrg), 0)) %>%
     dplyr::add_row(dat %>%
                      dplyr::filter(dplyr::row_number() == heteroInds) %>%
-                     dplyr::mutate(count = floor((1 - Mprop) * count),
-                                   patOrg = 1,
-                                   matOrg = 0)) %>%
+                     dplyr::mutate(count = dat$count[heteroInds] - M.count,
+                                   matOrg = 0,
+                                   patOrg = 1)) %>%
     dplyr::arrange(desc(D), desc(E), type, desc(matOrg)) %>%
     dplyr::mutate(typeOrig = rep(1:16, dplyr::n()/16),
-                  If = patOrg * D,
-                  Im = matOrg * D) %>%
+                  Im = matOrg * D,
+                  If = patOrg * D) %>%
     dplyr::relocate(typeOrig)
   return(PoO_dat)
 }
@@ -65,7 +66,7 @@ summ_emim <- function(res){
   sdVec["Im"] <- res$sd_lnIm
   pvalVec["Im"] <- 2 * pnorm(abs(res$lnIm / res$sd_lnIm), lower = F)
   resVec["Ip"] <- exp(res$lnIp)
-  sdVec["Im"] <- res$sd_lnIp
+  sdVec["Ip"] <- res$sd_lnIp
   pvalVec["Ip"] <- 2 * pnorm(abs(res$lnIp / res$sd_lnIp), lower = F)
   return(list(effects = resVec, se = sdVec, pvals = pvalVec))
 }
