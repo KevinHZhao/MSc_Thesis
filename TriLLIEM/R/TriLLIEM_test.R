@@ -6,7 +6,7 @@
 ## MatImp can be true/false based on if we assume maternal/paternal imprinting
 ## respectively (for now assuming can't be both)
 ## EM.diag = show EM diagnostics
-TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
+TriLLIEM_test <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
                      includeIm = FALSE, includeIf = FALSE, Minit = 0.5, max.iter = 12,
                      EM.diag = FALSE) {
   if(includeIm){
@@ -21,7 +21,8 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
   }
 
   # Portion of model equation and offset depends on mating type model
-  origDat <- add_PoO_data(dat, Mprop = Minit)
+  heteroInds <- with(dat, which((M == 1) & (F == 1) & (C == 1)))
+  origDat <- add_PoO_data_15(dat)
 
   # Portion of model equation depends on mating type model
   # No offset as we split the (1,1,1) case
@@ -43,8 +44,8 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
 
   if (is.element("E:M", effects)) { # check gene-environment paper on adding other effects ex E:C
     if (sum(origDat$D == 0) > 0) { # There are controls; include environmental interaction
-      origDat$C <- origDat$C * origDat$D # 1 if C=1, D=1; 2 if C=2, D=1; 0 OW
-      origDat$M <- origDat$M * origDat$D # 1 if C=1, D=1; 2 if C=2, D=1; 0 OW
+      origDat$C <- origDat$C * origDat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 OW
+      origDat$M <- origDat$M * origDat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 OW
       # (Note that the E:M term in model will be from crossing this
       # variable with E=1, which is exactly what is needed.
       if (mtmodel == "HWE") { # Include main effect of E to give different intercept for HW+E case
@@ -98,53 +99,85 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
     }
   }
 
+
   # Run model and save results
 
-  # EM for Imprinting, using same stopping criteria as Haplin...
+  # EM for Imprinting
   if(any(c("Im", "If") %in% effects)){
     counter <- 0
     if(EM.diag){
       message(paste0("Initial proportion for maternal inheritance cell = ", Minit))
     }
-    prev_coeffs <- -1
-    prev_dev <- -1
-    repeat{
-      counter <- counter + 1
-      res <- glm(as.formula(modelformula), data = origDat, family = poisson(), x = TRUE)
+    if(all(c("Im", "If") %in% effects)){
+      prev_Imhat <- 10
+      prev_Ifhat <- 10
+      repeat{
+        counter <- counter + 1
+        res <- glm(as.formula(modelformula),
+                   data = origDat,
+                   family = poisson(),
+                   offset = c(rep(0, 8),
+                              log((prev_Imhat^2 + prev_Ifhat^2)/(prev_Imhat + prev_Ifhat)),
+                              rep(0,6))
+                   )
 
-      Imhat <- ifelse(is.na(exp(res$coefficients["Im"])),
-                      1,
-                      exp(res$coefficients["Im"])
-                      )
-      Ifhat <- ifelse(is.na(exp(res$coefficients["If"])),
-                      1,
-                      exp(res$coefficients["If"])
-                      )
+        Imhat <- exp(res$coefficients["Im"])
+        Ifhat <- exp(res$coefficients["If"])
 
-      if(EM.diag){
-        message(paste0("\nIteration ", counter, " of EM algorithm.
-                        \nIm hat = ", Imhat,
-                       "\nIf hat = ", Ifhat,
-                       "\nProportion for maternal inheritance cell = ", Imhat/(Ifhat + Imhat)))
-      }
+        if(EM.diag){
+          message(paste0("\nIteration ", counter, " of EM algorithm.
+                          \nIm hat = ", Imhat,
+                         "\nIf hat = ", Ifhat,
+                         "\nProportion for maternal inheritance cell = ", Imhat/(Ifhat + Imhat)))
+        }
 
-      origDat <- add_PoO_data(dat,
-                              Mprop = Imhat/(Ifhat + Imhat)
-                              ) %>%
-        dplyr::mutate(HWgeno = M + F)
-      if(abs(deviance(res) - prev_dev) < 2e-006 && max(abs(coef(res) - prev_coeffs)) < 1e-006){
-        break
+        origDat <- add_PoO_data_15(dat) %>%
+          dplyr::mutate(HWgeno = M + F)
+        if(Imhat == prev_Imhat && Ifhat == prev_Ifhat){
+          message("EM convergence achieved.")
+          break
+        }
+        else if(counter == max.iter){
+          stop("Max iterations reached without convergence.")
+          break
+        }
+        prev_Imhat <- Imhat
+        prev_Ifhat <- Ifhat
       }
-      else if(counter == max.iter){
-        stop("Max iterations reached without convergence.")
-        break
+    }
+    else{
+      prev_Ihat <- -1
+      repeat{
+        counter <- counter + 1
+        res <- glm(as.formula(modelformula), data = origDat, family = poisson())
+
+        Ihat <- ifelse("Im" %in% effects, exp(res$coefficients["Im"]), exp(res$coefficients["Ip"]))
+
+        if(EM.diag){
+          message(paste0("\nIteration ", counter, " of EM algorithm.
+                       \nI", ifelse("Im" %in% effects,"m","f"), " hat = ", Ihat,
+                         "\nProportion for maternal inheritance cell = ", ifelse("Im" %in% effects,
+                                                                                 Ihat/(1 + Ihat),
+                                                                                 1/(1 + Ihat))))
+        }
+
+        origDat <- add_PoO_data_15(dat) %>%
+          dplyr::mutate(HWgeno = M + F)
+        if(Ihat == prev_Ihat){
+          message("EM convergence achieved.")
+          break
+        }
+        else if(counter == max.iter){
+          warning("Max iterations reached without convergence.")
+          break
+        }
+        prev_Ihat <- Ihat
       }
-      prev_coeffs <- coef(res)
-      prev_dev <- deviance(res)
-      }
-  } else {
-    res <- glm(as.formula(modelformula), data = dat, family = poisson())
+    }
+  } else{
+    res <- glm(as.formula(modelformula), data = origDat, family = poisson())
   }
+
 
   # R is not consistent about how interaction is specified. Even though it
   # is fit as E:M, sometimes R flips it to M:E in the output of results.

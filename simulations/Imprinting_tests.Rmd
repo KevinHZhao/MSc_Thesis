@@ -2,6 +2,7 @@
 library(tidyverse); theme_set(theme_bw())
 library(TriLLIEM)
 library(parallel)
+library(Haplin)
 ```
 
 First, will the parameterization be the Haplin parameterization for PoO (i.e. using $C_m, C_f$)? If not then we can't include Haplin in the comparison.  Should we use parallelization in this script to speed things up?  We also need the path to EMIM as well.
@@ -17,21 +18,24 @@ What type of data should we simulate?
 
 ```{r}
 ## Parameters we're focusing on now
+## HAPLIN SEEMS TO BREAK WHEN THERE ARE TOO MANY MINOR ALLELES
 R <- c(1,1,1) # Child effects, should be all 1's if including Haplin
-S <- c(1,2,4) # Maternal effects
-Im <- 1 # Maternal imprinting parameter/Cm parameter for Haplin
-If <- 2 # Paternal imprinting parameter/Cf parameter for Haplin
+S <- c(1,1,1) # Maternal effects
+Im <- 3 # Maternal imprinting parameter/Cm parameter for Haplin
+If <- 5 # Paternal imprinting parameter/Cf parameter for Haplin
 
 ## Parameters that could be useful to look at
 mtmodel <- "HWE" # Hardy-Weinberg = HWE, Mating Symmetry = MS, Mating Asymmetry = MaS
 maf <- 0.3 # Minor allele frequency
-nsim <- 50 # Number of iid data sets to be generated
+nsim <- 100 # Number of iid data sets to be generated
 ntrios <- 1000 # Number of trios to include in each data set
 
 ## Parameters we'll be looking at later
 includeE <- FALSE # TRUE for gene-environment interactions
+prE <- 0.5
 V <- c(1,2,4) # Maternal gene-environment interactions effects
 includeControl <- FALSE # TRUE for half controls, FALSE for no controls, not tested...
+prControl <- 0.5
 ```
 
 What effects are we including in the TriLLIEM/EMIM/Haplin models?
@@ -63,7 +67,7 @@ TRILL_analysis <- function(dat, effects){
                  dat = x$dat4R,
                  effects = effects,
                  max.iter = 30) %>%
-          summ_trill(effects = effects) %>%
+          summ_trill() %>%
           unlist()
       }
     ) %>%
@@ -81,7 +85,7 @@ TRILL_analysis <- function(dat, effects){
                  dat = x$dat4R,
                  effects = effects,
                  max.iter = 30) %>%
-          summ_trill(effects = effects) %>%
+          summ_trill() %>%
           unlist()
       }
     ) %>%
@@ -204,8 +208,10 @@ if (includeParallel) {
                   "mtmodel",
                   "maf",
                   "includeE",
+                  "prE",
                   "V",
-                  "includeControl")
+                  "includeControl",
+                  "prControl")
                 )
     
   dat <- parLapply(
@@ -221,8 +227,10 @@ if (includeParallel) {
         mtmodel = mtmodel,
         maf = maf,
         includeE = includeE,
+        prE = prE,
         V = V,
-        includeControl = includeControl)
+        includeControl = includeControl,
+        prControl = prControl)
     }
   )
   stopCluster(cl = my.cluster)
@@ -239,8 +247,10 @@ if (includeParallel) {
         mtmodel = mtmodel,
         maf = maf,
         includeE = includeE,
+        prE = prE,
         V = V,
-        includeControl = includeControl)
+        includeControl = includeControl,
+        prControl = prControl)
     }
   )
 }
