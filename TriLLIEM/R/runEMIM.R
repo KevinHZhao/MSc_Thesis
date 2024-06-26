@@ -1,7 +1,23 @@
-## Run a haplin analysis with the specified model
+#' Title
+#'
+#' @param mtmodel
+#' @param effects
+#' @param peddat
+#' @param emimpath
+#' @param includeIm
+#' @param includeIf
+#' @param weinberg
+#'
+#' @return
+#' @export
+#' @keywords internal
+#'
+#' @examples
 runEMIM <- function(mtmodel = "MS", effects = c("C", "M"), peddat,
                     emimpath = "C:/Users/Kevin/emim-v3.22-windows-x86_64/",
                     includeIm = FALSE, includeIf = FALSE, weinberg = FALSE) {
+  ## Set up temp wd so EMIM files don't show up
+  withr::local_dir(new = withr::local_tempdir())
 
   if(includeIm){
     effects <- c(effects, "Im")
@@ -13,12 +29,6 @@ runEMIM <- function(mtmodel = "MS", effects = c("C", "M"), peddat,
   if (all(c("C", "Im", "If") %in% effects)){
     stop("Cannot include maternal and paternal imprinting with child effects.")
   }
-
-  ## Set up temp wd so EMIM files don't show up
-  wd <- getwd()
-  td <- tempfile()
-  dir.create(td, showWarnings = FALSE)
-  setwd(td)
 
   ## This is for ensuring EMIM knows to use "2" as the risk allele (otherwise it
   ## will default to the least common allele)
@@ -189,8 +199,6 @@ runEMIM <- function(mtmodel = "MS", effects = c("C", "M"), peddat,
     #   }
     # }
   }
-  setwd(wd)
-  unlink(td, recursive = TRUE)
   #system("rm temp_pedigree*")
   return(res)
   #return(list(effects = resVec, pvals = pvalVec))

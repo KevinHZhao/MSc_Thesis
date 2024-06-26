@@ -61,3 +61,7 @@ make everything make sense to anyone
 analyze real data set for thesis
 
 write like a JSS paper, bioinformatics application notes, read them to get a sense of structure
+
+include a study on pop strat
+
+make a summary table of the stuff added into model (people should understand why things are being added, not just blindly adding coefficients and not understanding why new interactions are included).

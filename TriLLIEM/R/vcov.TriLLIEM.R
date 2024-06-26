@@ -1,6 +1,15 @@
 ## Calculates the Fisher info matrix, only for the imprinting case
 
-TriLLIEM_SE <- function(res) {
+#' Title
+#'
+#' @param res
+#'
+#' @return
+#' @export
+#' @keywords internal
+#'
+#' @examples
+vcov.TriLLIEM <- function(res) {
   ## Calculating SE's
   ## IX is the 16-row info matrix
   ## IY is the 15-row info matrix
@@ -8,7 +17,7 @@ TriLLIEM_SE <- function(res) {
   nsets <- nobs(res)/16
 
   if(nsets %% 1 != 0) {
-    stop("Number of observations is not a factor of 16.")
+    return(NextMethod())
   }
 
   ## I_X <- vcov(res) is slightly less precise
@@ -21,6 +30,7 @@ TriLLIEM_SE <- function(res) {
   L[c(outer(10:15,16L * (1:nsets - 1), FUN = "+")),] <- L[c(outer(11:16,16L * (1:nsets - 1), FUN = "+")),]
   L <- L[-(16L * (1:nsets)),]
 
+  ## Try to clean up so don't need to calculate all the zeros
   var_XgY <- vapply(X = 1:(nsets * 16),
                     FUN = function(x){
                       vapply(X = 1:(nsets * 16),
@@ -36,6 +46,5 @@ TriLLIEM_SE <- function(res) {
   )
   I_XgY <- t(Z) %*% var_XgY %*% Z
   I_Y <- I_X - I_XgY
-  se <- sqrt(diag(solve(I_Y)))
-  return(se)
+  return(solve(I_Y))
 }

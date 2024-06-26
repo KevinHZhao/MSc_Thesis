@@ -3,10 +3,8 @@
 \docType{data}
 \name{example_dat4R}
 \alias{example_dat4R}
-\title{Example Mating Asymmetry data}
+\title{Example triad data}
 \format{
-\subsection{\code{example_dat4R}}{
-
 A dataframe with columns for:
 \describe{
 \item{type}{Unique identifier for each row}
@@ -21,11 +19,10 @@ A dataframe with columns for:
 ...
 }
 }
-}
 \usage{
 example_dat4R
 }
 \description{
-Example data formatted to be used in the \code{\link[=MaSlrt]{MaSlrt()}} function.
+Example data formatted to be used in the \code{\link[=TriLLIEM]{TriLLIEM()}} function.
 }
 \keyword{datasets}

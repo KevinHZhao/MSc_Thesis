@@ -1,4 +1,4 @@
-#' Mating Asymmetry Likelihood Ratio Test
+#' Mating asymmetry likelihood ratio test
 #'
 #' `MaSlrt()` runs a Likelihood Ratio Test for a trios model with Mating Asymmetry.
 #'

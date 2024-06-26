@@ -1,0 +1,33 @@
+The current model works on a 16-row data frame, based on the 15-row data frame with its 9th row split, for example:
+```{r}
+library(TriLLIEM)
+library(tidyverse)
+
+example_dat <- simulateData()$dat4R %>% TriLLIEM::add_PoO_data(Mprop = 0.5)
+print(example_dat)
+```
+We can call the proportion of row 9 that is maternally inherited $p_M$.  Based on Weinberg 1998, $p_M = \frac{\hat{I}_M}{\hat{I}_M + \hat{I}_F}$.  The log-linear model looks like
+\[\ln[\mu_{M,F,C,Im,If,mt}] = \gamma_{mt} + C\ln R + M\ln S + I_{Im = 1}\ln I_M + I_{If = 1} \ln I_F,\]
+but we have issues with the likelihood returned from this as it doesn't represent the actual likelihood of the observed, 15-row data.  The estimated counts of rows 9 and 10 in the 16-row data will sastisfy ($mt = het$ for the appropriate triple heterozygote mating type)
+\[\ln[\mu_{1,1,1,1,0,het}] = \gamma_{het} + \ln R + \ln S + \ln I_M,\]
+\[\ln[\mu_{1,1,1,0,1,het}] = \gamma_{het} + \ln R + \ln S + \ln I_F,\]
+so if we combined the 9th and 10th rows, we'd have
+\[\ln[\mu_{1,1,1}] = \gamma_{het} + \ln R + \ln S + \ln (I_M + I_F).\]
+From what I understand, the issue is that, for the likelihood, the terms representing the triple heterozygote case should be
+\[(\hat I_M + \hat I_F)\hat S \hat R e^{\hat\gamma_{het}},\]
+but what we end up calculating is instead the product of the probablities for the two estimated rows of the 16-row data,
+\[(\hat I_M \hat S \hat R e^{\hat\gamma_{het}}) \cdot (\hat I_F \hat S \hat R e^{\hat\gamma_{het}}).\]
+
+Could we do the following parameterization of the 15-row data instead?  Use data of format
+```{r}
+example_15_dat <- simulateData()$dat4R %>%
+    dplyr::left_join(PoO_df, by = c("M", "F", "C")) %>%
+    dplyr::mutate(matOrg = replace(matOrg, is.na(matOrg), 0),
+                  patOrg = replace(patOrg, is.na(patOrg), 0)) %>%
+    dplyr::mutate(Im = matOrg * D,
+                  If = patOrg * D) %>%
+    dplyr::arrange(desc(D), desc(E), type, desc(matOrg))
+print(example_15_dat)
+```
+where we set $Im = If = 0$ for row 9, and fit the model
+\[\ln[\mu_{M,F,C,Im,If,mt}] = \gamma_{mt} + C\ln R + M\ln S + I_{Im = 1}\ln I_M + I_{If = 1} \ln I_F + \ln,\]

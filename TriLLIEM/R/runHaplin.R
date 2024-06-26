@@ -1,10 +1,19 @@
-## Run a haplin analysis with the specified model
+#' Title
+#'
+#' @param effects
+#' @param dat
+#' @param haplinControls
+#' @param PoO
+#' @param verbose
+#'
+#' @return
+#' @export
+#' @keywords internal
+#'
+#' @examples
 runHaplin <- function(effects = c("C", "M"), dat, haplinControls = FALSE, PoO = FALSE, verbose = FALSE) {
   ## Set up temp wd so Haplin files don't show up
-  wd <- getwd()
-  td <- tempfile()
-  dir.create(td, showWarnings = FALSE)
-  setwd(td)
+  withr::local_dir(new = withr::local_tempdir())
 
   # Setup results objects
   if (is.element("E:M", effects)) {
@@ -96,8 +105,6 @@ runHaplin <- function(effects = c("C", "M"), dat, haplinControls = FALSE, PoO = 
 
     res <- Haplin::haptable(res)[2, ]
   }
-  setwd(wd)
-  unlink(td, recursive = TRUE)
   # system("rm temp.map haplin_temp.dat")
   return(res)
   # return(list(effects = resVec, pvals = pvalVec))

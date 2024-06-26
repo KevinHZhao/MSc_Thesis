@@ -1,8 +1,6 @@
 ```{r setup, include = FALSE}
-library(tidyverse); theme_set(theme_bw())
 library(TriLLIEM)
 library(parallel)
-library(Haplin)
 ```
 
 ```{r}

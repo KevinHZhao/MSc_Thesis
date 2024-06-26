@@ -2,6 +2,18 @@
 ## mtmodel = "HW", "MS", "MaS"
 ## effects = "C", "M", "E:M", ... could examine environment child effects
 ## For EM start with 50/50 M/F, could also have sensitivity analysis
+#' Title
+#'
+#' @param mtmodel
+#' @param effects
+#' @param dat
+#' @param PStest
+#'
+#' @return
+#' @export
+#' @keywords internal
+#'
+#' @examples
 runLoglin <- function(mtmodel, effects = c("C", "M"), dat, PStest = FALSE) {
   # Portion of model equation and offset depends on mating type model
   dat$offset <- rep(NA, nrow(dat))

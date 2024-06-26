@@ -1,13 +1,37 @@
-## Run a loglinear analysis with the specified model
-## mtmodel = "HWE", "MS", "MaS"
-## effects = "C", "M", "E:M", ... could examine environment child effects
-## For EM start with 50/50 M/F, could also have sensitivity analysis
-## Minit from 0 to 1, initial "guess" for proportion of maternal origin in 1,1,1
-## MatImp can be true/false based on if we assume maternal/paternal imprinting
-## respectively (for now assuming can't be both)
-## EM.diag = show EM diagnostics
+#' Running a loglinear analysis of trio data.
+#'
+#' @param mtmodel Mating type model to use in the analysis, can be "`HWE`" for
+#' Hardy-Weinberg Equilibrium, "`MS`" for Mating Symmetry, and "`MaS`" for Mating Asymmetry.
+#' @param effects A vector listing the effects, as strings, to include
+#' in the model.  Example effects include:
+#' \describe{
+#'  \item{"`C`"}{Child effects.}
+#'  \item{"`M`"}{Maternal effects.}
+#'  \item{"`Im`"}{Maternal imprinting effects.}
+#'  \item{"`If`"}{Paternal imprinting effects.}
+#'  \item{"`E:M`"}{Maternal gene-environment effects.}
+#' }
+#' @param dat A data frame with triad data, with the formatting of [example_dat4R].
+#' @param PStest A logical value indicating whether to performa population
+#' stratification test on the data.
+#' @param includeIm A logical value indicating whether to include maternal
+#' imprinting in the model, equivalent to adding "`Im`" in the "`effects`" vector.
+#' @param includeIf A logical value indicating whether to include paternal
+#' imprinting in the model, equivalent to adding "`If`" in the "`effects`" vector.
+#' @param Minit Initial proportion of maternal inheritence to split the triple
+#' heterozygote cell by if the EM algorithm is necessary.
+#' @param max.iter Maximum number of iterations for the EM algorithm.
+#' @param EM.diag A logical value indicating whether to show diagnostic messages
+#' for the EM algorithm.
+#'
+#' @return An object of class "`glm`".
+#' @export
+#'
+#' @examples
+#' res <- TriLLIEM(mtmodel = "HWE", effects = c("C", "M", "Im"), dat = example_dat4R)
+#' summ_trill(res)
 TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
-                     includeIm = FALSE, includeIf = FALSE, Minit = 0.5, max.iter = 12,
+                     includeIm = FALSE, includeIf = FALSE, Minit = 0.5, max.iter = 30,
                      EM.diag = FALSE) {
   if(includeIm){
     effects <- c(effects, "Im")
@@ -48,8 +72,10 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
       # (Note that the E:M term in model will be from crossing this
       # variable with E=1, which is exactly what is needed.
       if (mtmodel == "HWE") { # Include main effect of E to give different intercept for HW+E case
+        ## For imprinting, If:E
         modeleffects <- c(mteffect, paste0(mteffect, ":E"), effects, "E", "D", "E:D")
       } else {
+        ## Look into if need E as well here
         modeleffects <- c(mteffect, paste0(mteffect, ":E"), effects, "D", "E:D")
       }
     } else { # No controls
@@ -84,6 +110,7 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
   pvalVecPS <- NULL
 
   # Include test and results under population stratification
+  ## try catch for PStest in case glm fails due to low counts
   if (PStest == TRUE) {
     resVecPS <- vector(length = length(effects))
     names(resVecPS) <- effects
@@ -110,7 +137,10 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
     prev_dev <- -1
     repeat{
       counter <- counter + 1
-      res <- glm(as.formula(modelformula), data = origDat, family = poisson(), x = TRUE)
+      res <- suppressWarnings(
+        glm(as.formula(modelformula), data = origDat, family = poisson(), x = TRUE)
+      )
+      class(res) <- c("TriLLIEM", "glm", "lm")
 
       Imhat <- ifelse(is.na(exp(res$coefficients["Im"])),
                       1,
@@ -132,7 +162,10 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
                               Mprop = Imhat/(Ifhat + Imhat)
                               ) %>%
         dplyr::mutate(HWgeno = M + F)
-      if(abs(deviance(res) - prev_dev) < 2e-006 && max(abs(coef(res) - prev_coeffs)) < 1e-006){
+      ## Use a proper deviance function for imprinting
+      ## Check Haplin LogLik code
+      if(abs(deviance(res) - prev_dev) < 2e-006 &&
+         max(abs(coef(res) - prev_coeffs)) < 1e-006){
         break
       }
       else if(counter == max.iter){
@@ -141,9 +174,24 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
       }
       prev_coeffs <- coef(res)
       prev_dev <- deviance(res)
-      }
+    }
+
+    filled_inds <- which(dat$type == 9)
+    res$aic <- -2 * (sum(dpois(x = res$y[-c(filled_inds, filled_inds+1)], lambda = res$fitted.values[-c(filled_inds, filled_inds+1)], log = TRUE),
+                         dpois(x = dat$count[filled_inds], lambda = (Imhat + Ifhat) * exp(res$coefficients[["as.factor(mt_MS)4"]] + res$coefficients[["C"]] + res$coefficients[["M"]]), log = TRUE)
+                         )
+                     ) +
+      2 * res$rank
+    ## saturated model set lambda = counts (perfect)
+    ## Instead of using subclass, return a Trilliem object only that has the glm returned as a part of it (with incorrect), and the relevant correct info, avoids the redundant functions that return nonsense
+    ## Add EM coefficients
+    ## EM works with 16-rows due to the "proof"
+    ## Test out emax.glm
+    ## Compare EM with emax.glm performance
+    ## Data abstraction and problem solving with cpp Chpt 1
   } else {
     res <- glm(as.formula(modelformula), data = dat, family = poisson())
+    class(res) <- c("TriLLIEM", "glm", "lm")
   }
 
   # R is not consistent about how interaction is specified. Even though it

@@ -1,8 +1,8 @@
-#' Example Mating Asymmetry data
+#' Example triad data
 #'
-#' Example data formatted to be used in the [MaSlrt()] function.
+#' Example data formatted to be used in the [TriLLIEM()] function.
 #'
-#' @format ## `example_dat4R`
+#' @format
 #' A dataframe with columns for:
 #' \describe{
 #'    \item{type}{Unique identifier for each row}

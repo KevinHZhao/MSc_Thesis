@@ -1,8 +1,6 @@
 ```{r setup, include = FALSE}
-library(tidyverse); theme_set(theme_bw())
 library(TriLLIEM)
 library(parallel)
-library(Haplin)
 ```
 
 First, will the parameterization be the Haplin parameterization for PoO (i.e. using $C_m, C_f$)? If not then we can't include Haplin in the comparison.  Should we use parallelization in this script to speed things up?  We also need the path to EMIM as well.
@@ -31,7 +29,8 @@ nsim <- 100 # Number of iid data sets to be generated
 ntrios <- 1000 # Number of trios to include in each data set
 
 ## Parameters we'll be looking at later
-includeE <- FALSE # TRUE for gene-environment interactions
+## E:M = M|E=1 / M|E=0, 
+includeE <- TRUE # TRUE for gene-environment interactions
 prE <- 0.5
 V <- c(1,2,4) # Maternal gene-environment interactions effects
 includeControl <- FALSE # TRUE for half controls, FALSE for no controls, not tested...
@@ -114,7 +113,7 @@ EMIM_analysis <- function(dat, effects){
                 peddat = x$dat4EMIM, 
                 effects = effects,
                 emimpath = EMIM_path) %>% 
-          summ_emim() %>%
+          TriLLIEM:::summ_emim() %>%
           unlist()
       }
     ) %>%
@@ -132,7 +131,7 @@ EMIM_analysis <- function(dat, effects){
                 peddat = x$dat4EMIM, 
                 effects = effects,
                 emimpath = EMIM_path) %>% 
-          summ_emim() %>%
+          TriLLIEM:::summ_emim() %>%
           unlist()
       }
     ) %>%
@@ -160,7 +159,7 @@ Haplin_analyses <- function(dat, effects){
         runHaplin(effects = effects,
                   dat = x$dat4haplin, 
                   PoO = TRUE) %>% 
-          summ_haplin(PoO = TRUE) %>%
+          TriLLIEM:::summ_haplin(PoO = TRUE) %>%
           unlist()
       }
     ) %>%
@@ -177,7 +176,7 @@ Haplin_analyses <- function(dat, effects){
         runHaplin(effects = effects,
                   dat = x$dat4haplin, 
                   PoO = TRUE) %>% 
-          summ_haplin(PoO = TRUE) %>%
+          TriLLIEM:::summ_haplin(PoO = TRUE) %>%
           unlist()
       }
     ) %>%

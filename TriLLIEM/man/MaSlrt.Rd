@@ -2,7 +2,7 @@
 % Please edit documentation in R/MASlrt.R
 \name{MaSlrt}
 \alias{MaSlrt}
-\title{Mating Asymmetry Likelihood Ratio Test}
+\title{Mating asymmetry likelihood ratio test}
 \usage{
 MaSlrt(dat)
 }
