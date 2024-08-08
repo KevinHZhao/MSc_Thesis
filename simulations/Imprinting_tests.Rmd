@@ -7,9 +7,10 @@ First, will the parameterization be the Haplin parameterization for PoO (i.e. us
 
 ```{r}
 includeHaplin = TRUE # TRUE for Haplin, FALSE for no Haplin
+includeEMIM = FALSE # TRUE for EMIM, FALSE for no EMIM
 includeParallel = TRUE # TRUE for parallelization, FALSE for no parallelization
 cores <- 10 # Number of cores to use if includeParallel is TRUE
-EMIM_path <- paste0(getwd(),"/EMIM/") ## CHANGE THIS TO THE PATH FOR THE EMIM DIRECTORY
+EMIM_path <- paste0("~/EMIM/") ## CHANGE THIS TO THE PATH FOR THE EMIM DIRECTORY
 ```
 
 What type of data should we simulate?
@@ -18,23 +19,22 @@ What type of data should we simulate?
 ## Parameters we're focusing on now
 ## HAPLIN SEEMS TO BREAK WHEN THERE ARE TOO MANY MINOR ALLELES
 R <- c(1,1,1) # Child effects, should be all 1's if including Haplin
-S <- c(1,1,1) # Maternal effects
-Im <- 3 # Maternal imprinting parameter/Cm parameter for Haplin
-If <- 5 # Paternal imprinting parameter/Cf parameter for Haplin
+S <- c(1,2,4) # Maternal effects
+Im <- 5 # Maternal imprinting parameter/Cm parameter for Haplin
+If <- 1 # Paternal imprinting parameter/Cf parameter for Haplin
 
 ## Parameters that could be useful to look at
 mtmodel <- "HWE" # Hardy-Weinberg = HWE, Mating Symmetry = MS, Mating Asymmetry = MaS
 maf <- 0.3 # Minor allele frequency
-nsim <- 100 # Number of iid data sets to be generated
+nsim <- 1000 # Number of iid data sets to be generated
 ntrios <- 1000 # Number of trios to include in each data set
 
-## Parameters we'll be looking at later
-## E:M = M|E=1 / M|E=0, 
+includeI <- FALSE
 includeE <- TRUE # TRUE for gene-environment interactions
-prE <- 0.5
-V <- c(1,2,4) # Maternal gene-environment interactions effects
+prE <- 0.3
+V <- c(1,3,9) # Maternal gene-environment interactions effects
 includeControl <- FALSE # TRUE for half controls, FALSE for no controls, not tested...
-prControl <- 0.5
+prControl <- 0.3
 ```
 
 What effects are we including in the TriLLIEM/EMIM/Haplin models?
@@ -42,40 +42,34 @@ What effects are we including in the TriLLIEM/EMIM/Haplin models?
 ```{r}
 ## effects can include "C", "M", "Im", "If", but not all three of "C", "Im" and "If"
 ## Haplin parameterization REQUIRES "Im" and "If"
-effects <- c("M", "Im", "If")
+effects <- c("C", "M")
 ```
 
 ```{r analysis_functions, include = FALSE}
 TRILL_analysis <- function(dat, effects){
   if (includeParallel){
-    my.cluster <- makeCluster(cores)
-    clusterEvalQ(my.cluster, {
-      library(TriLLIEM)
-      library(tidyverse)
-    })
-    
-    clusterExport(my.cluster, c("effects", "mtmodel"))
-    
     startT <- Sys.time()
     
-    TriLL_res <- parLapply(
-      my.cluster,
+    TriLL_res <- mclapply(
       dat,
       function(x){
         TriLLIEM(mtmodel = mtmodel,
                  dat = x$dat4R,
                  effects = effects,
+                 includeE = includeE,
+                 includeD = includeControl,
                  max.iter = 30) %>%
-          summ_trill() %>%
-          unlist()
-      }
+          summary() %>%
+          coef() %>%
+          .[,c(1,4)]
+      },
+      mc.cores = cores
     ) %>%
       do.call(rbind, .)
     
     endT <- Sys.time()
     print("trill:")
     print(endT - startT)
-    stopCluster(cl = my.cluster)
   } else {
     TriLL_res <- lapply(
       dat,
@@ -83,6 +77,8 @@ TRILL_analysis <- function(dat, effects){
         TriLLIEM(mtmodel = mtmodel,
                  dat = x$dat4R,
                  effects = effects,
+                 includeE = includeE,
+                 includeD = includeControl,
                  max.iter = 30) %>%
           summ_trill() %>%
           unlist()
@@ -95,18 +91,9 @@ TRILL_analysis <- function(dat, effects){
 
 EMIM_analysis <- function(dat, effects){  
   if(includeParallel){
-    my.cluster <- makeCluster(cores)
-    clusterEvalQ(my.cluster, {
-      library(TriLLIEM)
-      library(tidyverse)
-    })
-      
-    clusterExport(my.cluster, c("effects", "mtmodel", "EMIM_path"))
-      
     startT <- Sys.time()
     
-    emim_res <- parLapply(
-      my.cluster,
+    emim_res <- mclapply(
       dat,
       function(x){
         runEMIM(mtmodel = mtmodel,
@@ -115,14 +102,14 @@ EMIM_analysis <- function(dat, effects){
                 emimpath = EMIM_path) %>% 
           TriLLIEM:::summ_emim() %>%
           unlist()
-      }
+      },
+      mc.cores = cores
     ) %>%
       do.call(rbind, .)
     
     endT <- Sys.time()
     print("emim:")
     print(endT - startT)
-    stopCluster(cl = my.cluster)
   } else {
     emim_res <- lapply(
       dat,
@@ -142,41 +129,36 @@ EMIM_analysis <- function(dat, effects){
 
 Haplin_analyses <- function(dat, effects){
   if(includeParallel){
-    my.cluster <- makeCluster(cores)
-    clusterEvalQ(my.cluster, {
-      library(TriLLIEM)
-      library(tidyverse)
-    })
-    
-    clusterExport(my.cluster, "effects")
-      
     startT <- Sys.time()
     
-    hap_res <- parLapply(
-      my.cluster,
+    hap_res <- mclapply(
       dat,
       function(x){
         runHaplin(effects = effects,
                   dat = x$dat4haplin, 
-                  PoO = TRUE) %>% 
-          TriLLIEM:::summ_haplin(PoO = TRUE) %>%
+                  PoO = includeI,
+                  includeE = includeE) %>% 
+          TriLLIEM:::summ_haplin(PoO = includeI,
+                                 includeE = includeE) %>%
           unlist()
-      }
+      },
+      mc.cores = cores
     ) %>%
       do.call(rbind, .)
     
     endT <- Sys.time()
     print("haplin:")
     print(endT - startT)
-    stopCluster(cl = my.cluster)
   } else {
     hap_res <- lapply(
       dat,
       function(x){
         runHaplin(effects = effects,
                   dat = x$dat4haplin, 
-                  PoO = TRUE) %>% 
-          TriLLIEM:::summ_haplin(PoO = TRUE) %>%
+                  PoO = includeI,
+                  includeE = includeE) %>% 
+          TriLLIEM:::summ_haplin(PoO = includeI,
+                                 includeE = includeE) %>%
           unlist()
       }
     ) %>%
@@ -191,30 +173,7 @@ Simulate the data:
 ```{r}
 startT <- Sys.time()
 if (includeParallel) {
-  my.cluster <- makeCluster(cores)
-    clusterEvalQ(my.cluster, {
-      library(TriLLIEM)
-      library(tidyverse)
-    })
-    
-  clusterExport(my.cluster, 
-                c("ntrios",
-                  "nsim",
-                  "R",
-                  "S",
-                  "Im",
-                  "If",
-                  "mtmodel",
-                  "maf",
-                  "includeE",
-                  "prE",
-                  "V",
-                  "includeControl",
-                  "prControl")
-                )
-    
-  dat <- parLapply(
-    my.cluster,
+  dat <- mclapply(
     rep(ntrios, nsim),
     function(x){
       simulateData(
@@ -230,9 +189,9 @@ if (includeParallel) {
         V = V,
         includeControl = includeControl,
         prControl = prControl)
-    }
+    },
+    mc.cores = cores
   )
-  stopCluster(cl = my.cluster)
 } else {
   dat <- lapply(
     rep(ntrios, nsim),
@@ -262,7 +221,9 @@ Analyze the data with TriLLIEM, EMIM, and Haplin (if Haplin's included):
 
 ```{r}
 trill_res <- TRILL_analysis(dat = dat, effects = effects)
-emim_res <- EMIM_analysis(dat = dat, effects = effects)
+if(includeEMIM){
+  emim_res <- EMIM_analysis(dat = dat, effects = effects)
+}
 if(includeHaplin){
   hap_res <- Haplin_analyses(dat = dat, effects = effects)
 }

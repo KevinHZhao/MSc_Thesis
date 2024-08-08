@@ -176,7 +176,7 @@ runEMIM <- function(mtmodel = "MS", effects = c("C", "M"), peddat,
                              "",
                              ".exe")
                       )
-    system(command, intern = TRUE)
+    system(command, intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE)
 
     # Read in results
     res <- read.table("emimsummary.out", header = T)

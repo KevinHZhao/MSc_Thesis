@@ -11,12 +11,14 @@
 #' @keywords internal
 #'
 #' @examples
-runHaplin <- function(effects = c("C", "M"), dat, haplinControls = FALSE, PoO = FALSE, verbose = FALSE) {
+runHaplin <- function(effects = c("C", "M"), dat, haplinControls = FALSE,
+                      includeE = FALSE, PoO = FALSE, verbose = FALSE) {
+  ## Test with pooxe
   ## Set up temp wd so Haplin files don't show up
   withr::local_dir(new = withr::local_tempdir())
 
   # Setup results objects
-  if (is.element("E:M", effects)) {
+  if (includeE) {
     neweffects <- c(setdiff(effects, c("E:M", "M")), "M[E=0]", "M[E=1]", "M[E=1]/M[E=0]")
     resVec <- vector(length = length(neweffects))
     pvalVec <- vector(length = length(effects))
@@ -40,7 +42,7 @@ runHaplin <- function(effects = c("C", "M"), dat, haplinControls = FALSE, PoO = 
     map.file = "temp.map"
   ))
 
-  if (is.element("E:M", effects)) {
+  if (includeE) {
     if (haplinControls) {
       dat.processed <- invisible(Haplin::genDataPreprocess(
         data.in = dat.raw, design = "cc.triad",
@@ -67,7 +69,7 @@ runHaplin <- function(effects = c("C", "M"), dat, haplinControls = FALSE, PoO = 
     resVec["M[E=1]"] <- Haplin::haptable(res)[6, "RRm.est."] # RR for E=1, M=1
     resVec["M[E=0]"] <- Haplin::haptable(res)[4, "RRm.est."] # RR for E=0, M=1
     resVec["M[E=1]/M[E=0]"] <- resVec["M[E=1]"] / resVec["M[E=0]"]
-    pvalVec["E:M"] <- Haplin::GEtest$gxe.test[3, "pval"] # pval for stratified test
+    pvalVec["E:M"] <- GEtest$gxe.test[3, "pval"] # pval for stratified test
     pvalVec["M"] <- Haplin::haptable(res)[2, "RRm.p.value"] # pval for unstratified analysis
 
     if (is.element("C", effects)) { # Using the RR and p-value for the unstratified analysis
@@ -103,7 +105,7 @@ runHaplin <- function(effects = c("C", "M"), dat, haplinControls = FALSE, PoO = 
       ))
     }
 
-    res <- Haplin::haptable(res)[2, ]
+    # res <- Haplin::haptable(res)[2, ]
   }
   # system("rm temp.map haplin_temp.dat")
   return(res)

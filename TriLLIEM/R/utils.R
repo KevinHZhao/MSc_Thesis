@@ -61,10 +61,23 @@ cov_trill <- function(y, L, a, b, mu){
   }
 }
 
-summ_haplin <- function(res, PoO = FALSE){
+summ_haplin <- function(res, PoO = FALSE, includeE = TRUE){
   resVec <- c()
   pvalVec <- c()
-  if(PoO){
+  if(includeE){
+    GEtest <- Haplin::gxe(res)
+    resVec["M[E=1]"]=haptable(res)[6,"RRm.est."] #RR for E=1, M=1
+    resVec["M[E=0]"]=haptable(res)[4,"RRm.est."]  #RR for E=0, M=1
+    resVec["M[E=1]/M[E=0]"]=resVec["M[E=1]"]/resVec["M[E=0]"]
+    pvalVec["E:M"]=GEtest$gxe.test[3,"pval"] # pval for stratified test
+    pvalVec["M"]=haptable(res)[2,"RRm.p.value"] # pval for unstratified analysis
+
+    if (is.element("C",effects)){ # Using the RR and p-value for the unstratified analysis
+      resVec["C"]=haptable(res)[2,"RR.est."]
+      pvalVec["C"]=haptable(res)[2,"RR.p.value"]
+    }
+  }
+  else if(PoO){
     resVec["M"] <- res$RRm.est
     pvalVec["M"] <- res$RRm.p.value
     resVec["RRcm"] <- res$RRcm.est

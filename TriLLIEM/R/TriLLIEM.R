@@ -9,10 +9,14 @@
 #'  \item{"`M`"}{Maternal effects.}
 #'  \item{"`Im`"}{Maternal imprinting effects.}
 #'  \item{"`If`"}{Paternal imprinting effects.}
-#'  \item{"`E:M`"}{Maternal gene-environment effects.}
 #' }
-#' @param dat A data frame with triad data, with the formatting of [example_dat4R].
-#' @param PStest A logical value indicating whether to performa population
+#' @param includeE A logical value indicating whether to include maternal
+#' gene-environment effects.
+#' @param includeD A logical value indicating whether to use the hybrid
+#' model with controls.
+#' @param dat A data frame with triad data, with the formatting of
+#' [example_dat4R].
+#' @param PStest A logical value indicating whether to perform a population
 #' stratification test on the data.
 #' @param includeIm A logical value indicating whether to include maternal
 #' imprinting in the model, equivalent to adding "`Im`" in the "`effects`" vector.
@@ -31,8 +35,13 @@
 #' res <- TriLLIEM(mtmodel = "HWE", effects = c("C", "M", "Im"), dat = example_dat4R)
 #' summ_trill(res)
 TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
-                     includeIm = FALSE, includeIf = FALSE, Minit = 0.5, max.iter = 30,
-                     EM.diag = FALSE) {
+                     includeE = FALSE, includeD = FALSE, includeIm = FALSE,
+                     includeIf = FALSE, Minit = 0.5, max.iter = 30, EM.diag = FALSE) {
+  ## Test for violation of HWE when pop strat (sim MS data and compare HWE vs MS)
+  ## Only one of E:M or E:Im
+  ## test out with other code
+  ## p values should be smaller than haplin
+  ## Test with D compared to EMIM and haplin
   if(includeIm){
     effects <- c(effects, "Im")
   }
@@ -44,20 +53,17 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
     stop("Cannot include maternal and paternal imprinting with child effects.")
   }
 
-  # Portion of model equation and offset depends on mating type model
-  origDat <- add_PoO_data(dat, Mprop = Minit)
-
   # Portion of model equation depends on mating type model
-  # No offset as we split the (1,1,1) case
+  dat <- dat %>% dplyr::mutate(offset = dplyr::case_when(type == 9 ~ 2, .default = 1))
   if (mtmodel == "HWE") {
-    origDat$HWgeno <- origDat$M + origDat$F
+    dat$HWgeno <- dat$M + dat$F
     mteffect <- "HWgeno"
     modelformula <- "count~" # Must include intercept for HW model because of log(1-p) term
   } else if (mtmodel == "MS") {
     mteffect <- "as.factor(mt_MS)"
     modelformula <- "count~-1+" # I think I can remove the intercept for MS model
   } else if (mtmodel == "MaS") {
-    if (length(unique(origDat$D)) == 1) {
+    if (length(unique(dat$D)) == 1) {
       stop("Only 1 phenotype in the phenotype column. Mating asymmetry models require \n
             both cases and controls\n")
     }
@@ -65,37 +71,36 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
     modelformula <- "count~-1+" # I think I can remove intercept
   }
 
-  if (is.element("E:M", effects)) { # check gene-environment paper on adding other effects ex E:C
-    if (sum(origDat$D == 0) > 0) { # There are controls; include environmental interaction
-      origDat$C <- origDat$C * origDat$D # 1 if C=1, D=1; 2 if C=2, D=1; 0 OW
-      origDat$M <- origDat$M * origDat$D # 1 if C=1, D=1; 2 if C=2, D=1; 0 OW
-      # (Note that the E:M term in model will be from crossing this
-      # variable with E=1, which is exactly what is needed.
-      if (mtmodel == "HWE") { # Include main effect of E to give different intercept for HW+E case
-        ## For imprinting, If:E
-        modeleffects <- c(mteffect, paste0(mteffect, ":E"), effects, "E", "D", "E:D")
-      } else {
-        ## Look into if need E as well here
-        modeleffects <- c(mteffect, paste0(mteffect, ":E"), effects, "D", "E:D")
-      }
-    } else { # No controls
-
-      if (mtmodel == "HWE") { # Include main effect of E to give different intercept for HW+E case
-        modeleffects <- c(mteffect, paste0(mteffect, ":E"), effects, "E")
-      } else {
-        modeleffects <- c(mteffect, paste0(mteffect, ":E"), effects)
-      }
+  # Environmental effects
+  Eeffects <- c()
+  if(includeE){
+    if(length(unique(dat$E)) < 2){
+      stop("E column must have at least 2 distinct values.")
     }
-  } else { # No E:M effect
-
-    if (sum(origDat$D == 0) > 0) {
-      origDat$C <- origDat$C * origDat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 OW
-      origDat$M <- origDat$M * origDat$D # 1 if C=1, D=1; 2 if C=2, D=2; 0 O
-      modeleffects <- c(mteffect, effects, "D")
-    } else {
-      modeleffects <- c(mteffect, effects)
-    }
+    Eeffects <- ## Only one of maternal by E or (one of Im or If) imprinting by E, add mteffects too
+      c(mteffect, effects) %>%
+      paste0(":E", sep = "") %>%
+      {if(mtmodel == "HWE") append(., "E") else .} %>%
+      setdiff(c("C:E"))
   }
+
+  # Portion of model equation and offset depends on mating type model
+  origDat <- add_PoO_data(dat, Mprop = Minit)
+
+  # Hybrid model
+  Deffects <- c()
+  if(includeD){
+    if(length(unique(dat$D)) < 2){
+      stop("D column must have at least 2 distinct values.")
+    }
+    dat <-
+      dat %>%
+      dplyr::mutate(C = C * D,
+                    M = M * D)
+    Deffects <- c("D", if (includeE) "E:D")
+  }
+
+  modeleffects <- c(mteffect, Eeffects, Deffects, effects)
 
   linpred <- paste(modeleffects,
                    collapse = "+")
@@ -164,6 +169,7 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
         dplyr::mutate(HWgeno = M + F)
       ## Use a proper deviance function for imprinting
       ## Check Haplin LogLik code
+      ## Make conv criteria parameters
       if(abs(deviance(res) - prev_dev) < 2e-006 &&
          max(abs(coef(res) - prev_coeffs)) < 1e-006){
         break
@@ -176,12 +182,12 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
       prev_dev <- deviance(res)
     }
 
-    filled_inds <- which(dat$type == 9)
-    res$aic <- -2 * (sum(dpois(x = res$y[-c(filled_inds, filled_inds+1)], lambda = res$fitted.values[-c(filled_inds, filled_inds+1)], log = TRUE),
-                         dpois(x = dat$count[filled_inds], lambda = (Imhat + Ifhat) * exp(res$coefficients[["as.factor(mt_MS)4"]] + res$coefficients[["C"]] + res$coefficients[["M"]]), log = TRUE)
-                         )
-                     ) +
-      2 * res$rank
+    # filled_inds <- which(dat$type == 9)
+    # res$aic <- -2 * (sum(dpois(x = res$y[-c(filled_inds, filled_inds+1)], lambda = res$fitted.values[-c(filled_inds, filled_inds+1)], log = TRUE),
+    #                      dpois(x = dat$count[filled_inds], lambda = (Imhat + Ifhat) * exp(res$coefficients[["as.factor(mt_MS)4"]] + sum(res$coefficients[modeleffects %>% setdiff(c("Im", "If", mteffect))])), log = TRUE)
+    #                      )
+    #                  ) +
+    #   2 * res$rank
     ## saturated model set lambda = counts (perfect)
     ## Instead of using subclass, return a Trilliem object only that has the glm returned as a part of it (with incorrect), and the relevant correct info, avoids the redundant functions that return nonsense
     ## Add EM coefficients
@@ -190,7 +196,8 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
     ## Compare EM with emax.glm performance
     ## Data abstraction and problem solving with cpp Chpt 1
   } else {
-    res <- glm(as.formula(modelformula), data = dat, family = poisson())
+    ## Only include offset in this case when we don't split the 1,1,1 cell
+    res <- glm(as.formula(modelformula), data = dat, offset=log(dat$offset), family = poisson())
     class(res) <- c("TriLLIEM", "glm", "lm")
   }
 

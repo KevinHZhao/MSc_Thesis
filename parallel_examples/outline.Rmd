@@ -1,0 +1,115 @@
+# Parallelization
+- If we want to run a simple function many times, it's not great time-wise...
+```{r}
+## system.time returns how long a piece of code takes to run in seconds
+dat <- rep(NA, 1000)
+system.time({
+  for (i in 1:1000) {
+    dat[i] <- mean(runif(1000000, min = 0, max = 1))
+  }
+})
+```
+- When each of these function calls are independent, we can speed it up by using parallelization.
+- Instead of having the 1,000 function calls be run one at a time, we can enlist $n$ of our CPU \emph{cores} to each run the function at the same time, making our code $n$ times faster.
+- We can do this with the `parallel` package.  For paralellization in R, we have two methods:
+  - FORK: the "better" method, works ONLY on UNIX based systems (Linux, Mac, NOT Windows).  Windows users can use WSL to get these UNIX features though, but need to install R for Linux.
+  - PSOCK: the "worse" method, works for all systems.
+- Now if we want to parallelize our for loop, we use the `foreach` and `doParallel` packages:
+
+```{r}
+## The basic incantation for FORK paralleling a for loop
+## Loading necessary packages
+# install.packages(c("foreach", "doParallel"))
+library(foreach) # Provides the foreach loop which supports parallelizing
+library(doParallel) # Provides the %dopar% operator for foreach
+library(parallel)
+
+detectCores() # Optional, checks how many cores your CPU has, this is the upper bound for number of parallels
+n.cores <- 5 ## REPLACE WITH APPROPRIATE NUMBER OF CORES
+cl <- makeCluster(n.cores, type = "FORK")
+registerDoParallel(cl = cl)
+
+system.time({
+  dat_fork <- foreach(i = 1:1000, .combine = "c") %dopar% {
+    mean(runif(1000000, min = 0, max = 1)) ## REPLACE WITH CODE TO PARALLELIZE
+  }
+})
+
+stopCluster(cl = cl)
+```
+
+```{r}
+## The basic incantation for PSOCK paralleling a for loop
+## Loading necessary packages
+# install.packages(c("foreach", "doParallel"))
+library(foreach) # Provides the foreach loop which supports parallelizing
+library(doParallel) # Provides the %dopar% operator for foreach
+library(parallel)
+
+detectCores() # Optional, checks how many cores your CPU has, this is the upper bound for number of parallels
+n.cores <- 5 ## REPLACE WITH APPROPRIATE NUMBER OF CORES
+cl <- makeCluster(n.cores, type = "PSOCK")
+registerDoParallel(cl = cl)
+
+system.time({
+  dat_psock <- foreach(i = 1:1000, .combine = "c") %dopar% {
+    mean(runif(1000000, min = 0, max = 1)) ## REPLACE WITH CODE TO PARALLELIZE
+  }
+})
+
+stopCluster(cl = cl)
+```
+- Generally for this type of parallelization, we should use apply functions instead of for loops.
+```{r}
+# Non-parallelized *apply
+# apply for matrices
+# lapply lists
+# sapply for vectors and lists with automatic simplification
+# vapply for vectors and lists where you specify expected output
+# mapply for multiple vectors/lists of inputs
+system.time({
+  dat_app <- mapply(FUN = function(x) mean(runif(1000000, min = 0, max = 1)),
+                    x = 1:1000 # Arguments for FUN should go here
+                    )
+})
+```
+- We can easily parallelize apply functions, only requiring the `parallel` package:
+```{r}
+## The basic incantation for FORK parallelizing a *apply function
+## With FORK, we get parallel lapply and mapply (mclapply and mcmapply)
+## Load parallel package
+library(parallel)
+
+detectCores() # Optional, checks how many cores your CPU has, this is the upper bound for number of parallels
+n.cores <- 10 ## REPLACE WITH APPROPRIATE NUMBER OF CORES
+
+system.time({
+  dat_app_fork <- mcmapply(
+    FUN = function(x) mean(runif(1000000, min = 0, max = 1)),
+    mc.cores = n.cores, ## If left blank, will automatically use all the cores available
+    x = 1:1000
+  )
+})
+```
+- This also works for PSOCK, with a bit more set up:
+```{r}
+## The basic incantation for PSOCK parallelizing a *apply function
+## With PSOCK, we get parallel apply, sapply, and lapply (parApply, parSapply, parLapply)
+## Load parallel package
+library(parallel)
+
+detectCores() # Optional, checks how many cores your CPU has, this is the upper bound for number of parallels
+n.cores <- 10 ## REPLACE WITH APPROPRIATE NUMBER OF CORES
+
+cl <- makeCluster(n.cores, type = "PSOCK")
+
+system.time({
+  dat_app_psock <- parSapply(
+    cl = cl,
+    X = 1:1000,
+    FUN = function(x) mean(runif(1000000, min = 0, max = 1))
+  )
+})
+
+stopCluster(cl = cl)
+```

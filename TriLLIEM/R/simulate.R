@@ -44,6 +44,8 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
                          includeControl = FALSE, prControl = 0, prE.control = prE,
                          includePopStrat = FALSE, numPop = 1, Fst = 0.005,
                          prCase.byPop = NULL, prControl.byPop = NULL) {
+  # prE.control should be a random binomial parameter, NOT a ratio
+  # Start off small with tests
   if(Im != 1 && If != 1 && !identical(R, c(1,1,1))){
     warning("Maternal and paternal imprinting included with child effects,
             resulting data cannot have all parameters simultaneously modelled.")
