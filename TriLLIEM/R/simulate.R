@@ -9,14 +9,12 @@
 #' @param V Vector of 3 elements representing gene-environment effects
 #' for 0, 1, and 2 copies of the risk allele, respectively.
 #' @param mtCoef Mating type coefficients.
-#' @param mtmodel Mating type of the population, can be "`HWE`" for Hardy-Weinberg
-#' Equilibrium, "`MS`" for Mating Symmetry, and "`MaS`" for Mating Asymmetry.
 #' @param Im Maternal imprinting effect.
 #' @param If Paternal imprinting effect.
 #' @param includeE A logical value indicating whether environmental effects
 #' should be included in the simulation.
-#' @param envint If set to "`Mother`", simulates maternal gene-environment
-#' interactions, otherwise simulates child gene-environmnet interactions.
+#' @param Einteraction A string indicating what variable environmental effects
+#' interact with.  Can be "`Im`", "`If`", "`C`", or "`M`".
 #' @param prE Probability of a trio to have the environmental effects.
 #' @param includeControl A logical value indicating whether controls should
 #' be included in the simulations.
@@ -38,9 +36,8 @@
 #' simulateData(S = c(1, 2, 4), If = 3)
 simulateData <- function(ntrios = 1000, maf = 0.3,
                          R = c(1, 1, 1), S = c(1, 1, 1), V = c(1, 1, 1),
-                         mtCoef = c(1, 1, 1), mtmodel = "MS",
-                         Im = 1, If = 1,
-                         includeE = FALSE, envint = "Mother", prE = 0,
+                         mtCoef = c(1, 1, 1), Im = 1, If = 1,
+                         includeE = FALSE, Einteraction = "M", prE = 0,
                          includeControl = FALSE, prControl = 0, prE.control = prE,
                          includePopStrat = FALSE, numPop = 1, Fst = 0.005,
                          prCase.byPop = NULL, prControl.byPop = NULL) {
@@ -149,7 +146,7 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
     if (includeE == TRUE) {
       caseE1 <- simulateDataSubset(
         ntrios = ntrios.pop.E.case, maf = q[i], R = R, S = S, mtCoef = mtCoef,
-        V = V, includeE = TRUE, envint = envint, Im = Im, If = If
+        V = V, includeE = TRUE, Einteraction = Einteraction, Im = Im, If = If
       )
       if (i == 1) {
         caseE1.all <- caseE1
@@ -183,7 +180,7 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
         controlE1 <- simulateDataSubset(
           ntrios = ntrios.pop.E.control, maf = q[i],
           R = c(1, 1, 1), S = c(1, 1, 1), mtCoef = mtCoef,
-          V = c(1, 1, 1), includeE = TRUE, envint = envint,
+          V = c(1, 1, 1), includeE = TRUE, Einteraction = Einteraction,
           includeControl = TRUE
         )
         if (i == 1) {

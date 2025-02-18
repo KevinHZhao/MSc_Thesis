@@ -24,6 +24,8 @@ header-includes:
 
 ```{r setup, include = FALSE}
 library(tidyverse); theme_set(theme_bw())
+library(TriLLIEM)
+library(parallel)
 ```
 
 ## Triad data
@@ -31,327 +33,237 @@ library(tidyverse); theme_set(theme_bw())
 - Goal: Quantifying the effect of a single-nucleotide polymorphism (SNP) of interest on one's disease risk.
 - Case-control studies (\color{blue}Control \color{black}+ \color{red}Case\color{black}) are decent, but influenced by population substructures.
 - Case-parent/Triad studies (\color{blue}Control Parents \color{black}+ \color{red}Case Child\color{black}) address this, and can identify \emph{maternal effects}.  Can't quantify mating asymmetry with case-triads alone.
-- A \textbf{hybrid} triad study with \color{blue}control \color{black}and \color{red}case \color{black}children can solve these issues.
-
-## TriLLIEM in action!
-
-```{r}
-library(TriLLIEM)
-## R = child effects for 0, 1, 2 copies of minor allele
-dat <- simulateData(R = c(2^0, 2^1, 2^2)) 
-TriLLIEM(dat = dat$dat4R, effects = c("C", "M")) %>% 
-  summ_trill(effects = c("C", "M"))
-```
+- A \textbf{hybrid} triad study with \color{blue}control \color{black}and \color{red}case \color{black}children can solve this issue.
 
 ## The hybrid model
 
 - The counts of each triad are modelled with a log-linear GLM.
 - A simple example of a model we can apply to data:
-\[\ln(n_{M,F,C}) = \ln K + C \ln R + M \ln S + \ln \Pr(C|M,F).\]
+\[\ln(n_{M,F,C,D}) = \ln (\mu_i) + CD \ln R + MD \ln S + \ln (\mathrm{Off}).\]
 - Additional terms to consider:
-    - Mating type parameters
-    - Gene-environment interactions
-    - Imprinting effects
+    - Mating type parameters (for HWE, MS, and MaS)
+    - Imprinting effects ($I_m$ and/or $I_f$)
+    - Gene-environment interactions ($M:E$, $I_m:E$, $I_f:E$, $C:E$)
 
-## Comparisons with EMIM - imprinting data
+## TriLLIEM in action!
 
-- 2000 data sets, 1000 trios each with maternal, child, and imprinting effects.
-- Simulated null model with $M = C = I_m = 1$, what do both methods give?
-
-```{r, echo = FALSE, fig.height = 3}
-trill_null <- data.frame(readRDS("data_EMIM/trill_NULL_CMI1.rds"))
-emim_null <- data.frame(readRDS("data_EMIM/EMIM_NULL_CMI1.rds"))
-
-ggplot(trill_null %>%
-         mutate(EMIM.effects.C = emim_null$effects.C,
-                EMIM.effects.M = emim_null$effects.M,
-                EMIM.effects.Im = emim_null$effects.Im) %>%
-         pivot_longer(c(effects.C,
-                        EMIM.effects.C,
-                        effects.M,
-                        EMIM.effects.M,
-                        effects.Im,
-                        EMIM.effects.Im),
-                      names_to = "Parameter",
-                      values_to = "Estimate") %>%
-         mutate(Parameter = fct_relevel(Parameter,
-                                        rev(
-                                          c(
-                                            "effects.C",
-                                            "EMIM.effects.C",
-                                            "effects.M",
-                                            "EMIM.effects.M",
-                                            "effects.Im",
-                                            "EMIM.effects.Im"
-                                          )
-                                        )))
-) +
-  geom_boxplot(aes(x = Estimate, y = Parameter)) +
-  scale_y_discrete(
-    labels = rev(c("TriLLIEM C",
-               "EMIM C",
-               "TriLLIEM M",
-               "EMIM M",
-               "TriLLIEM Im",
-               "EMIM Im"))
-  ) +
-  ylab("")
-## Significances should be sim, check SE.  also check diff of estimates between im
-## EMIM uses a direct maximization approach for splitting (1,1,1) cell, and for dyads.
-## Check Ainsworth, used direct search algorithm
+```{r}
+dat <- simulateData(
+  ntrios = 10000, # Simulate 10,000 triads
+  mtmodel = "MaS", # Simulate Mating Asymmetry data
+  mtCoef = c(1.15, 1.15, 1), # MaS parameters
+  R = c(2^0, 2^1, 2^2), # Risk if child has 0, 1, or 2 copies
+  S = c(1.5^0, 1.5^1, 1.5^2), # Risk if mother has 0, 1, or 2 copies
+  V = c(1.1^0, 1.1^1, 1.1^2), # Maternal gene-environment risk
+  Im = 2.5, # Maternal imprinting increases risk 2.5-fold
+  includeE = TRUE, # Including environmental effects
+  prE = 0.3, # 30% of the sample will have E = 1
+  includeControl = TRUE, # Including controls
+  prControl = 0.3 # 30% of the sample will have D = 0
+)$dat4R
 ```
-```{r, include = FALSE}
-sum(trill_null$pvals.Im < 0.05)/nrow(trill_null)
-sum(emim_null$pvals.Im < 0.05)/nrow(emim_null)
-```
-- At this sample size, TriLLIEM incorrectly deemed $I_m$ significant at $\alpha = 0.05$ 10.8\% of the time, while EMIM deemed it significant 5.6\% of the time.
+## TriLLIEM in action!
 
-## Comparisons with EMIM
-
-- 2000 data sets, 1000 trios each with child, maternal, and imprinting effects ($C = M = I_m = 2$).
-
-```{r, echo = FALSE, fig.height = 3}
-trill_alt1 <- data.frame(readRDS("data_EMIM/trill_ALT_CMI2.rds"))
-emim_alt1 <- data.frame(readRDS("data_EMIM/EMIM_ALT_CMI2.rds"))
-
-ggplot(trill_alt1 %>%
-         mutate(EMIM.effects.C = emim_alt1$effects.C,
-                EMIM.effects.M = emim_alt1$effects.M,
-                EMIM.effects.Im = emim_alt1$effects.Im) %>%
-         pivot_longer(c(effects.C,
-                        EMIM.effects.C,
-                        effects.M,
-                        EMIM.effects.M,
-                        effects.Im,
-                        EMIM.effects.Im),
-                      names_to = "Parameter",
-                      values_to = "Estimate") %>%
-         mutate(Parameter = fct_relevel(Parameter,
-                                        rev(
-                                          c(
-                                            "effects.C",
-                                            "EMIM.effects.C",
-                                            "effects.M",
-                                            "EMIM.effects.M",
-                                            "effects.Im",
-                                            "EMIM.effects.Im"
-                                          )
-                                        )))
-) +
-  geom_boxplot(aes(x = Estimate, y = Parameter)) +
-  scale_y_discrete(
-    labels = rev(c("TriLLIEM C",
-               "EMIM C",
-               "TriLLIEM M",
-               "EMIM M",
-               "TriLLIEM Im",
-               "EMIM Im"))
-  ) +
-  ylab("")
-```
-```{r, include = FALSE}
-sum(trill_alt1$pvals.Im > 0.05)/nrow(trill_alt1)
-sum(emim_alt1$pvals.Im > 0.05)/nrow(emim_alt1)
-```
-- At this sample size, TriLLIEM failed to deem $I_m$ significant at $\alpha = 0.05$ 0.85\% of the time, while EMIM failed to deem it significant 37.8\% of the time.
-
-## Comparisons with EMIM
-
-- 2000 data sets, 1000 trios each with maternal imprinting effects only ($C = M = 1, I_m = 2$).
-
-```{r, echo = FALSE, fig.height = 3}
-trill_alt2 <- data.frame(readRDS("data_EMIM/trill_ALT_CM1_I2.rds"))
-emim_alt2 <- data.frame(readRDS("data_EMIM/EMIM_ALT_CM1_I2.rds"))
-
-ggplot(trill_alt2 %>%
-         mutate(EMIM.effects.C = emim_alt2$effects.C,
-                EMIM.effects.M = emim_alt2$effects.M,
-                EMIM.effects.Im = emim_alt2$effects.Im) %>%
-         pivot_longer(c(effects.C,
-                        EMIM.effects.C,
-                        effects.M,
-                        EMIM.effects.M,
-                        effects.Im,
-                        EMIM.effects.Im),
-                      names_to = "Parameter",
-                      values_to = "Estimate") %>%
-         mutate(Parameter = fct_relevel(Parameter,
-                                        rev(
-                                          c(
-                                            "effects.C",
-                                            "EMIM.effects.C",
-                                            "effects.M",
-                                            "EMIM.effects.M",
-                                            "effects.Im",
-                                            "EMIM.effects.Im"
-                                          )
-                                        )))
-) +
-  geom_boxplot(aes(x = Estimate, y = Parameter)) +
-  scale_y_discrete(
-    labels = rev(c("TriLLIEM C",
-               "EMIM C",
-               "TriLLIEM M",
-               "EMIM M",
-               "TriLLIEM Im",
-               "EMIM Im"))
-  ) +
-  ylab("")
-```
-```{r, include = FALSE}
-sum(trill_alt2$pvals.Im > 0.05)/nrow(trill_alt2)
-sum(emim_alt2$pvals.Im > 0.05)/nrow(emim_alt2)
-```
-- At this sample size, TriLLIEM failed to deem $I_m$ significant at $\alpha = 0.05$ 0.4\% of the time, while EMIM failed to deem it significant 9.4\% of the time.
-
-## Comparisons with Haplin
-
-- 2000 data sets, 1000 trios each with maternal, and imprinting effects.
-- Simulated null model with $M = C_m = C_f = 1$, what do both methods give?
-
-```{r, echo = FALSE, fig.height = 3}
-trill_null <- data.frame(readRDS("data_Haplin/trill_NULL_MII1.rds"))
-hap_null <- data.frame(readRDS("data_Haplin/Haplin_NULL_MII1.rds"))
-
-ggplot(trill_null %>%
-         mutate(Haplin.effects.M = hap_null$effects.M,
-                Haplin.effects.Im = hap_null$effects.RRcm,
-                Haplin.effects.If = hap_null$effects.RRcf) %>%
-         pivot_longer(c(effects.M,
-                        Haplin.effects.M,
-                        effects.Im,
-                        Haplin.effects.Im,
-                        effects.If,
-                        Haplin.effects.If),
-                      names_to = "Parameter",
-                      values_to = "Estimate") %>%
-         mutate(Parameter = fct_relevel(Parameter,
-                                        rev(
-                                          c(
-                                            "effects.M",
-                                            "Haplin.effects.M",
-                                            "effects.Im",
-                                            "Haplin.effects.Im",
-                                            "effects.If",
-                                            "Haplin.effects.If"
-                                          )
-                                        )))
-) +
-  geom_boxplot(aes(x = Estimate, y = Parameter)) +
-  scale_y_discrete(
-    labels = rev(c("TriLLIEM M",
-               "Haplin M",
-               "TriLLIEM Cm",
-               "Haplin Cm",
-               "TriLLIEM Cf",
-               "Haplin Cf"))
-  ) +
-  ylab("")
+```{r}
+head(dat, n = 16)
 ```
 
-```{r, include = FALSE}
-sum(trill_null$pvals.Im < 0.05)/nrow(trill_null)
-sum(hap_null$pvals.RRcm < 0.05)/nrow(hap_null)
-```
-- At this sample size, TriLLIEM incorrectly deemed $C_m$ significant at $\alpha = 0.05$ 8.65\% of the time, while Haplin deemed it significant 4.9\% of the time.
+## TriLLIEM in action!
 
-
-## Comparisons with Haplin
-
-- Simulated model with $M = C_m = C_f = 2$.
-
-```{r, echo = FALSE, fig.height = 3}
-trill_alt1 <- data.frame(readRDS("data_Haplin/trill_ALT_MII2.rds"))
-hap_alt1 <- data.frame(readRDS("data_Haplin/Haplin_ALT_MII2.rds"))
-
-ggplot(trill_alt1 %>%
-         mutate(Haplin.effects.M = hap_alt1$effects.M,
-                Haplin.effects.Im = hap_alt1$effects.RRcm,
-                Haplin.effects.If = hap_alt1$effects.RRcf) %>%
-         pivot_longer(c(effects.M,
-                        Haplin.effects.M,
-                        effects.Im,
-                        Haplin.effects.Im,
-                        effects.If,
-                        Haplin.effects.If),
-                      names_to = "Parameter",
-                      values_to = "Estimate") %>%
-         mutate(Parameter = fct_relevel(Parameter,
-                                        rev(
-                                          c(
-                                            "effects.M",
-                                            "Haplin.effects.M",
-                                            "effects.Im",
-                                            "Haplin.effects.Im",
-                                            "effects.If",
-                                            "Haplin.effects.If"
-                                          )
-                                        )))
-) +
-  geom_boxplot(aes(x = Estimate, y = Parameter)) +
-  scale_y_discrete(
-    labels = rev(c("TriLLIEM M",
-               "Haplin M",
-               "TriLLIEM Cm",
-               "Haplin Cm",
-               "TriLLIEM Cf",
-               "Haplin Cf"))
-  ) +
-  ylab("")
+```{r}
+results <- TriLLIEM(
+  mtmodel = "MaS", 
+  dat = dat, 
+  effects = c("C", "M", "Im"),
+  includeE = TRUE,
+  includeD = TRUE
+) %>% 
+  summary() %>%
+  coef() %>%
+  .[c("C", "M", "Im", "E:M"), c(1,4)]
+results[, 1] <- exp(results[, 1])
+results
 ```
 
-```{r, include = FALSE}
-sum(trill_alt1$pvals.Im > 0.05)/nrow(trill_alt1)
-sum(hap_alt1$pvals.RRcm > 0.05)/nrow(hap_alt1)
-```
-- At this sample size, TriLLIEM and Haplin both had no false negatives for $C_m$.
+## TriLLIEM in action!
 
-## Comparisons with Haplin
-
-- Simulated model with $M = C_f = 1$, $C_m = 2$.
-
-```{r, echo = FALSE, fig.height = 3}
-trill_alt2 <- data.frame(readRDS("data_Haplin/trill_ALT_MIf1_Im2.rds"))
-hap_alt2 <- data.frame(readRDS("data_Haplin/Haplin_ALT_MIf1_Im2.rds"))
-
-ggplot(trill_alt2 %>%
-         mutate(Haplin.effects.M = hap_alt2$effects.M,
-                Haplin.effects.Im = hap_alt2$effects.RRcm,
-                Haplin.effects.If = hap_alt2$effects.RRcf) %>%
-         pivot_longer(c(effects.M,
-                        Haplin.effects.M,
-                        effects.Im,
-                        Haplin.effects.Im,
-                        effects.If,
-                        Haplin.effects.If),
-                      names_to = "Parameter",
-                      values_to = "Estimate") %>%
-         mutate(Parameter = fct_relevel(Parameter,
-                                        rev(
-                                          c(
-                                            "effects.M",
-                                            "Haplin.effects.M",
-                                            "effects.Im",
-                                            "Haplin.effects.Im",
-                                            "effects.If",
-                                            "Haplin.effects.If"
-                                          )
-                                        )))
-) +
-  geom_boxplot(aes(x = Estimate, y = Parameter)) +
-  scale_y_discrete(
-    labels = rev(c("TriLLIEM M",
-               "Haplin M",
-               "TriLLIEM Cm",
-               "Haplin Cm",
-               "TriLLIEM Cf",
-               "Haplin Cf"))
-  ) +
-  ylab("")
+```{r}
+results <- TriLLIEM(
+  mtmodel = "HWE", 
+  dat = dat, 
+  effects = c("C", "M", "Im"),
+  includeE = TRUE,
+  includeD = TRUE
+) %>% 
+  summary() %>%
+  coef() %>%
+  .[c("C", "M", "Im", "E:M"), c(1,4)]
+results[, 1] <- exp(results[, 1])
+results
 ```
 
-```{r, include = FALSE}
-sum(trill_alt2$pvals.Im > 0.05)/nrow(trill_alt2)
-sum(hap_alt2$pvals.RRcm > 0.05)/nrow(hap_alt2)
+## Verifying TriLLIEM works!
+
+```{r datsim, cache=TRUE}
+dat <- mclapply(
+  X = 1:1000, # Simulate 1000 times
+  FUN = function(X, ...) simulateData(...)$dat4R, # What we're repeating
+  ntrios = 1000, # Simulate 10,000 triads
+  mtmodel = "MaS", # Simulate Mating Asymmetry data
+  mtCoef = c(1.15, 1.15, 1), # MaS parameters
+  R = c(2^0, 2^1, 2^2), # Risk if child has 0, 1, or 2 copies
+  S = c(1.5^0, 1.5^1, 1.5^2), # Risk if mother has 0, 1, or 2 copies
+  V = c(1.1^0, 1.1^1, 1.1^2), # Maternal gene-environment risk
+  Im = 2.5, # Maternal imprinting increases risk 2.5-fold
+  includeE = TRUE, # Including environmental effects
+  prE = 0.3, # 30% of the sample will have E = 1
+  includeControl = TRUE, # Including controls
+  prControl = 0.3, # 30% of the sample will have D = 0
+  mc.cores = 10
+)
 ```
-- At this sample size, TriLLIEM and Haplin both had no false negatives for $C_m$.
+
+## Verifying TriLLIEM works!
+
+```{r masres, cache=TRUE}
+results_MaS <- mclapply(X = dat, function(X) {
+  results <- TriLLIEM(
+    dat = X,
+    mtmodel = "MaS",
+    effects = c("C", "M", "Im"),
+    includeE = TRUE,
+    includeD = TRUE
+  ) %>%
+    summary() %>%
+    coef() %>%
+    .[c("C", "M", "Im", "E:M"), c(1, 4)]
+  results[, 1] <- exp(results[, 1])
+  return(results)
+}, mc.cores = 10)
+```
+
+## Verifying TriLLIEM works!
+
+```{r masplot, fig.height = 3, cache=TRUE}
+sapply(X = results_MaS, FUN = function(X) X[,1]) %>% 
+  t() %>% 
+  boxplot(horizontal = TRUE, col = palette.colors(5)[-1], las = 1)
+abline(v = 2, col = palette.colors(5)[2])
+abline(v = 1.5, col = palette.colors(5)[3])
+abline(v = 2.5, col = palette.colors(5)[4])
+abline(v = 1.1, col = palette.colors(5)[5])
+## How often do we properly claim a parameter is relevant?
+sapply(X = results_MaS, FUN = function(X) X[,2]) %>%
+  apply(MARGIN = 1, FUN = function(x) sum(x < 0.05)/length(x))
+```
+
+## Simulating violations of the HW assumption 
+
+```{r hweres, cache=TRUE}
+results_HWE <- mclapply(X = dat, function(X) {
+  results <- TriLLIEM(
+    dat = X,
+    mtmodel = "HWE", # The only change!
+    effects = c("C", "M", "Im"),
+    includeE = TRUE,
+    includeD = TRUE
+  ) %>%
+    summary() %>%
+    coef() %>%
+    .[c("C", "M", "Im", "E:M"), c(1, 4)]
+  results[, 1] <- exp(results[, 1])
+  return(results)
+}, mc.cores = 10)
+```
+
+## Simulating violations of the HW assumption 
+
+```{r hweplot, fig.height = 3, cache=TRUE}
+sapply(X = results_HWE, FUN = function(X) X[,1]) %>% 
+  t() %>% 
+  boxplot(horizontal = TRUE, col = palette.colors(5)[-1], las = 1)
+abline(v = 2, col = palette.colors(5)[2])
+abline(v = 1.5, col = palette.colors(5)[3])
+abline(v = 2.5, col = palette.colors(5)[4])
+abline(v = 1.1, col = palette.colors(5)[5])
+## How often do we properly claim the parameters are relevant?
+sapply(X = results_HWE, FUN = function(X) X[,2]) %>%
+  apply(MARGIN = 1, FUN = function(x) sum(x < 0.05)/length(x))
+```
+
+## Results with null data
+
+```{r datnullsim, cache=TRUE}
+dat_null <- mclapply(
+  X = 1:1000, # Simulate 1000 times
+  FUN = function(X, ...) simulateData(...)$dat4R, # What we're repeating
+  ntrios = 1000, # Simulate 10,000 triads
+  mtmodel = "MaS", # Simulate Mating Asymmetry data
+  mtCoef = c(1.15, 1.15, 1), # MaS parameters
+  includeE = TRUE, # Including environmental effects
+  prE = 0.3, # 30% of the sample will have E = 1
+  includeControl = TRUE, # Including controls
+  prControl = 0.3, # 30% of the sample will have D = 0
+  mc.cores = 10
+)
+```
+
+## Results with null data
+
+```{r masresnull, cache=TRUE}
+results_MaS_null <- mclapply(X = dat_null, function(X) {
+  results <- TriLLIEM(
+    dat = X,
+    mtmodel = "MaS",
+    effects = c("C", "M", "Im"),
+    includeE = TRUE,
+    includeD = TRUE
+  ) %>%
+    summary() %>%
+    coef() %>%
+    .[c("C", "M", "Im", "E:M"), c(1, 4)]
+  results[, 1] <- exp(results[, 1])
+  return(results)
+}, mc.cores = 10)
+```
+
+## Results with null data
+
+```{r masplotnull, fig.height = 3, cache=TRUE}
+sapply(X = results_MaS_null, FUN = function(X) X[,1]) %>% 
+  t() %>% 
+  boxplot(horizontal = TRUE, col = palette.colors(5)[-1], las = 1)
+## How often do we erroneously claim a parameter is significant?
+sapply(X = results_MaS_null, FUN = function(X) X[,2]) %>%
+  apply(MARGIN = 1, FUN = function(x) sum(x < 0.05)/length(x))
+```
+
+## Results with null data
+
+```{r hweresnull, cache=TRUE}
+results_HWE_null <- mclapply(X = dat_null, function(X) {
+  results <- TriLLIEM(
+    dat = X,
+    mtmodel = "HWE", # The only change!
+    effects = c("C", "M", "Im"),
+    includeE = TRUE,
+    includeD = TRUE
+  ) %>%
+    summary() %>%
+    coef() %>%
+    .[c("C", "M", "Im", "E:M"), c(1, 4)]
+  results[, 1] <- exp(results[, 1])
+  return(results)
+}, mc.cores = 10)
+```
+
+## Results with null data
+
+```{r hweplotnull, fig.height = 3, cache=TRUE}
+sapply(X = results_HWE_null, FUN = function(X) X[,1]) %>% 
+  t() %>% 
+  boxplot(horizontal = TRUE, col = palette.colors(5)[-1], las = 1)
+## How often do we erroneously claim a parameter is significant?
+sapply(X = results_HWE_null, FUN = function(X) X[,2]) %>%
+  apply(MARGIN = 1, FUN = function(x) sum(x < 0.05)/length(x))
+```

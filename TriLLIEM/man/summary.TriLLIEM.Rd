@@ -4,7 +4,7 @@
 \alias{summary.TriLLIEM}
 \title{Summary function for TriLLIEM functions}
 \usage{
-\method{summary}{TriLLIEM}(res)
+\method{summary}{TriLLIEM}(object)
 }
 \arguments{
 \item{res}{Resulting object of class "\code{glm} from the \code{\link[=TriLLIEM]{TriLLIEM()}} function.}

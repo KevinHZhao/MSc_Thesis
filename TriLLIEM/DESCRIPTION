@@ -12,7 +12,6 @@ LazyData: true
 Imports: 
     dplyr,
     Haplin,
-    HardyWeinberg,
     magrittr
 Suggests: 
     knitr,
@@ -20,7 +19,7 @@ Suggests:
     testthat (>= 3.0.0),
     tidyverse,
     trio
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Depends: 
     R (>= 2.10)
 Roxygen: list(markdown = TRUE)

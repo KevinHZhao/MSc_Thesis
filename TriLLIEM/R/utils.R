@@ -1,22 +1,58 @@
-add_PoO_data <- function(dat, Mprop) {
+add_PoO_data <- function(dat, Mprop, includeE) {
   # Portion of model equation and offset depends on mating type model
-  heteroInds <- with(dat, which(type == 9))
-  M.count <- Mprop * dat$count[heteroInds]
-  PoO_dat <- dat %>%
-    dplyr::left_join(PoO_df, by = c("M", "F", "C")) %>%
-    dplyr::mutate(count = replace(count, is.na(patOrg), M.count),
-                  matOrg = replace(matOrg, is.na(matOrg), 1),
-                  patOrg = replace(patOrg, is.na(patOrg), 0)) %>%
-    dplyr::add_row(dat %>%
-                     dplyr::filter(dplyr::row_number() %in% heteroInds) %>%
-                     dplyr::mutate(count = dat$count[heteroInds] - M.count,
-                                   matOrg = 0,
-                                   patOrg = 1)) %>%
-    dplyr::arrange(desc(D), desc(E), type, desc(matOrg)) %>%
-    dplyr::mutate(typeOrig = rep(1:16, dplyr::n()/16),
-                  Im = matOrg * D,
-                  If = patOrg * D) %>%
-    dplyr::relocate(typeOrig)
+  if (includeE && length(Mprop) != 2){
+    stop("Environmental interactions included hence Mprop should be a vector of length two!")
+  }
+  heteroInds.E0 <- with(dat, which(type == 9 & E == 0))
+  M.count.E0 <- dat %>%
+    dplyr::filter(type == 9, E == 0) %>%
+    dplyr::pull(count) %>%
+    magrittr::multiply_by(Mprop[[1L]])
+  if (includeE){
+    heteroInds.E1 <- with(dat, which(type == 9 & E == 1))
+    M.count.E1 <- dat %>%
+      dplyr::filter(type == 9, E == 1) %>%
+      dplyr::pull(count) %>%
+      magrittr::multiply_by(Mprop[[2L]])
+
+    PoO_dat <- dat %>%
+      dplyr::left_join(PoO_df %>% dplyr::select(type, matOrg, patOrg), by = "type") %>%
+      dplyr::mutate(count = replace(count, is.na(patOrg) & E == 0, M.count.E0),
+                    count = replace(count, is.na(patOrg) & E == 1, M.count.E1),
+                    matOrg = replace(matOrg, is.na(matOrg), 1),
+                    patOrg = replace(patOrg, is.na(patOrg), 0)) %>%
+      dplyr::add_row(dat %>%
+                       dplyr::filter(dplyr::row_number() %in% heteroInds.E0) %>%
+                       dplyr::mutate(count = dat$count[heteroInds.E0] - M.count.E0,
+                                     matOrg = 0,
+                                     patOrg = 1)) %>%
+      dplyr::add_row(dat %>%
+                       dplyr::filter(dplyr::row_number() %in% heteroInds.E1) %>%
+                       dplyr::mutate(count = dat$count[heteroInds.E1] - M.count.E1,
+                                     matOrg = 0,
+                                     patOrg = 1)) %>%
+      dplyr::arrange(desc(D), desc(E), type, desc(matOrg)) %>%
+      dplyr::mutate(typeOrig = rep(1:16, dplyr::n()/16),
+                    Im = matOrg * D,
+                    If = patOrg * D) %>%
+      dplyr::relocate(typeOrig)
+  } else {
+    PoO_dat <- dat %>%
+      dplyr::left_join(PoO_df %>% dplyr::select(type, matOrg, patOrg), by = "type") %>%
+      dplyr::mutate(count = replace(count, is.na(patOrg), M.count.E0),
+                    matOrg = replace(matOrg, is.na(matOrg), 1),
+                    patOrg = replace(patOrg, is.na(patOrg), 0)) %>%
+      dplyr::add_row(dat %>%
+                       dplyr::filter(dplyr::row_number() %in% heteroInds.E0) %>%
+                       dplyr::mutate(count = dat$count[heteroInds.E0] - M.count.E0,
+                                     matOrg = 0,
+                                     patOrg = 1)) %>%
+      dplyr::arrange(desc(D), desc(E), type, desc(matOrg)) %>%
+      dplyr::mutate(typeOrig = rep(1:16, dplyr::n()/16),
+                    Im = matOrg * D,
+                    If = patOrg * D) %>%
+      dplyr::relocate(typeOrig)
+  }
   return(PoO_dat)
 }
 
@@ -61,23 +97,33 @@ cov_trill <- function(y, L, a, b, mu){
   }
 }
 
-summ_haplin <- function(res, PoO = FALSE, includeE = TRUE){
+summ_haplin <- function(res, PoO = FALSE, includeE = FALSE){
   resVec <- c()
   pvalVec <- c()
-  if(includeE){
+  if(includeE && PoO){
     GEtest <- Haplin::gxe(res)
-    resVec["M[E=1]"]=haptable(res)[6,"RRm.est."] #RR for E=1, M=1
-    resVec["M[E=0]"]=haptable(res)[4,"RRm.est."]  #RR for E=0, M=1
+    resVec["M[E=1]"]=Haplin::haptable(res)[6,"RRm.est."] #RR for E=1, M=1
+    resVec["M[E=0]"]=Haplin::haptable(res)[4,"RRm.est."]  #RR for E=0, M=1
     resVec["M[E=1]/M[E=0]"]=resVec["M[E=1]"]/resVec["M[E=0]"]
     pvalVec["E:M"]=GEtest$gxe.test[3,"pval"] # pval for stratified test
-    pvalVec["M"]=haptable(res)[2,"RRm.p.value"] # pval for unstratified analysis
-
-    if (is.element("C",effects)){ # Using the RR and p-value for the unstratified analysis
-      resVec["C"]=haptable(res)[2,"RR.est."]
-      pvalVec["C"]=haptable(res)[2,"RR.p.value"]
-    }
+    pvalVec["M"]=Haplin::haptable(res)[2,"RRm.p.value"] # pval for unstratified analysis
+    resVec["RRcm"] <- Haplin::haptable(res)[2,"RRcm.est."]
+    pvalVec["RRcm"] <- Haplin::haptable(res)[2,"RRcm.p.value"]
+    resVec["RRcf"] <- Haplin::haptable(res)[2,"RRcf.est."]
+    pvalVec["RRcf"] <- Haplin::haptable(res)[2,"RRcf.p.value"]
+  }
+  else if(includeE){
+    GEtest <- Haplin::gxe(res)
+    resVec["M[E=1]"]=Haplin::haptable(res)[6,"RRm.est."] #RR for E=1, M=1
+    resVec["M[E=0]"]=Haplin::haptable(res)[4,"RRm.est."]  #RR for E=0, M=1
+    resVec["M[E=1]/M[E=0]"]=resVec["M[E=1]"]/resVec["M[E=0]"]
+    pvalVec["E:M"]=GEtest$gxe.test[3,"pval"] # pval for stratified test
+    pvalVec["M"]=Haplin::haptable(res)[2,"RRm.p.value"] # pval for unstratified analysis
+    resVec["C"]=Haplin::haptable(res)[2,"RR.est."]
+    pvalVec["C"]=Haplin::haptable(res)[2,"RR.p.value"]
   }
   else if(PoO){
+    res <- Haplin::haptable(res)[2,]
     resVec["M"] <- res$RRm.est
     pvalVec["M"] <- res$RRm.p.value
     resVec["RRcm"] <- res$RRcm.est
@@ -86,6 +132,7 @@ summ_haplin <- function(res, PoO = FALSE, includeE = TRUE){
     pvalVec["RRcf"] <- res$RRcf.p.value
   }
   else{
+    res <- Haplin::haptable(res)[2,]
     resVec["C"] <- res$RR.est.
     pvalVec["C"] <- res$RR.p.value
     resVec["M"] <- res$RRm.est.
@@ -98,18 +145,64 @@ summ_emim <- function(res){
   resVec <- c()
   sdVec <- c()
   pvalVec <- c()
-  resVec["C"] <- exp(res$lnR1)
-  sdVec["C"] <- res$sd_lnR1
-  pvalVec["C"] <- 2 * pnorm(abs(res$lnR1 / res$sd_lnR1), lower = F)
-  resVec["M"] <- exp(res$lnS1)
-  sdVec["M"] <- res$sd_lnS1
-  pvalVec["M"] <- 2 * pnorm(abs(res$lnS1 / res$sd_lnS1), lower = F)
-  resVec["Im"] <- exp(res$lnIm)
-  sdVec["Im"] <- res$sd_lnIm
-  pvalVec["Im"] <- 2 * pnorm(abs(res$lnIm / res$sd_lnIm), lower = F)
-  resVec["Ip"] <- exp(res$lnIp)
-  sdVec["Ip"] <- res$sd_lnIp
-  pvalVec["Ip"] <- 2 * pnorm(abs(res$lnIp / res$sd_lnIp), lower = F)
+  if(attr(res, "includeE")) {
+    list2env(res, envir = environment())
+    resVec["C"] <- exp(resAll$lnR1)
+    sdVec["C"] <- resAll$sd_lnR1
+    resVec["M"] <- exp(resAll$lnS1)
+    sdVec["M"] <- resAll$sd_lnS1
+    pvalVec["C"] <- 2 * pnorm(abs(resAll$lnR1 / resAll$sd_lnR1), lower = F)
+    pvalVec["M"] <- 2 * pnorm(abs(resAll$lnS1 / resAll$sd_lnS1), lower = F)
+    resVec["Im"] <- exp(resAll$lnIm)
+    resVec["If"] <- exp(resAll$lnIp)
+
+    if(attr(res, "Einteraction") == "M"){
+      resVec <- resVec[! names(resVec) == "M"]
+      resVec["M[E=0]"] <- exp(res0$lnS1)
+      resVec["M[E=1]"] <- exp(res1$lnS1)
+      resVec["M[E=1]/M[E=0]"] <- resVec["M[E=1]"] / resVec["M[E=0]"]
+
+      # Get a Wald-type GE test like Haplin
+      z <- abs(res0$lnS1 - res1$lnS1) / sqrt(res0$sd_lnS1^2 + res1$sd_lnS1^2)
+      pvalVec["E:M"] <- 2 * pnorm(z, lower = F)
+    } else if(attr(res, "Einteraction") == "Im"){ ## CHeck over notes
+      resVec <- resVec[! names(resVec) == "Im"]
+      resVec["Im[E=0]"] <- exp(res0$lnIm)
+      resVec["Im[E=1]"] <- exp(res1$lnIm)
+      resVec["Im[E=1]/Im[E=0]"] <- resVec["Im[E=1]"] / resVec["Im[E=0]"]
+
+      # Get a Wald-type GE test like Haplin
+      z <- abs(res0$lnIm - res1$lnIm) / sqrt(res0$sd_lnIm^2 + res1$sd_lnIm^2)
+      pvalVec["E:Im"] <- 2 * pnorm(z, lower = F)
+    } else if(attr(res, "Einteraction") == "If"){
+      resVec <- resVec[! names(resVec) == "If"]
+      resVec["If[E=0]"] <- exp(res0$lnIp)
+      resVec["If[E=1]"] <- exp(res1$lnIp)
+      resVec["If[E=1]/If[E=0]"] <- resVec["If[E=1]"] / resVec["If[E=0]"]
+
+      # Get a Wald-type GE test like Haplin
+      z <- abs(res0$lnIp - res1$lnIp) / sqrt(res0$sd_lnIp^2 + res1$sd_lnIp^2)
+      pvalVec["E:If"] <- 2 * pnorm(z, lower = F)
+    }
+
+    sdVec["Im"] <- resAll$sd_lnIm
+    pvalVec["Im"] <- 2 * pnorm(abs(resAll$lnIm / resAll$sd_lnIm), lower = F)
+    sdVec["If"] <- resAll$sd_lnIp
+    pvalVec["If"] <- 2 * pnorm(abs(resAll$lnIp / resAll$sd_lnIp), lower = F)
+  } else {
+    resVec["C"] <- exp(res$lnR1)
+    sdVec["C"] <- res$sd_lnR1
+    pvalVec["C"] <- 2 * pnorm(abs(res$lnR1 / res$sd_lnR1), lower = F)
+    resVec["M"] <- exp(res$lnS1)
+    sdVec["M"] <- res$sd_lnS1
+    pvalVec["M"] <- 2 * pnorm(abs(res$lnS1 / res$sd_lnS1), lower = F)
+    resVec["Im"] <- exp(res$lnIm)
+    sdVec["Im"] <- res$sd_lnIm
+    pvalVec["Im"] <- 2 * pnorm(abs(res$lnIm / res$sd_lnIm), lower = F)
+    resVec["If"] <- exp(res$lnIp)
+    sdVec["If"] <- res$sd_lnIp
+    pvalVec["If"] <- 2 * pnorm(abs(res$lnIp / res$sd_lnIp), lower = F)
+  }
   return(list(effects = resVec, se = sdVec, pvals = pvalVec))
 }
 
@@ -175,8 +268,6 @@ mtmat <- function(maf = 0.4, C = c(1, 1, 1)) {
   ])
 }
 
-
-
 # A simplified function for simulating a subset of the full data
 # under particular conditions
 # mtCoef = C1, C2, C4 in paper, used like this since it preserves HWE for tests
@@ -189,7 +280,7 @@ mtmat <- function(maf = 0.4, C = c(1, 1, 1)) {
 simulateDataSubset <- function(ntrios = 1000, maf = 0.3,
                                R = c(1, 1, 1), S = c(1, 1, 1),
                                mtCoef = c(1, 1, 1),
-                               V = c(1, 1, 1), includeE = FALSE, envint = "Mother",
+                               V = c(1, 1, 1), includeE = FALSE, Einteraction = "M",
                                includeControl = FALSE, Im = 1, If = 1) {
   genomat <- mtmat(maf, C = mtCoef)
   # Compute the values proportional to P(D|M,F,C,E) for the
@@ -204,10 +295,14 @@ simulateDataSubset <- function(ntrios = 1000, maf = 0.3,
   diseasefactor <- diseasefactor * impFactorm * impFactorf
 
   # Add environmental effects for trios that will have E=1
-  if (envint == "Mother") {
+  if (Einteraction == "M") {
     diseasefactor <- diseasefactor * V[(genomat$M + 1)]
-  } else {
+  } else if (Einteraction == "C") {
     diseasefactor <- diseasefactor * V[(genomat$C + 1)]
+  } else if (Einteraction == "Im") {
+    diseasefactor <- diseasefactor * V[(genomat$matOrg + 1)]
+  } else if (Einteraction == "If") {
+    diseasefactor <- diseasefactor * V[(genomat$patOrg + 1)]
   }
 
   # Compute the values proportional to P(M,F,C,E|D) = P(D|M,F,C,E)P(M,F)P(C|M,F)
@@ -373,8 +468,7 @@ createPed <- function(dat) {
       # genotype1[genotype1==-8]=0
       # genotype2[genotype2==-8]=0
 
-      #tempdat <- data.frame(E, D = phenotype, genotype1, genotype2)
-      tempdat <- data.frame(D = phenotype, genotype1, genotype2)
+      tempdat <- data.frame(E, D = phenotype, genotype1, genotype2)
 
       finaldat <- rbind(finaldat, tempdat)
     }

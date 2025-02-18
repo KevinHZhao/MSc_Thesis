@@ -4,7 +4,7 @@
 \alias{vcov.TriLLIEM}
 \title{Title}
 \usage{
-\method{vcov}{TriLLIEM}(res)
+\method{vcov}{TriLLIEM}(res, proven = FALSE)
 }
 \arguments{
 \item{res}{}

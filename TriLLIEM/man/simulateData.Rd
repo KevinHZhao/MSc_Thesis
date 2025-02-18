@@ -15,7 +15,7 @@ simulateData(
   Im = 1,
   If = 1,
   includeE = FALSE,
-  envint = "Mother",
+  Einteraction = "M",
   prE = 0,
   includeControl = FALSE,
   prControl = 0,
@@ -53,8 +53,8 @@ Equilibrium, "\code{MS}" for Mating Symmetry, and "\code{MaS}" for Mating Asymme
 \item{includeE}{A logical value indicating whether environmental effects
 should be included in the simulation.}
 
-\item{envint}{If set to "\code{Mother}", simulates maternal gene-environment
-interactions, otherwise simulates child gene-environmnet interactions.}
+\item{Einteraction}{A string indicating what variable environmental effects
+interact with.  Can be "\code{Im}", "\code{If}", "\code{C}", or "\code{M}".}
 
 \item{prE}{Probability of a trio to have the environmental effects.}
 

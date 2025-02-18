@@ -34,10 +34,18 @@ summary.TriLLIEM <- function (object)
   keep <- match(c("call", "terms", "family", "deviance", "aic",
                   "contrasts", "df.residual", "null.deviance", "df.null",
                   "iter", "na.action"), names(object), 0L)
-  ans <- c(object[keep], list(deviance.resid = residuals(object,
-                                                         type = "deviance"), coefficients = coef.table, aliased = aliased,
-                              dispersion = 1, df = c(object$rank, df.r, df.f),
-                              cov.unscaled = covmat, cov.scaled = covmat))
+  ans <- c(
+    object[keep],
+    list(
+      deviance.resid = residuals(object, type = "deviance"),
+      coefficients = coef.table,
+      aliased = aliased,
+      dispersion = 1,
+      df = c(object$rank, df.r, df.f),
+      cov.unscaled = covmat,
+      cov.scaled = covmat
+    )
+  )
   class(ans) <- c("summary.TriLLIEM", "summary.glm")
   return(ans)
 }

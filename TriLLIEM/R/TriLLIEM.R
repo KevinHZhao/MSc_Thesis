@@ -10,8 +10,12 @@
 #'  \item{"`Im`"}{Maternal imprinting effects.}
 #'  \item{"`If`"}{Paternal imprinting effects.}
 #' }
-#' @param includeE A logical value indicating whether to include maternal
-#' gene-environment effects.
+#' @param includeE A logical value indicating whether to include environment
+#' interaction effects.
+#' @param Einteraction A string indicating what variable environmental effects
+#' interact with.  Can be "`Im`", "`If`", "`C`", or "`M`".
+#' @param Estrat A logical value indicating whether to use a stratified approach
+#' for environmental interactions equivalent to that of EMIM and/or Haplin.
 #' @param includeD A logical value indicating whether to use the hybrid
 #' model with controls.
 #' @param dat A data frame with triad data, with the formatting of
@@ -33,20 +37,26 @@
 #'
 #' @examples
 #' res <- TriLLIEM(mtmodel = "HWE", effects = c("C", "M", "Im"), dat = example_dat4R)
-#' summ_trill(res)
+#' summary(res)
 TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
-                     includeE = FALSE, includeD = FALSE, includeIm = FALSE,
+                     includeE = FALSE, Einteraction = "M", Estrat = FALSE,
+                     includeD = FALSE, includeIm = FALSE,
                      includeIf = FALSE, Minit = 0.5, max.iter = 30, EM.diag = FALSE) {
   ## Test for violation of HWE when pop strat (sim MS data and compare HWE vs MS)
   ## Only one of E:M or E:Im
   ## test out with other code
   ## p values should be smaller than haplin
   ## Test with D compared to EMIM and haplin
-  if(includeIm){
+  if (includeIm){
     effects <- c(effects, "Im")
   }
-  if(includeIf){
+  if (includeIf){
     effects <- c(effects, "If")
+  }
+  # If Einteraction is not in effect, give warning and add it to effect
+  if (!(Einteraction %in% effects) && includeE == TRUE){
+    warning("Einteraction is not in effects, including it manually.")
+    effects <- c(effects, Einteraction)
   }
 
   if (all(c("C", "Im", "If") %in% effects)){
@@ -77,15 +87,23 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
     if(length(unique(dat$E)) < 2){
       stop("E column must have at least 2 distinct values.")
     }
-    Eeffects <- ## Only one of maternal by E or (one of Im or If) imprinting by E, add mteffects too
-      c(mteffect, effects) %>%
-      paste0(":E", sep = "") %>%
-      {if(mtmodel == "HWE") append(., "E") else .} %>%
-      setdiff(c("C:E"))
+    ## If we want the same results as the stratified approach of emim and haplin, MUST include E:everything,
+    ## otherwise, don't include by default to save on power
+    if(Estrat){
+      Eeffects <-
+        c(mteffect, effects) %>%
+        paste0(":E", sep = "") %>%
+        {if(mtmodel == "HWE") append(., "E") else .}
+    } else {
+      Eeffects <-
+        c(mteffect, Einteraction) %>%
+        paste0(":E", sep = "") %>%
+        {if(mtmodel == "HWE") append(., "E") else .}
+    }
   }
 
   # Portion of model equation and offset depends on mating type model
-  origDat <- add_PoO_data(dat, Mprop = Minit)
+  origDat <- add_PoO_data(dat, Mprop = c(Minit, if (includeE) Minit), includeE = includeE)
 
   # Hybrid model
   Deffects <- c()
@@ -155,16 +173,33 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
                       1,
                       exp(res$coefficients["If"])
                       )
+      if (includeE){
+        ImEhat <- ifelse(is.na(exp(res$coefficients["E:Im"])),
+                        1,
+                        exp(res$coefficients["E:Im"])
+        )
+        IfEhat <- ifelse(is.na(exp(res$coefficients["E:If"])),
+                        1,
+                        exp(res$coefficients["E:If"])
+        )
+      }
 
       if(EM.diag){
         message(paste0("\nIteration ", counter, " of EM algorithm.
                         \nIm hat = ", Imhat,
                        "\nIf hat = ", Ifhat,
-                       "\nProportion for maternal inheritance cell = ", Imhat/(Ifhat + Imhat)))
+                       if (includeE) "\nE:Im hat = ", ImEhat,
+                       if (includeE) "\nE:If hat = ", IfEhat,
+                       "\nProportion for maternal inheritance cell = ", Imhat/(Ifhat + Imhat),
+                       if (includeE) "\nProportion for maternal inheritance cell = ", ImEhat*Imhat/(ImEhat*Imhat + IfEhat*Ifhat),
+                       "\nDifference in deviance: ", abs(deviance(res) - prev_dev),
+                       "\nMax difference in coefficients: ", max(abs(coef(res) - prev_coeffs))))
       }
 
       origDat <- add_PoO_data(dat,
-                              Mprop = Imhat/(Ifhat + Imhat)
+                              Mprop = c(Imhat/(Ifhat + Imhat),
+                                        if (includeE) ImEhat*Imhat/(ImEhat*Imhat + IfEhat*Ifhat)),
+                              includeE = includeE
                               ) %>%
         dplyr::mutate(HWgeno = M + F)
       ## Use a proper deviance function for imprinting

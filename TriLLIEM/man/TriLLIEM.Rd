@@ -9,10 +9,13 @@ TriLLIEM(
   effects = c("C", "M"),
   dat,
   PStest = FALSE,
+  includeE = FALSE,
+  Einteraction = "M",
+  includeD = FALSE,
   includeIm = FALSE,
   includeIf = FALSE,
   Minit = 0.5,
-  max.iter = 12,
+  max.iter = 30,
   EM.diag = FALSE
 )
 }
@@ -27,13 +30,22 @@ in the model.  Example effects include:
 \item{"\code{M}"}{Maternal effects.}
 \item{"\code{Im}"}{Maternal imprinting effects.}
 \item{"\code{If}"}{Paternal imprinting effects.}
-\item{"\code{E:M}"}{Maternal gene-environment effects.}
 }}
 
-\item{dat}{A data frame with triad data, with the formatting of \link{example_dat4R}.}
+\item{dat}{A data frame with triad data, with the formatting of
+\link{example_dat4R}.}
 
-\item{PStest}{A logical value indicating whether to performa population
+\item{PStest}{A logical value indicating whether to perform a population
 stratification test on the data.}
+
+\item{includeE}{A logical value indicating whether to include environment
+interaction effects.}
+
+\item{Einteraction}{A string indicating what variable environmental effects
+interact with.  Can be "\code{Im}", "\code{If}", "\code{C}", or "\code{M}".}
+
+\item{includeD}{A logical value indicating whether to use the hybrid
+model with controls.}
 
 \item{includeIm}{A logical value indicating whether to include maternal
 imprinting in the model, equivalent to adding "\code{Im}" in the "\code{effects}" vector.}
