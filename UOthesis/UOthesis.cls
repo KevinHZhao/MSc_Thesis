@@ -71,6 +71,21 @@
 \RequirePackage{hyperref}
 \hypersetup{pdfencoding=unicode}
 % \hypersetup{pdfstartview=}
+% KZ Adding cleveref for easier referencing figs/tables, using \cref
+% instead of \ref
+\usepackage[nameinlink,capitalize]{cleveref}
+%% A space is still included when multiple sections are referenced,
+%% but I think removing the space for multiple section refs would look
+%% worse.
+\crefname{chapter}{Chapter}{Chapters}
+\Crefname{chapter}{Chapter}{Chapters}
+\crefname{section}{\S}{\S\S}
+\Crefname{section}{Section}{Sections}
+\crefname{equation}{Equation}{Equations}
+\Crefname{equation}{Equation}{Equations}
+\crefname{figure}{Figure}{Figures}
+\Crefname{figure}{Figure}{Figures}
+\Crefname{appsec}{Appendix}{appendices}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Structure of the theorems, propositions, ...

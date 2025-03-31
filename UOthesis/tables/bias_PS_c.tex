@@ -1,0 +1,25 @@
+\begin{table}[H]
+\centering
+\caption{\label{tab:bias_PS_c}Relative bias for various models in our simulation study on
+                    population stratification, where the data has both cases and controls.
+                    Given values are the average across over 2,000 simulations.}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}[t]{llllllll}
+\toprule
+$\CC$ & $\MM$ & $\EE:\MM$ & $\EE:I_{\MM}$ & $\EE:I_{\FF}$ & $I_{\MM}$ & $I_{\FF}$ & Mating type\\
+\midrule
+0.07704 & 0.10052 & -0.03596 &  &  &  &  & HWE\\
+0.13195 & 0.13725 &  & -0.02678 &  & -0.13969 &  & HWE\\
+-0.03723 & 0.13688 &  &  & -0.02288 &  & 0.18710 & HWE\\
+\addlinespace
+0.07369 & 0.09667 & -0.03400 &  &  &  &  & MS\\
+0.14866 & 0.15438 &  & -0.03361 &  & -0.15469 &  & MS\\
+-0.04330 & 0.15409 &  &  & -0.03060 &  & 0.21696 & MS\\
+\addlinespace
+0.05665 & 0.15345 & -0.04527 &  &  &  &  & MaS\\
+0.12360 & 0.18026 &  & -0.03735 &  & -0.12857 &  & MaS\\
+-0.03702 & 0.18025 &  &  & -0.03823 &  & 0.18685 & MaS\\
+\bottomrule
+\end{tabular}}
+\end{table}

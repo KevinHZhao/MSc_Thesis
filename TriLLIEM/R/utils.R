@@ -234,9 +234,9 @@ mtmat <- function(maf = 0.4, C = c(1, 1, 1)) {
   Mprobs <- dbinom(mts[, 1], 2, prob = maf)
   Fprobs <- dbinom(mts[, 2], 2, prob = maf)
 
-  asymfactor <- c(1, C[1], 2 - C[1],
-                  C[2], 2 - C[2], 1,
-                  C[3], 2 - C[3], 1)
+  asymfactor <- c(1, 2 - C[1], C[1],
+                  2 - C[2], C[2], 1,
+                  2 - C[3], C[3], 1)
   mts <- cbind(mts, prMF = Mprobs * Fprobs * asymfactor)
   ## First three mating pairs: can make 0 or 1
   ## Middle three mating pairs: can make 0, 1, or 2

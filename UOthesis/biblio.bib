@@ -8,85 +8,271 @@
 % lists of types and fields.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-@article{Wein98,
-  title     = "A log-linear approach to case-parent-triad data: assessing
-               effects of disease genes that act either directly or through
-               maternal effects and that may be subject to parental imprinting",
-  author    = "Weinberg, C R and Wilcox, A J and Lie, R T",
-  abstract  = "We describe a log-linear method for analysis of
-               case-parent-triad data, based on maximum likelihood with
-               stratification on parental mating type. The method leads to
-               estimates of association parameters, such as relative risks, for
-               a single allele, and also to likelihood ratio chi2 tests (LRTs)
-               of linkage disequilibrium. Hardy-Weinberg equilibrium need not
-               be assumed. Our simulations suggest that the LRT has power
-               similar to that of the chi2 ``score'' test proposed by Schaid
-               and Sommer and that both can outperform the
-               transmission/disequilibrium test (TDT), although the TDT can
-               perform better under an additive model of inheritance. Because a
-               restricted version of the LRT is asymptotically equivalent to
-               the TDT, the proposed test can be regarded as a generalization
-               of the TDT. The method that we describe generalizes easily to
-               accommodate maternal effects on risk and, in fact, produces
-               powerful and orthogonal tests of the contribution of fetal
-               versus maternal genetic factors. We further generalize the model
-               to allow for effects of parental imprinting. Imprinting effects
-               can be fitted by a simple, iterative procedure that relies on
-               the expectation-maximization algorithm and that uses standard
-               statistical software for the maximization steps. Simulations
-               reveal that LRT tests for detection of imprinting have very good
-               operating characteristics. When a single allele is under study,
-               the proposed method can yield powerful tests for detection of
-               linkage disequilibrium and is applicable to a broader array of
-               causal scenarios than is the TDT.",
-  journal   = "Am. J. Hum. Genet.",
+@article{GjesLie06,
+  title = "Case-parent triads: estimating single- and double-dose effects of
+           fetal and maternal disease gene haplotypes",
+  author = "Gjessing, H K and Lie, R T",
+  abstract = "Case-parent triad data are considered a robust basis for studying
+              association between variants of a gene and a disease. Methods
+              evaluating statistical significance of association, like the
+              TDT-test and its extensions, are frequently used. When there are
+              prior hypotheses of a causal effect of the gene under study,
+              however, methods measuring penetrance of alleles or haplotypes as
+              relative risks will be more informative. Log-linear models have
+              been proposed as a flexible tool for such relative risk estimation.
+              We demonstrate an extension of the log-linear model to a natural
+              framework for also estimating effects of multiple alleles or
+              haplotypes, incorporating both single- and double-dose effects. The
+              model also incorporates effects of single- and double-dose maternal
+              haplotypes on a fetus during pregnancy. Unknown phase of haplotypes
+              as well as missing parents are accounted for by the EM algorithm. A
+              number of numerical improvements to maximum likelihood estimation
+              are also implemented to facilitate a larger number of haplotypes.
+              Software for these analyses, HAPLIN, is publicly available through
+              our web site. As an illustration we have re-analyzed data on the
+              MSX1 homeobox-gene on chromosome 4 to show how haplotypes may
+              influence the risk of oral clefts.",
+  journal = "Ann. Hum. Genet.",
+  publisher = "Wiley",
+  volume = 70,
+  number = "Pt 3",
+  pages = "382--396",
+  month = may,
+  year = 2006,
+  copyright = "http://onlinelibrary.wiley.com/termsAndConditions\#vor",
+  language = "en",
+}
+
+@article{HoweCord12,
+  title = {PREMIM and EMIM: tools for estimation of maternal, imprinting and
+           interaction effects using multinomial modelling},
+  volume = {13},
+  ISSN = {1471-2105},
+  url = {http://dx.doi.org/10.1186/1471-2105-13-149},
+  DOI = {10.1186/1471-2105-13-149},
+  number = {1},
+  journal = {BMC Bioinformatics},
+  publisher = {Springer Science and Business Media LLC},
+  author = {Howey, Richard and Cordell, Heather J},
+  year = {2012},
+  month = jun,
+}
+
+@article{Verm97,
+  author = {Vermunt, Jeroen},
+  year = {1997},
+  month = {01},
+  pages = {},
+  title = {LEM: A General Program for the Analysis of Categorical Data},
+}
+
+@article{Garl+20,
+  title = {Role of epigenetics and {miRNAs} in orofacial clefts},
+  volume = {112},
+  ISSN = {2472-1727},
+  url = {http://dx.doi.org/10.1002/bdr2.1802},
+  DOI = {10.1002/bdr2.1802},
+  number = {19},
+  journal = {Birth Defects Research},
+  publisher = {Wiley},
+  author = {Garland, Michael A. and Sun, Bo and Zhang, Shuwen and Reynolds, Kurt
+            and Ji, Yu and Zhou, Chengji J.},
+  year = {2020},
+  month = sep,
+  pages = {1635–1659},
+}
+
+@article{WeinUmba+05,
+  title = {A Hybrid Design for Studying Genetic Influences on Risk of Diseases
+           with Onset Early in Life},
+  volume = {77},
+  ISSN = {0002-9297},
+  url = {http://dx.doi.org/10.1086/496900},
+  DOI = {10.1086/496900},
+  number = {4},
+  journal = {The American Journal of Human Genetics},
+  publisher = {Elsevier BV},
+  author = {Weinberg, C.R. and Umbach, D.M.},
+  year = {2005},
+  month = oct,
+  pages = {627–636},
+}
+
+@article{Bour+11,
+  author = {Bourgey, Mathieu and Healy, Jasmine and Saint-Onge, Pascal and Massé
+            , Hugues and Sinnett, Daniel and Roy-Gagnon, Marie-Hélène},
+  title = {Genome-wide detection and characterization of mating asymmetry in
+           human populations},
+  journal = {Genetic Epidemiology},
+  volume = {35},
+  number = {6},
+  pages = {526-535},
+  keywords = {mating asymmetry, confounding, maternal effects, HapMap,
+              simulation study},
+  doi = {https://doi.org/10.1002/gepi.20602},
+  url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/gepi.20602},
+  eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/gepi.20602},
+  abstract = {Abstract The study of the genetic component of early-onset
+              diseases requires investigation into parental genetic effects,
+              particularly those mediated by the mother who can influence the
+              offspring's risk of disease through the effects of her genes acting
+              directly on the intrauterine milieu or indirectly through
+              maternal-gene child-gene interaction effects. An important source
+              of bias that can arise in feto-maternal association testing is the
+              possibility of confounding due to mating asymmetry (MA). However,
+              there is little information on the levels of MA present in human
+              populations and the impact on maternal association testing. In this
+              study, we developed a novel approach to measuring MA and, using
+              HapMap mate-pairs of European and African descent, carried out a
+              genome-wide investigation and characterization of MA. We further
+              investigated the impact of observed levels of MA on maternal
+              association tests through simulation experiments. For the first
+              time, we showed that non-negligible levels of MA are detected in
+              human populations, such that subtle genotype frequency differences
+              between individuals mating in the population are sufficient to
+              induce spurious maternal genotype associations. Though the
+              underlying mechanisms driving the asymmetry within these
+              populations remain elusive, our findings provide consequential
+              evidence for the occurrence of MA in humans and highlight the
+              importance of controlling for MA in maternal association testing.
+              Genet. Epidemiol. 2011. © 2011 Wiley-Liss, Inc. 35: 526-535, 2011},
+  year = {2011},
+}
+
+@article{Lee+05,
+  author = {Lee, P J and Ridout, D and Walter, J H and Cockburn, F},
+  title = {Maternal phenylketonuria: report from the United Kingdom Registry
+           1978{\textendash}97},
+  volume = {90},
+  number = {2},
+  pages = {143--146},
+  year = {2005},
+  doi = {10.1136/adc.2003.037762},
+  publisher = {BMJ Publishing Group Ltd},
+  abstract = {Background: The effects of maternal phenylalanine on the fetus
+              include facial dysmorphism, microcephaly, intrauterine growth
+              retardation, developmental delay, and congenital heart
+              disease.Aims: To evaluate the impact of phenylalanine restricted
+              diet in pregnant women with phenylketonuria (PKU) on their
+              offspring.Methods: Data on virtually all pregnancies of women with
+              PKU in the United Kingdom between 1978 and 1997 were reported to
+              the United Kingdom PKU Registry. The effect of the use and timing
+              in relation to pregnancy of a phenylalanine restricted diet on
+              birth weight, birth head circumference, the presence or absence of
+              congenital heart disease (CHD), 4 year developmental quotient, and
+              8 year intelligence quotient were examined.Results: A total of 228
+              pregnancies resulted in live births (seven twin pregnancies were
+              excluded). In 110 (50\%), diet started before conception. For this
+              group mean (SD) birth weight was 3160 (612) g, birth head
+              circumference 33.6 (1.9) cm, 4 year DQ 108.9 (13.2), 8 year IQ
+              103.4 (15.6), and incidence of CHD was 2.4\%. In comparison, for
+              those born where treatment was started during pregnancy (n = 91),
+              birth weight was 2818 (711) g, birth head circumference 32.7 (2.0)
+              cm, 4 year DQ 96.8 (15.0), 8 year IQ 86.5 (13.0), and incidence of
+              CHD was 17\%. Month-by-month regression analyses suggested that
+              metabolic control by 12{\textendash}16 weeks gestation had most
+              influence on outcome.Conclusions: Many features of the maternal PKU
+              syndrome are preventable by starting a phenylalanine restricted
+              diet. Women with PKU and their carers must be aware of the risks
+              and should start the diet before conception, or as soon after as
+              possible.},
+  issn = {0003-9888},
+  URL = {https://adc.bmj.com/content/90/2/143},
+  eprint = {https://adc.bmj.com/content/90/2/143.full.pdf},
+  journal = {Archives of Disease in Childhood},
+}
+
+
+@phdthesis{Huds19,
+  title = "Maternal Gene-Environment Effects: An Evaluation of Statistical
+           Approaches to Detect Effects and an Investigation of the Effect of
+           Violations of Model Assumptions",
+  author = "Julie Hudson",
+  year = 2019,
+  month = sep,
+  address = {Ottawa, ON},
+  note = {Available at \url{http://dx.doi.org/10.20381/ruor-23880}},
+  school = {University of Ottawa},
+  type = {{MSc.} thesis},
+}
+
+@article{Wein+98,
+  title = "A log-linear approach to case-parent-triad data: assessing effects of
+           disease genes that act either directly or through maternal effects and
+           that may be subject to parental imprinting",
+  author = "Weinberg, C R and Wilcox, A J and Lie, R T",
+  abstract = "We describe a log-linear method for analysis of case-parent-triad
+              data, based on maximum likelihood with stratification on parental
+              mating type. The method leads to estimates of association
+              parameters, such as relative risks, for a single allele, and also
+              to likelihood ratio chi2 tests (LRTs) of linkage disequilibrium.
+              Hardy-Weinberg equilibrium need not be assumed. Our simulations
+              suggest that the LRT has power similar to that of the chi2
+              ``score'' test proposed by Schaid and Sommer and that both can
+              outperform the transmission/disequilibrium test (TDT), although the
+              TDT can perform better under an additive model of inheritance.
+              Because a restricted version of the LRT is asymptotically
+              equivalent to the TDT, the proposed test can be regarded as a
+              generalization of the TDT. The method that we describe generalizes
+              easily to accommodate maternal effects on risk and, in fact,
+              produces powerful and orthogonal tests of the contribution of fetal
+              versus maternal genetic factors. We further generalize the model to
+              allow for effects of parental imprinting. Imprinting effects can be
+              fitted by a simple, iterative procedure that relies on the
+              expectation-maximization algorithm and that uses standard
+              statistical software for the maximization steps. Simulations reveal
+              that LRT tests for detection of imprinting have very good operating
+              characteristics. When a single allele is under study, the proposed
+              method can yield powerful tests for detection of linkage
+              disequilibrium and is applicable to a broader array of causal
+              scenarios than is the TDT.",
+  journal = "Am. J. Hum. Genet.",
   publisher = "Elsevier BV",
-  volume    =  62,
-  number    =  4,
-  pages     = "969--978",
-  month     =  apr,
-  year      =  1998,
+  volume = 62,
+  number = 4,
+  pages = "969--978",
+  month = apr,
+  year = 1998,
   copyright = "https://www.elsevier.com/open-access/userlicense/1.0/",
-  language  = "en"
+  language = "en",
 }
 
 @book{Stra99,
-publisher = {BIOS Scientific},
-isbn = {1859962025},
-year = {1999},
-title = {Human molecular genetics 2 / Tom Strachan and Andrew P. Read.},
-edition = {2nd ed.},
-language = {eng},
-author = {Strachan, T},
-keywords = {Human molecular genetics},
+  publisher = {BIOS Scientific},
+  isbn = {1859962025},
+  year = {1999},
+  title = {Human molecular genetics 2 / Tom Strachan and Andrew P. Read.},
+  edition = {2nd ed.},
+  language = {eng},
+  author = {Strachan, T},
+  keywords = {Human molecular genetics},
 }
 
 @article{Port14,
-  title     = "The birth and development of the {DNA} theory of inheritance:
-               sixty years since the discovery of the structure of {DNA}",
-  author    = "Portin, Petter",
-  abstract  = "The development of the DNA theory of inheritance culminated in
-               the publication of the molecular structure of DNA 60 years ago.
-               This paper describes this development, beginning with the
-               discovery of DNA as a chemical substance by Friedrich Miescher
-               in 1869, followed by its basic chemical analysis and
-               demonstration of its participation in the structure of
-               chromosomes. Subsequently it was discovered by Oswald Avery in
-               1944 that DNA was the genetic material, and then Erwin Chargaff
-               showed that the proportions of the bases included in the
-               structure of DNA followed a certain law. These findings, in
-               association with the biophysical studies of Maurice Wilkins and
-               Rosalind Franklin with Raymond Gosling, led James Watson and
-               Francis Crick to the discovery of the double-helical structure
-               of DNA in 1953. The paper ends with a short description of the
-               development of the DNA theory of inheritance after the discovery
-               of the double helix.",
-  journal   = "J. Genet.",
+  title = "The birth and development of the {DNA} theory of inheritance: sixty
+           years since the discovery of the structure of {DNA}",
+  author = "Portin, Petter",
+  abstract = "The development of the DNA theory of inheritance culminated in the
+              publication of the molecular structure of DNA 60 years ago. This
+              paper describes this development, beginning with the discovery of
+              DNA as a chemical substance by Friedrich Miescher in 1869, followed
+              by its basic chemical analysis and demonstration of its
+              participation in the structure of chromosomes. Subsequently it was
+              discovered by Oswald Avery in 1944 that DNA was the genetic
+              material, and then Erwin Chargaff showed that the proportions of
+              the bases included in the structure of DNA followed a certain law.
+              These findings, in association with the biophysical studies of
+              Maurice Wilkins and Rosalind Franklin with Raymond Gosling, led
+              James Watson and Francis Crick to the discovery of the
+              double-helical structure of DNA in 1953. The paper ends with a
+              short description of the development of the DNA theory of
+              inheritance after the discovery of the double helix.",
+  journal = "J. Genet.",
   publisher = "Springer Science and Business Media LLC",
-  volume    =  93,
-  number    =  1,
-  pages     = "293--302",
-  month     =  apr,
-  year      =  2014,
-  language  = "en"
+  volume = 93,
+  number = 1,
+  pages = "293--302",
+  month = apr,
+  year = 2014,
+  language = "en",
 }

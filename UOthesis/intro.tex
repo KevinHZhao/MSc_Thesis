@@ -1,12 +1,43 @@
-\chapter{Introduction}
+\chapter{Introduction}\label{chap:intro}
 
-No equation with a reference number should be used outside a section
-otherwise you get something like in the following equation.  That does
-not look nice.
+With the advent of ``big data'' and other technological breakthroughs in the field of genetics, interest in bioinformatics research has been growing at unprecedented rates, with tens of thousands of research articles being published each year on just PubMed alone.
+With the growing number of researchers in the field, it becomes increasingly more important to have powerful and accessible tools for analyzing genetic data.
 
-\begin{equation}
-\int_0^a f(x) \text{d}\mu
-\end{equation}
+In this thesis, we present \texttt{TriLLIEM}: Triad Log-Linear modelling of Imprinting, Environmental interactions, and Maternal effects, a freely available R package for conducting statistical analysis of genetic data.
+More specifically, \texttt{TriLLIEM} allows us to infer the relative risk genetic effects have on a child having a disease of interest.
+These genetic effects are related to one specific gene state or allele of interest, which we refer to as the \emph{variant allele} (also interchangeably called the \emph{minor allele}, as we generally assume this allele is uncommon).
+
+To outline the contents of this thesis, in \cref{chap:background}, we provide a brief overview of the genetic concepts, such as Mendelian inheritance, required to understand the statistical methods used throughout this thesis.
+We then describe the case-triad design, where we recruit a sample of cases from the population, and then obtain a genetically similar set of controls by recruiting their parents as well.
+We can then collect data by genotyping each of these triads to see how many copies of the variant allele each individual has, as well as if the triad was exposed to a specific environmental factor.
+Finally, we describe the Weinberg group's log-linear model, a statistical model for triad data, in detail \cite{Wein+98}.
+The parameters estimated by the model can be easily interpreted as relative risk for disease based on a given genetic factor.
+The genetic factors we consider are the child's genotype, the mother's genotype, parent-of-origin effects (which requires solving a missing data problem), and interactions between these main genetic effects and an environmental stimulus.
+We also describe the hybrid model for triad data where we are sampling both cases and controls, which allows the model to still be valid in a population with mating asymmetry, where parental genotypes are non-exchangeable \cite{WeinUmba+05}.
+
+With a thorough understanding of the log-linear model, in \cref{chap:methods} we describe how this model has been implemented in various software package.
+The oldest of these packages is LEM \cite{Verm97}, released in 1997, which allowed its users to set up the log-linear model and perform the Expectation-Maximization (EM) algorithm to impute missing data.
+LEM would be sufficient to capture all the features of the log-linear model, but unfortunately it is now deprecated and requires technical knowledge to set up the software.
+Haplin \cite{GjesLie06}, released in 2006, is an R package that fits triad data using the log-linear model, and uses the EM algorithm to impute missing data.
+Haplin is convenient and accessible to most researchers as an R package, but makes very strong assumptions on how the genotypes of mothers and fathers are distributed in a population, which have been violated in real-world populations \cite{Bour+11}.
+Haplin offers many of the features of the log-linear model, albeit with a modified parameterization for imprinting, but is limited to a stratified approach on environmental exposure status to model gene-environment interactions.
+EMIM \cite{HoweCord12}, released in 2012, is another software package that fits triad data to the log-linear model using a multinomial based approach, and uses a direct search algorithm to impute missing data.
+While EMIM incorporates many of the features of the log-linear model and is very fast, as it is a compiled standalone software package, it is also limited by its status as standalone software, as users cannot conveniently use its features directly in R or other statistical software.
+EMIM is also limited in that users must write their own scripts to estimate and perform statistical tests on environmental interactions, via the same stratified approach used in Haplin.
+Finally, for \texttt{TriLLIEM}, we aimed to address the limitations of all these software packages while preserving the advantages of the log-linear model.
+\texttt{TriLLIEM} is an R package that fits triad data using the log-linear model and uses the EM algorithm to impute missing data.
+It offers a robust set of options for users, such as the assumptions they wish to make about the distribution of parental genotypes in the population, and the ability to easily acquire point estimates and perform significance tests on effects in the model.
+We also present our own non-stratified method for environmental interactions, which best exploits the features of the log-linear model to estimate these effects without over-parameterizing the model.
+Both the stratified and non-stratified methods are implemented in \texttt{TriLLIEM}.
+
+In \cref{chap:simstudy}, we conducted two simulation studies, where we used \texttt{TriLLIEM} to create many simulated datasets.
+First, we assessed the accuracy of \texttt{TriLLIEM} by comparing its results to those of EMIM and Haplin under a wide assortment of conditions.
+We found that \texttt{TriLLIEM}, EMIM and Haplin were able to produce essentially identical results (ignoring minor floating point differences) in all applicable conditions.
+We also compared the performance of the stratified and non-stratified methods for environmental interactions in \texttt{TriLLIEM}, and found that the non-stratified method had higher power than the stratified method when testing for environmental interactions.
+In our second simulation study, we examined model performance when sampling from a population composed of two hidden sub-populations, with distinct demographic parameters such as disease prevalence and environmental exposure rates.
+Data was simulated and analyzed in \texttt{TriLLIEM}, and we found that with case and control trios, the model's Type 1 error rate at $\alpha < 0.05$ significance rose to $>10\%$ in nearly all the main effects when attempting to test for gene-environment interactions, although Type 1 error for these interactions remained within the $5\%$ -- $6.5\%$ range.
+
+Last of all, in \cref{chap:conclusion}, we summarize and discuss the results from our simulation studies, providing an outline of future work that could be done to improve the log-linear methods in \texttt{TriLLIEM}.
 
 \vfill
 

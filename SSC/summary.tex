@@ -1,0 +1,37 @@
+\documentclass[11pt]{article}
+\usepackage{mathptmx}
+\usepackage[margin=1in]{geometry}
+\usepackage{natbib}
+\usepackage{setspace}
+\usepackage{graphicx} % Required for inserting images
+
+\begin{document}
+\singlespacing
+\noindent \texttt{TriLLIEM}: Triad Log-Linear modelling of Imprinting, Environmental interactions, and Maternal effects\\
+Kevin Zhao and Kelly Burkett (Department of Mathematics and Statistics, University of Ottawa)\\
+\emph{Keywords}: Log-linear modelling, R package, Family-based genetic association study\\
+Summary:\\
+Motivation:
+Family-based designs, such as case-parents studies where cases and their parents are genotyped (forming a ``trio''), are commonly used in studies on gene-disease associations.
+They are advantageous as we can model factors such as maternal effects, for diseases where the fetal environment affects the child's development such as spina bifida (Hobbs et al., 2014), maternal gene-environment interactions, for diseases where environmental stimuli during pregnancy impact maternal effects such as consumption of phenylalanine in mothers with phenylketonuria (Lee et al., 2005), and imprinting effects, for diseases which could be caused by genes activated based on parent-of-origin such as orofacial clefts (Garland et al., 2020).
+Weinberg et al. (1998) proposed a log-linear model for case-family data allowing one to draw inferences such as the relative risk of a disease given some genetic factor, which was further extended to a hybrid design, where trio data of cases and their biological parents could be compared to parents of controls (Weinberg and Umbach, 2005).
+No official software for their model exists, though there exist software packages based on their methods, such as Howey and Cordell's (2012) EMIM, which was similar but used a multinomial model, and Gjerdevik et al.'s (2019) Haplin R package, which employed the log-linear model.
+These packages have limitations in that EMIM is a standalone software that requires users to integrate into R or any other coding language themselves, and Haplin makes strong assumptions about the distribution of fathers and mothers in the population.
+Both are also limited to a stratified approach for analyzing environmental interactions, and require the user to write their own scripts to interpret the results of an environmental interaction model.
+As global interest in bioinformatics grows, it becomes increasingly clear that accessible software is necessary for researchers to conveniently formulate and analyze these sophisticated models.
+\\
+Methods:
+For our research project, we created \texttt{TriLLIEM}, a freely available R package allowing anyone to simulate and analyze a diverse assortment of trio data with the hybrid model.
+This includes the basic code to fit the model as a generalized linear model (GLM) object in R, which will allow users to construct confidence intervals and perform significance tests on covariates using functions in base R.
+The package is designed to be robust, allowing users to input data with or without controls and account for missing data using the Expectation-Maximization (EM) algorithm.
+We conducted several simulation studies to assess the model's accuracy and power under a wide variety of circumstances, such as comparisons between stratified and non-stratified models.
+\texttt{TriLLIEM} was also used to evaluate the log-linear model's performance in a population composed of hidden sub-populations with distinct demographic parameters when attempting to model environmental interactions with maternal effects and maternal and paternal imprinting.\\
+Results:
+From our simulation studies, we found that \texttt{TriLLIEM} was able to provide parameter estimates and significance tests that were identical to those of EMIM and Haplin under all circumstances.
+Furthermore, we compared the stratified approach to environmental interactions that EMIM and Haplin uses to a non-stratified approach only currently possible in \texttt{TriLLIEM}, and found that the non-stratified model leads to better power and lower Type 1 error rates than the stratified model when testing a specific gene-environment interaction.
+This was true in all of our tested conditions, and is especially apparent when analyzing parent-of-origin by environmental interactions when the model includes child effects, where the power for the non-stratified model was approximately double that of the stratified model in all conditions.
+From our simulations on hidden population substructures while controls are present, we found that the log-linear model does indeed suffer when testing for environmental interactions, with most type 1 error rates for child, maternal, and imprinting main effects rising to above $10\%$ at the $\alpha < 0.05$ significance level.\\
+Conclusions:
+We expect that \texttt{TriLLIEM} will be pivotal to many researchers in the field of genetic epidemiology, as it provides a user-friendly method of conducting complicated statistical tests on trio data.
+The inferences drawn using our package will help researchers better understand how specific diseases are caused by genetic factors, which will inspire new discoveries for prevention methods.
+\end{document}

@@ -3,7 +3,7 @@
 % of your PDF document.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{filecontents*}{\jobname.xmpdata}
-  \Title{the title of the thesis}
+  \Title{TriLLIEM: Triad Log-Linear modelling of Imprinting, Environmental interactions, and Maternal effects}
   \Author{Kevin Zhao}
   \Org{University of Ottawa}
   \Language{en-CA}
@@ -42,7 +42,7 @@
 %    \index{main_entry[!sub_entry][!subsub_entry]}
 %    The text between [...] is optional.
 % An INDEX IS NOT REQUIRED
-% 
+%
 % With the options NoLofF and NoLofT, you can remove the list of
 % figures and the list of tables.  You should use these options if
 % there is no table or figure in your thesis.  If there are some, the
@@ -125,7 +125,7 @@
 % Note that the numbering of equations, ... in a chapter with no
 % chapter number will be based on the previous chapter and section
 % numbers.  This is certainly not what we should have.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % For those you will write a thesis that include research papers.
@@ -163,6 +163,11 @@
 \usepackage{shadow}
 \usepackage[all]{xy}
 \usepackage{url}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{longtable}
+\LTcapwidth=\textwidth
+\usepackage[doublespacing]{setspace}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Table of contents, list of figures, list of tables, and list of
@@ -178,7 +183,7 @@
 %\addSpaceRightMargin{1em}      % add space between the title, description,
                                 % ... and the right margin
 %\addSpacePageNumber{1em}       % add space for the page number in the
-                                % table of contents 
+                                % table of contents
 %\addSpaceFigure{1em}           % add space for the figure number
 %\addSpaceTable{1em}            % add space for the table number
 %\addSpaceLabelSymbols{1em}     % add space for the label of the symbol
@@ -216,13 +221,13 @@
 % Variables that must be redefined.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setUOname{Kevin Zhao}                              % Name of the candidate
-\setUOcpryear{2024}                                    % Year of graduation
-\setUOtitle{TITLE OF THESIS}  % Title of the thesis
+\setUOcpryear{2025}                                    % Year of graduation
+\setUOtitle{TriLLIEM: Triad Log-Linear modelling of Imprinting, Environmental interactions, and Maternal effects}  % Title of the thesis
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Some of the variables that you may need to redefine.  Comment out
 % the variables that you need to define.  These variables have a
-% default value that is appropriate in most cases. 
+% default value that is appropriate in most cases.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\setUO{ }                    % Name of the university
 %\setUOprogrfac{ }            % Name of the faculty giving the program
@@ -253,14 +258,22 @@
 \newcommand{\MM}{{\rm M}}
 \newcommand{\FF}{{\rm F}}
 \newcommand{\CC}{{\rm C}}
+\newcommand{\EE}{{\rm E}}
+\newcommand{\DD}{{\rm D}}
+\newcommand{\MAF}{{\rm MAF}}
+\newcommand{\Rp}{{\rm R}}
+\newcommand{\Sp}{{\rm S}}
+\newcommand{\Vp}{{\rm V}}
+\newcommand{\Op}{{\rm O}}
 
 \DeclareMathOperator{\Per}{Per}
 \DeclareMathOperator{\IM}{Im}
 \DeclareMathOperator{\KER}{Ker}
 \DeclareMathOperator{\Fix}{Fix}
+\DeclareMathOperator{\E}{E}
 
 \begin{document}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % We suggest to include your chapters, ... as illustrated below      %
 % and leave this file with as Little of the contents of the thesis   %
 % as it is possible.                                                 %
@@ -304,7 +317,7 @@
 % Note that for this chapter, the pages will be numbered in roman
 % numbers as the previous pages.  The size of this chapter should be
 % very small.  If you have more then two pages, equations, and so on,
-% you should instead have a normal chapter later. 
+% you should instead have a normal chapter later.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -318,10 +331,19 @@
 \include{background}
 \clearpage
 
+\include{methods}
+\clearpage
+
+\include{analysis}
+\clearpage
+
+\include{conclusion}
+\clearpage
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % If the following line of code is uncomment, then
 % the following chapters will be numbered A, B, ...
-% 
+%
 % If there are no section in your appendix, your theorems, ..., and
 % equations will be numbered Theorem A.0.1, ...  To eliminate the
 % extra 0 in the numbering, you should modify the numbering as
@@ -391,8 +413,8 @@
 
 \end{document}
 
-%%% Local Variables: 
+%%% Local Variables:
 %%% mode: latex
 %%% TeX-master: t
-%%% End: 
+%%% End:
 

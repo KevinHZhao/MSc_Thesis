@@ -188,10 +188,10 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
         message(paste0("\nIteration ", counter, " of EM algorithm.
                         \nIm hat = ", Imhat,
                        "\nIf hat = ", Ifhat,
-                       if (includeE) "\nE:Im hat = ", ImEhat,
-                       if (includeE) "\nE:If hat = ", IfEhat,
+                       if (includeE) paste0("\nE:Im hat = ", ImEhat),
+                       if (includeE) paste0("\nE:If hat = ", IfEhat),
                        "\nProportion for maternal inheritance cell = ", Imhat/(Ifhat + Imhat),
-                       if (includeE) "\nProportion for maternal inheritance cell = ", ImEhat*Imhat/(ImEhat*Imhat + IfEhat*Ifhat),
+                       if (includeE) paste0("\nProportion for maternal inheritance cell = ", ImEhat*Imhat/(ImEhat*Imhat + IfEhat*Ifhat)),
                        "\nDifference in deviance: ", abs(deviance(res) - prev_dev),
                        "\nMax difference in coefficients: ", max(abs(coef(res) - prev_coeffs))))
       }

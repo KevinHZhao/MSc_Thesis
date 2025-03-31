@@ -1,16 +1,4 @@
-The goal of this thesis is to illustrate how complex a simple
-{\bfseries discrete dynamical system} of the form
-\[
-x_{i+1} = f(x_i)  \quad,
-\]
-where $f:\RR\rightarrow \RR$ is a continuous function, can be.  The
-complexity is even greater if $f:\RR^k \rightarrow \RR^k$ with $k>1$.
-Discrete dynamical systems are parts of many numerical algorithms.
-For instance, the Newton method is a discrete dynamical system, some methods
-to solve ordinary differential equations and partial differential
-equations are using discrete dynamical systems, etc.  It is
-therefore important to understand the behaviour of discrete
-dynamical systems. %\href{http://aix1.uottawa.ca/~bdionne}{TEST}
+The case-parents design, where an affected child and their parents are genotyped, allows for estimation of disease risk due to either the child or mother’s genes through log-linear modelling.  It is robust to the confounding effects of population subdivision, but cannot account for non-exchangeability of parental genotypes.  Factors such as gene-environment interactions and imprinting, where risk depends on which parent contributed a genetic factor, can also be estimated.  Existing analytical software are either deprecated (LEM) or unable to model all factors simultaneously (Haplin, EMIM).  We introduce \texttt{TriLLIEM}, an R package implementing the log-linear approach to address these limitations. The software includes options for gene by environment, imprinting by environment, and non-exchangeable parental genotypes if parents of controls are also available.  We use these features in a simulation study to assess the accuracy of \texttt{TriLLIEM} and to analyze how population stratification affects imprinting by environment interactions.
 
 %%% Local Variables:
 %%% mode: latex

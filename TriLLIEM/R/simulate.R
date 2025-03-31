@@ -15,18 +15,19 @@
 #' should be included in the simulation.
 #' @param Einteraction A string indicating what variable environmental effects
 #' interact with.  Can be "`Im`", "`If`", "`C`", or "`M`".
-#' @param prE Probability of a trio to have the environmental effects.
+#' @param propE Proportion of case trios in the environmental exposure group by
+#' population, assumed equal to case population proportion.
 #' @param includeControl A logical value indicating whether controls should
 #' be included in the simulations.
-#' @param prControl Probability of a trio to be a control trio.
-#' @param prE.control Probablity of a trio to be a control trio with the
-#' environmental effect.
+#' @param nControl Number of control trios, must be less than ntrios.
+#' @param propE.control Proportion of control trios in the environmental exposure
+#' group by population, assumed equal to case population proportion.
 #' @param includePopStrat A logical value indicating whether to include
 #' population stratification in the simulation.
 #' @param numPop
 #' @param Fst
-#' @param prCase.byPop
-#' @param prControl.byPop
+#' @param prev.byPop Prevalence of cases in each sub population.
+#' @param prop.byPop Proportion of each sub population, must sum to 1.
 #'
 #' @return A data frame of the same format as [example_dat4R]
 #' @export
@@ -37,10 +38,10 @@
 simulateData <- function(ntrios = 1000, maf = 0.3,
                          R = c(1, 1, 1), S = c(1, 1, 1), V = c(1, 1, 1),
                          mtCoef = c(1, 1, 1), Im = 1, If = 1,
-                         includeE = FALSE, Einteraction = "M", prE = 0,
-                         includeControl = FALSE, prControl = 0, prE.control = prE,
+                         includeE = FALSE, Einteraction = "M", propE = 0,
+                         includeControl = FALSE, nControl = 0, propE.control = propE,
                          includePopStrat = FALSE, numPop = 1, Fst = 0.005,
-                         prCase.byPop = NULL, prControl.byPop = NULL) {
+                         prev.byPop = NULL, prop.byPop = NULL) {
   # prE.control should be a random binomial parameter, NOT a ratio
   # Start off small with tests
   if(Im != 1 && If != 1 && !identical(R, c(1,1,1))){
@@ -50,49 +51,63 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
 
   if (includePopStrat == TRUE) {
     # Ensure that the proportion of the cases from each population is provided.
-    if (round(sum(prCase.byPop), 8) != 1) {
-      stop("The sum of prCase.byPop must equal 1. Each element is the proportion
-              of the case trios from each subpopulation.\n")
+    if (is.null(prev.byPop) && is.null(prop.byPop)){
+      stop("Must include prev.byPop and prop.byPop if simulating population
+           stratification.\n")
     }
+    else {
+      if (length(prev.byPop) != numPop) {
+        stop("The length of prev.byPop must be numPop. Each element is the prevalence
+                of disease from each subpopulation.\n")
+      }
 
-    if ((includeControl == TRUE) & (round(sum(prControl.byPop), 8) != 1)) {
-      stop("The sum of prControl.byPop must equal 1. Each element is the proportion
-              of the case trios from each subpopulation.\n")
+      if (round(sum(prop.byPop), 8) != 1) {
+        stop("The sum of prop.byPop must equal 1. Each element is the final proportion
+                of individuals from each subpopulation.\n")
+      }
     }
   } else {
-    prCase.byPop <- 1
-    prControl.byPop <- 1
+    prop.byPop <- 1
+    prev.byPop <- 0.5 # Prevalence doesn't matter in the non popstrat scenario
   }
 
   # Ensure we know proportion of families that are control trios
   if (includeControl == TRUE) {
-    if ((prControl <= 0) || (prControl >= 1)) {
-      stop("Proportion of trios that are control trios must be between 0 and 1\n")
+    if ((nControl <= 0) || (nControl >= ntrios)) {
+      stop("nControl must be between 0 and ntrios exclusive.\n")
     }
   } else {
-    prControl <- 0 # In case this was not 0 by accident
-  }
-
-
-  # Check proportion of environmental variable
-  if (includeE == TRUE) {
-    if ((sum(prE <= 0) > 0) || (sum(prE >= 1) > 0)) {
-      stop("Probabilities for environmental variables for cases must be between 0 and 1\n")
-    }
-    if ((sum(prE.control <= 0) > 0) || (sum(prE.control >= 1) > 0)) {
-      stop("Probabilities for environmental variables for controls must be between 0 and 1\n")
-    }
-  } else {
-    prE <- 0 # In case these were not 0 by accident
-    prE.control <- prE
+    nControl <- 0 # In case this was not 0 by accident
   }
 
 
   # If only a single frequency of environmental variable is given,
   # make all populations have the same frequency
-  if ((includePopStrat == TRUE) && (length(prE) == 1)) {
-    prE <- rep(prE, numPop)
-    prE.control <- rep(prE.control, numPop)
+  if (includePopStrat == TRUE) {
+    if (length(propE) == 1){
+      propE <- rep(propE, numPop)
+    }
+    if (length(propE.control) == 1){
+      propE.control <- rep(propE.control, numPop)
+    }
+    if (length(propE) != numPop || length(propE.control) != numPop){
+      stop(paste0(length(propE), " elements in propE and ", length(propE.control),
+      " elements propE.control, please enter either 1 or ", numPop, " elements for both.\n"))
+    }
+  }
+
+
+  # Check proportion of environmental variable
+  if (includeE == TRUE) {
+    if (any(propE <= 0) || any(propE > 1)) {
+      stop("Environmental exposure proportions for cases must be between 0 and 1.\n")
+    }
+    if (any(propE.control <= 0) || any(propE.control > 1)) {
+      stop("Environmental exposure proportions for controls must be between 0 and 1.\n")
+    }
+  } else {
+    propE <- 0 # In case these were not 0 by accident
+    propE.control <- propE
   }
 
 
@@ -116,15 +131,56 @@ simulateData <- function(ntrios = 1000, maf = 0.3,
   controlE1.all <- NULL
   full.tables <- NULL
 
+  prControl.E.byPop = (1 - prev.byPop) * propE.control * prop.byPop / sum((1 - prev.byPop) * prop.byPop)
+  prCase.E.byPop = prev.byPop * propE * prop.byPop / sum(prev.byPop * prop.byPop)
+  prControl.notE.byPop = (1 - prev.byPop) * (1 - propE.control) * prop.byPop / sum((1 - prev.byPop) * prop.byPop)
+  prCase.notE.byPop = prev.byPop * (1 - propE) * prop.byPop / sum(prev.byPop * prop.byPop)
+  ## THESE EQUATIONS ARE VALID IFF WE MAKE THE ASSUMPTION THAT D AND E ARE CONDITIONALLY INDEPENDENT (V = 1)
+
+  prCase.byPop = c(prCase.E.byPop, prCase.notE.byPop)
+  prControl.byPop = c(prControl.E.byPop, prControl.notE.byPop)
+  ## These will be 2*numpop vectors, first numpop is for E = 1, last numpop is for E = 0
+
+  sampled_pop_E_counts <-
+    rmultinom(
+      n = 1,
+      size = ntrios - nControl,
+      prob = c(
+        prCase.byPop
+      )
+    ) %>%
+    cbind(
+      rmultinom(
+        n = 1,
+        size = nControl,
+        prob = c(
+          prControl.byPop
+        )
+      )
+    )
+  ## Gives us a two column, 2 * numPop row matrix where col1 and col2 are the counts
+  ## for number of cases and controls, respectively,
+  ## where first numpop rows represent the subpopulations with E = 1, and last
+  ## numpop rows represent subpops with E = 0.
+
+  ## REMEMBER THAT THIS ONLY WORKS IF WE ASSUME D AND E ARE INDEPENDENT
+
   # Create all the datasets separately in each population
   for (i in 1:numPop) {
-    ntrios.pop.case <- round(ntrios * (1 - prControl) * prCase.byPop[i])
-    ntrios.pop.control <- round(ntrios * prControl * prControl.byPop[i])
+    ## NEW CODE
+    ntrios.pop.E.case <- sampled_pop_E_counts[i, 1]
+    ntrios.pop.notE.case <- sampled_pop_E_counts[i + numPop, 1]
+    ntrios.pop.E.control <- sampled_pop_E_counts[i, 2]
+    ntrios.pop.notE.control <- sampled_pop_E_counts[i + numPop, 2]
 
-    ntrios.pop.notE.case <- round(ntrios.pop.case * (1 - prE[i]))
-    ntrios.pop.E.case <- round(ntrios.pop.case * prE[i])
-    ntrios.pop.notE.control <- round(ntrios.pop.control * (1 - prE.control[i]))
-    ntrios.pop.E.control <- round(ntrios.pop.control * prE.control[i])
+    ## OLD CODE
+    # ntrios.pop.case <- round(ntrios * (1 - prControl) * prCase.byPop[i])
+    # ntrios.pop.control <- round(ntrios * prControl * prControl.byPop[i])
+    #
+    # ntrios.pop.notE.case <- round(ntrios.pop.case * (1 - prE[i]))
+    # ntrios.pop.E.case <- round(ntrios.pop.case * prE[i])
+    # ntrios.pop.notE.control <- round(ntrios.pop.control * (1 - prE.control[i]))
+    # ntrios.pop.E.control <- round(ntrios.pop.control * prE.control[i])
 
 
     # Simulate "case" trios,
