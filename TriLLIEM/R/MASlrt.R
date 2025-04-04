@@ -3,7 +3,6 @@
 #' `MaSlrt()` runs a Likelihood Ratio Test for a trios model with Mating Asymmetry.
 #'
 #' @param dat A dataframe formatted with the same columns as [example_dat4R]
-#' Note that PED files can be converted into this format using the [planned()] function.
 #'
 #' @return A p-value for the Likelihood Ratio Test.
 #' @export

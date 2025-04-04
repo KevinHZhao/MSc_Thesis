@@ -17,10 +17,10 @@ add_PoO_data <- function(dat, Mprop, includeE) {
 
     PoO_dat <- dat %>%
       dplyr::left_join(PoO_df %>% dplyr::select(type, matOrg, patOrg), by = "type") %>%
-      dplyr::mutate(count = replace(count, is.na(patOrg) & E == 0, M.count.E0),
-                    count = replace(count, is.na(patOrg) & E == 1, M.count.E1),
-                    matOrg = replace(matOrg, is.na(matOrg), 1),
-                    patOrg = replace(patOrg, is.na(patOrg), 0)) %>%
+      dplyr::mutate(count = base::replace(count, is.na(patOrg) & E == 0, M.count.E0),
+                    count = base::replace(count, is.na(patOrg) & E == 1, M.count.E1),
+                    matOrg = base::replace(matOrg, is.na(matOrg), 1),
+                    patOrg = base::replace(patOrg, is.na(patOrg), 0)) %>%
       dplyr::add_row(dat %>%
                        dplyr::filter(dplyr::row_number() %in% heteroInds.E0) %>%
                        dplyr::mutate(count = dat$count[heteroInds.E0] - M.count.E0,
@@ -31,24 +31,24 @@ add_PoO_data <- function(dat, Mprop, includeE) {
                        dplyr::mutate(count = dat$count[heteroInds.E1] - M.count.E1,
                                      matOrg = 0,
                                      patOrg = 1)) %>%
-      dplyr::arrange(desc(D), desc(E), type, desc(matOrg)) %>%
-      dplyr::mutate(typeOrig = rep(1:16, dplyr::n()/16),
+      dplyr::arrange(dplyr::desc(D), dplyr::desc(E), type, dplyr::desc(matOrg)) %>%
+      dplyr::mutate(typeOrig = base::rep(1:16, dplyr::n()/16),
                     Im = matOrg * D,
                     If = patOrg * D) %>%
       dplyr::relocate(typeOrig)
   } else {
     PoO_dat <- dat %>%
       dplyr::left_join(PoO_df %>% dplyr::select(type, matOrg, patOrg), by = "type") %>%
-      dplyr::mutate(count = replace(count, is.na(patOrg), M.count.E0),
-                    matOrg = replace(matOrg, is.na(matOrg), 1),
-                    patOrg = replace(patOrg, is.na(patOrg), 0)) %>%
+      dplyr::mutate(count = base::replace(count, is.na(patOrg), M.count.E0),
+                    matOrg = base::replace(matOrg, is.na(matOrg), 1),
+                    patOrg = base::replace(patOrg, is.na(patOrg), 0)) %>%
       dplyr::add_row(dat %>%
                        dplyr::filter(dplyr::row_number() %in% heteroInds.E0) %>%
                        dplyr::mutate(count = dat$count[heteroInds.E0] - M.count.E0,
                                      matOrg = 0,
                                      patOrg = 1)) %>%
-      dplyr::arrange(desc(D), desc(E), type, desc(matOrg)) %>%
-      dplyr::mutate(typeOrig = rep(1:16, dplyr::n()/16),
+      dplyr::arrange(dplyr::desc(D), dplyr::desc(E), type, dplyr::desc(matOrg)) %>%
+      dplyr::mutate(typeOrig = base::rep(1:16, dplyr::n()/16),
                     Im = matOrg * D,
                     If = patOrg * D) %>%
       dplyr::relocate(typeOrig)

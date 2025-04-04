@@ -1,6 +1,5 @@
 ## Get ratio of cases/controls by population. Used only under
 ## population stratification
-## Can I remove this??
 getRatio <- function(alpha, maf, omega, R = c(1, 1, 1), S = c(1, 1, 1), V = c(1, 1, 1),
                      mtcoef = c(1, 1, 1)) {
   numPop <- length(alpha)

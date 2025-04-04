@@ -11,13 +11,15 @@
 #'  \item{"`If`"}{Paternal imprinting effects.}
 #' }
 #' @param includeE A logical value indicating whether to include environment
-#' interaction effects.
+#' interaction effects.  If set to "`FALSE`", any exposed counts in `dat` are
+#' combined with the respective unexposed count.
 #' @param Einteraction A string indicating what variable environmental effects
 #' interact with.  Can be "`Im`", "`If`", "`C`", or "`M`".
 #' @param Estrat A logical value indicating whether to use a stratified approach
 #' for environmental interactions equivalent to that of EMIM and/or Haplin.
 #' @param includeD A logical value indicating whether to use the hybrid
-#' model with controls.
+#' model with controls.  If set to "`FALSE`", any control trios will be removed
+#' from the data set prior to analysis.
 #' @param dat A data frame with triad data, with the formatting of
 #' [example_dat4R].
 #' @param PStest A logical value indicating whether to perform a population
@@ -37,7 +39,7 @@
 #'
 #' @examples
 #' res <- TriLLIEM(mtmodel = "HWE", effects = c("C", "M", "Im"), dat = example_dat4R)
-#' summary(res)
+#' res %>% summary() %>% coef()
 TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
                      includeE = FALSE, Einteraction = "M", Estrat = FALSE,
                      includeD = FALSE, includeIm = FALSE,
@@ -63,24 +65,6 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
     stop("Cannot include maternal and paternal imprinting with child effects.")
   }
 
-  # Portion of model equation depends on mating type model
-  dat <- dat %>% dplyr::mutate(offset = dplyr::case_when(type == 9 ~ 2, .default = 1))
-  if (mtmodel == "HWE") {
-    dat$HWgeno <- dat$M + dat$F
-    mteffect <- "HWgeno"
-    modelformula <- "count~" # Must include intercept for HW model because of log(1-p) term
-  } else if (mtmodel == "MS") {
-    mteffect <- "as.factor(mt_MS)"
-    modelformula <- "count~-1+" # I think I can remove the intercept for MS model
-  } else if (mtmodel == "MaS") {
-    if (length(unique(dat$D)) == 1) {
-      stop("Only 1 phenotype in the phenotype column. Mating asymmetry models require \n
-            both cases and controls\n")
-    }
-    mteffect <- "as.factor(mt_MaS)"
-    modelformula <- "count~-1+" # I think I can remove intercept
-  }
-
   # Environmental effects
   Eeffects <- c()
   if(includeE){
@@ -100,10 +84,10 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
         paste0(":E", sep = "") %>%
         {if(mtmodel == "HWE") append(., "E") else .}
     }
+  } else {
+    # If includeE is FALSE, treat all counts as unexposed
+    dat <- dat %>% dplyr::mutate(E = 0)
   }
-
-  # Portion of model equation and offset depends on mating type model
-  origDat <- add_PoO_data(dat, Mprop = c(Minit, if (includeE) Minit), includeE = includeE)
 
   # Hybrid model
   Deffects <- c()
@@ -116,7 +100,31 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
       dplyr::mutate(C = C * D,
                     M = M * D)
     Deffects <- c("D", if (includeE) "E:D")
+  } else if (sum(dat$D == 0) != 0) {
+    base::warning("Control trios detected but includeD set to FALSE.  Ignoring all control trios...\n")
+    dat <- dat %>% dplyr::filter(D != 0)
   }
+
+  # Portion of model equation depends on mating type model
+  dat <- dat %>% dplyr::mutate(offset = dplyr::case_when(type == 9 ~ 2, .default = 1))
+  if (mtmodel == "HWE") {
+    dat$HWgeno <- dat$M + dat$F
+    mteffect <- "HWgeno"
+    modelformula <- "count~" # Must include intercept for HW model because of log(1-p) term
+  } else if (mtmodel == "MS") {
+    mteffect <- "as.factor(mt_MS)"
+    modelformula <- "count~-1+" # I think I can remove the intercept for MS model
+  } else if (mtmodel == "MaS") {
+    if (length(unique(dat$D)) == 1) {
+      stop("Only 1 phenotype in the phenotype column. Mating asymmetry models require
+            both cases and controls, and setting includeD to TRUE\n")
+    }
+    mteffect <- "as.factor(mt_MaS)"
+    modelformula <- "count~-1+" # I think I can remove intercept
+  }
+
+  # Portion of model equation and offset depends on mating type model
+  origDat <- add_PoO_data(dat, Mprop = c(Minit, if (includeE) Minit), includeE = includeE)
 
   modeleffects <- c(mteffect, Eeffects, Deffects, effects)
 
@@ -140,7 +148,7 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
     pvalVecPS <- vector(length = length(effects))
     names(pvalVecPS) <- effects
 
-    if (sum(origDat$D == 0) == 0) {
+    if (!includeD) {
       stop("Can only test for population stratification if there are control trios\n")
     } else {
       PSeffect <- paste0(mteffect, ":D")
