@@ -9,16 +9,18 @@ We then explain methods for gathering data to study associations between genes a
 
 As discovered by Oswald Avery in 1944, genetic information is transmitted from parent to offspring via deoxyribonucleic acid (DNA).
 This DNA is composed of billions of nucleotides, as was shown by Watson and Crick in 1953, which make up the entire genetic code/genome in all organisms \cite{Port14}.
-The mother and father each contribute copies of half of their genome to the offspring's genome, with genetic information being ``paired,'' as information on the father's contribution has a counterpart on the mother's contribution.
-
-Variations in nucleotides between individuals are used to explain differences in biology; loci in the genome coding for particular traits, such as blood type or synthesis of a specific protein in a cell, are referred to as genes, with one's combined information about a particular gene being called their genotype.
-We refer to different variants of a gene as an allele, which for the sake of this thesis, we represent by counting how many of the variant allele an individual has ($0$, $1$, or $2$).
+The DNA is typically stored as $23$ pairs of homologous chromosomes in humans, with each individual inheriting one set of $23$ chromosomes from each parent.
+Variations in the sequence of nucleotides at specific regions (loci) of the genome are used to explain differences in biology, with researchers focussing on loci coding for particular traits, such as blood type or synthesis of a specific protein in a cell.
+Loci contributing to specific traits, or their \emph{phenotypes}, are referred to as genes.
+Since each individual typically receives one set of genetic information from each parent, genes are paired, with one copy originating maternally and other paternally.
+We refer to different variants of a gene as an allele, and in the context of the research in this thesis, we assume that we are already aware of a single particular gene of interest, and suspect that a particular variant/minor allele for this gene influences one's risk of disease relative to if they had any other allele.
+To summarize an individual's genetic information at this gene of interest, or their \emph{genotype}, we count the number of variant alleles the individual has ($0$, $1$, or $2$).
 
 \subsection{Inheritance}
 
-As mentioned before, one's mother and father both contribute to half of the genome, which forms the basis of inheritance.
-We may further quantify this with the assumption of Mendelian inheritance, based on the research of Gregor Mendel in 1865.
-To summarize Mendelian inheritance, since each parent has two copies of each gene but only contributes one to each offspring, we assume both copies are equally likely and independently transmitted to the offspring \cite{Stra99}.
+As mentioned before, one's mother and father both contribute one copy of their genes to a child, which forms the basis of inheritance.
+We can quantify this with the assumption of Mendelian inheritance, based on the research of Gregor Mendel in 1865.
+To summarize Mendelian inheritance, since each parent has two copies of their genes (received from the respective grandparents of the child) but only one is inherited by the child, we assume both copies are equally likely to be transmitted to the offspring, and that the genes transmitted maternally and paternally are independent \cite{Stra99}.
 With this information, we may construct a probability distribution for a gene of an offspring based solely on the alleles of said gene in both parents.
 
 Letting $\MM$, $\FF$, and $\CC$ represent the number of copies of an allele of interest a mother, father, and child have, respectively, we represent the marginal distribution of $\CC$ given $(\MM, \FF)$ in \cref{tab:Mendel}.
@@ -46,14 +48,35 @@ An intuitive method of gathering evidence of gene-disease associations would be 
 However, case-control studies are susceptible to confounding from maternal effects and hidden population substructures (population stratification).
 Maternal effects, where the mother's genotype impacts the child's disease risk, has been observed empirically in congenital diseases associated with the fetal environment.
 For example, the genetic disorder phenylketonuria (PKU) in a pregnant mother can lead to heart disease in the child, hence there is a maternal effect where the variant of the allele coding for PKU in the mother increases the child's risk of disease \cite{Lee+05}.
-While we may take maternal effects into account by genotyping mothers of cases and controls, accounting for the issue of population stratification, where the population is composed of genetically distinct sub-populations, requires more sophisticated methods, as we would need a method of ensuring that cases and controls are genetically similar.
-These considerations motivate the use of family-based or case-triad study designs, where we genotype cases and their two biological parents, allowing their parents to act as genetically similar controls.
-With this study design, the Weinberg group \cite{Wein+98} developed a log-linear approach to analyzing this type of data, which has been refined to allow researchers to test for child and maternal effects, alongside various other genetically plausible factors.
+Another example would be spina bifida, a congenital disease associated with folate deficiency during pregnancy, where it was found that alongside the genes of the fetus, the mother's genes involved in the metabolic pathway for synthesizing folate affect risk of spina bifida in the child \cite{Hobbs+14}.
+Population stratification, on the other hand, occurs when when the population is composed of genetically distinct sub-populations, such as when there are groups descending from various ancestries or with various lifestyles based on culture \cite{Hell+17}.
+This may lead to spurious associations \cite{CardPalm03}, for example, if one sub-population has a higher disease prevalence than another while simultaneously having a larger prevalence for the variant allele, whereas a second sub-population has lower prevalences, the case group would oversample individuals from the former sub-population, while the control group would oversample individuals from the latter sub-population, leading to an incorrect conclusion that the larger prevalence of the variant allele in the case group causes the disease.
+While we may take maternal effects into account by genotyping mothers of cases and controls, accounting for population stratification requires more sophisticated methods, as we would need a method of ensuring that cases and controls are genetically similar.
+These considerations motivate the use of family-based/case-triad study designs, where we genotype cases and their two biological parents, allowing their parents to act as genetically similar controls.
+With this study design, the Weinberg group developed a log-linear approach \cite{Wilc+98, Wein+98, WeinUmba05} to analyzing this type of data, which has been refined to allow researchers to test for child and maternal effects, alongside various other genetically plausible factors.
 
 \section{The log-linear model} \label{sec:loglin}
 
-In the log-linear model, we attempt to model the counts of $(\MM, \FF, \CC)$ from a case triad study.
-To do this, we first must define a baseline mating type model which captures our assumptions about how the variant allele is distributed in the population, independent of disease status.
+In the log-linear model, we model the multinomial probabilities of a triad in the population having genotypes $(\MM, \FF, \CC)$ given the child is a case using the data from a case triad study.
+We use the approximation of the multinomial distribution as a set of Poisson distributions, where, given $k$ independent poisson variables with means $\lambda_1, \ldots, \lambda_k$, the conditional distribution of the counts $Y_1, \ldots, Y_k$ given $\sum_{i=1}^k Y_i = Y_. = n$ will be
+\begin{align*}
+    \Pr(Y_1 = n_1, \ldots, Y_k = n_k \mid Y_. = n) &= \frac{\Pr(Y_1 = n_1, \ldots, Y_k = n_k)}{\Pr(Y_. = n)}, \\
+                                                   &= \frac{\prod_{i = 1}^n e^{-\lambda_i}\lambda_i^{n_i}/n_i!}{e^{-\sum_{i=1}^k \lambda_i}\left(\sum_{i=1}^k \lambda_i\right)^n/n!}, \\
+                                                   &= \frac{n!}{\prod_{i=1}^k n_i!} \prod_{i=1}^k \left(\frac{\lambda_i}{\sum_{j=1}^k \lambda_j}\right)^{n_i},
+\end{align*}
+which is a multinomial distribution of sample size $n$ and $k$ categories, with respective probabilities $\pi_i = \lambda_i / \sum_{j=1}^k \lambda_j$ for $i \in \{1, \ldots, k\}$ \cite{Huds19}.
+We wish to model $\pi_{\MM, \FF, \CC} = \Pr(\MM, \FF, \CC \mid \DD = 1)$, where $\DD$ is a binary variable representing the child's disease status.
+We can write
+\begin{equation}\label{eq:bayes}
+    \Pr(\MM, \FF, \CC \mid \DD = 1) = \frac{\Pr(\DD = 1 \mid \MM, \FF, \CC) \Pr(\CC \mid \MM, \FF) \Pr(\MM, \FF)}{\Pr(\DD = 1)},
+\end{equation}
+hence as a log-linear model, we can express this as
+\begin{equation}\label{eq:loglin}
+    \ln(\pi_{\MM, \FF, \CC}) = \ln\left(\Pr(\DD = 1 \mid \MM, \FF, \CC)\right) + \ln\left(\Pr(\CC \mid \MM, \FF)\right) + \ln\left(\Pr(\MM, \FF)\right) - \ln(\alpha)
+\end{equation}
+The terms in this model are readily interpretable: $\Pr(\DD = 1 \mid \MM, \FF, \CC)$ is the probability of disease based on the trio's genotypes (whose expression is how we associate the variant allele with disease), $\Pr(\CC \mid \MM, \FF)$ is the Mendelian inheritance probabilities (see \cref{tab:Mendel}), and $\Pr(\MM, \FF)$ is the mating type probability for the mother and father.
+The final term, $\alpha = \Pr(\DD = 1)$, is the prevalence of disease, which cannot be estimated from case-triad data, hence this term is uninformative.
+To express the mating type probabilities, we must provide a mating type model which captures our assumptions about how the variant allele is distributed in the population, independent of disease status.
 This lets us assign a baseline probability for each $(\MM, \FF)$ pairing of occuring in the population.
 We outline three population mating type models, from weakest to strongest in terms of assumptions: Hardy-Weinberg equilibrium (HWE), Mating Symmetry (MS), and Mating Assymetry (MaS).
 
@@ -68,147 +91,187 @@ We can further state that we expect the counts of the $(\MM, \FF, \CC) = (1, 1, 
 
 In the MS model, we relax our assumptions from the HWE model to only require that $\Pr(\MM = a, \FF = b) = \Pr(\MM = b, \FF = a)$ for all $a, b \in \{0, 1, 2\}$.
 Hence, knowing the proportion of $(\MM, \FF) = (a, b)$ only tells us the proportion of $(\MM, \FF) = (b, a)$ as well, and not of any other mating combinations.
-There are $6$ unique combinations of $(\MM, \FF)$, hence we introduce $\mu_i$ for $i = \{0, \ldots, 5\}$ as mating type parameters to capture the proportions of $(\MM, \FF, \CC)$ based on $(\MM, \FF)$, with the restriction that all proportions must sum to $1$.
+There are $6$ unique combinations of $(\MM, \FF)$, hence we introduce $\mu_i$ for $i \in \{0, \ldots, 5\}$ as mating type parameters to represent $\Pr(\MM, \FF)$.
 
-Lastly, in the MaS model, we allow $\Pr(\MM = a, \FF = b) \neq \Pr(\MM = b, \FF = a)$, hence we keep the $6$ $\mu_i$ mating type parameters, and introduce $0 \leq C_j\leq 2$ for $j \in \{1, 2, 4\}$ as multiplicative mating asymmetry parameters, which modulate the extent to which parent pairings between individuals with $2$ \& $1$, $2$ \& $0$, and $1$ \& $0$ alleles are biased towards $\MM > \FF$, respectively (based on the parameterization given in \cite{Bour+11}).
-Evidence of mating asymmetry in human populations has been previously documented \cite{Bour+11}.
+Lastly, in the MaS model, we allow $\Pr(\MM = a, \FF = b) \neq \Pr(\MM = b, \FF = a)$, hence we introduce $\nu_j$ for $j \in \{0, \ldots, 8\}$ as $9$ mating asymmetry parameters for the $9$ distinct $(\MM, \FF)$ tuples.
+Bourgey et al.\ (2011) give their own parameterization, which keeps the $6$ $\mu_i$ mating type parameters, but also introduce $0 \leq C_k\leq 2$ for $k \in \{1, 2, 4\}$ as multiplicative mating asymmetry parameters, which modulate the extent to which parent pairings between individuals with $2$ \& $1$, $2$ \& $0$, and $1$ \& $0$ alleles are biased towards $\MM > \FF$, respectively \cite{Bour+11}.
+Evidence of mating asymmetry in human populations has been previously documented \cite{Heal+10, Bour+11}.
 
-We summarize the proportions of every $(\MM, \FF, \CC)$ category estimated by each mating type model in \cref{tab:mt}.
+We summarize the proportions of every $(\MM, \FF)$ category under each mating type model in \cref{tab:mt}.
 
 % Please add the following required packages to your document preamble:
 % \usepackage{booktabs}
 \begin{table}[htb]
 \centering
-\caption{Proportion of each $(\MM, \FF, \CC)$ category expected from the population in each given mating type model.}
+\caption{$\Pr(\MM, \FF)$ in each given mating type model.}
 \label{tab:mt}
-\begin{tabular}{lllll}
+\begin{tabular}{llllll}
 \toprule
-     &           & \multicolumn{3}{c}{Proportions}                         \\ \cline {3-5}
-\multicolumn{2}{l}{\begin{tabular}[c]{@{}l@{}}Mating type:\\ $(\MM, \FF, \CC)$\end{tabular}} & HWE & MS & MaS \\ \midrule
-$0$: &           &               &          &                              \\
-     & $(2,2,2)$ & $p^4$         & $\mu_0$  & $\mu_0$                      \\
-$1$: &           &               &          &                              \\
-     & $(2,1,2)$ & $p^3(1-p)$    & $\mu_1$  & $\mu_1 C_1$                  \\
-     & $(2,1,1)$ & $p^3(1-p)$    & $\mu_1$  & $\mu_1 C_1$                  \\
-     & $(1,2,2)$ & $p^3(1-p)$    & $\mu_1$  & $\mu_1 \left(1 - C_1\right)$ \\
-     & $(1,2,1)$ & $p^3(1-p)$    & $\mu_1$  & $\mu_1 \left(1 - C_1\right)$ \\
-$2$: &           &               &          &                              \\
-     & $(2,0,1)$ & $p^2(1-p)^2$  & $\mu_2$  & $\mu_2 C_2$                  \\
-     & $(0,2,1)$ & $p^2(1-p)^2$  & $\mu_2$  & $\mu_2 \left(1 - C_2\right)$ \\
-$3$: &           &               &          &                              \\
-     & $(1,1,2)$ & $p^2(1-p)^2$  & $\mu_3$  & $\mu_3$                      \\
-     & $(1,1,1)$ & $2p^2(1-p)^2$ & $2\mu_3$ & $2\mu_3$                     \\
-     & $(1,1,0)$ & $p^2(1-p)^2$  & $\mu_3$  & $\mu_3$                      \\
-$4$: &           &               &          &                              \\
-     & $(1,0,1)$ & $p(1-p)^3$    & $\mu_4$  & $\mu_4 C_4$                  \\
-     & $(1,0,0)$ & $p(1-p)^3$    & $\mu_4$  & $\mu_4 C_4$                  \\
-     & $(0,1,1)$ & $p(1-p)^3$    & $\mu_4$  & $\mu_4 \left(1 - C_4\right)$ \\
-     & $(0,1,0)$ & $p(1-p)^3$    & $\mu_4$  & $\mu_4 \left(1 - C_4\right)$ \\
-$5$: &           &               &          &                              \\
-     & $(0,0,0)$ & $(1-p)^4$     & $\mu_5$  & $\mu_5$                      \\ \bottomrule
+     &           & \multicolumn{4}{c}{$\Pr(\MM,\FF)$}                         \\ \cline {3-6}
+    \multicolumn{2}{l}{\begin{tabular}[c]{@{}l@{}}Mating type:\\ $(\MM, \FF)$\end{tabular}} & HWE & MS & MaS & Bourgey et al.\ (2011) MaS \\ \midrule
+    $0$: &           &               &       &    &                              \\
+         & $(2,2)$ & $p^4$         & $\mu_0$ & $\nu_0$  & $\mu_0$                      \\
+    $1$: &           &               &      &    &                              \\
+         & $(2,1)$ & $2p^3(1-p)$    & $\mu_1$ & $\nu_1$  & $\mu_1 C_1$                  \\
+         & $(1,2)$ & $2p^3(1-p)$    & $\mu_1$ & $\nu_2$  & $\mu_1 \left(1 - C_1\right)$ \\
+    $2$: &           &               &      &     &                              \\
+         & $(2,0)$ & $p^2(1-p)^2$  & $\mu_2$ & $\nu_3$  & $\mu_2 C_2$                  \\
+         & $(0,2)$ & $p^2(1-p)^2$  & $\mu_2$ & $\nu_4$  & $\mu_2 \left(1 - C_2\right)$ \\
+    $3$: &           &               &      &     &                              \\
+         & $(1,1)$ & $4p^2(1-p)^2$  & $\mu_3$ & $\nu_5$  & $\mu_3$                      \\
+    $4$: &           &               &      &     &                              \\
+         & $(1,0)$ & $2p(1-p)^3$    & $\mu_4$ & $\nu_6$  & $\mu_4 C_4$                  \\
+         & $(0,1)$ & $2p(1-p)^3$    & $\mu_4$ & $\nu_7$  & $\mu_4 \left(1 - C_4\right)$ \\
+    $5$: &           &               &       &    &                              \\
+         & $(0,0,0)$ & $(1-p)^4$     & $\mu_5$ & $\nu_8$  & $\mu_5$                      \\ \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Model formulation}
+\subsection{Expressing disease risk based on genotype}
 
-With our mating type parameters defined, we can formulate an expression for $\E\left(n_{\MM, \FF, \CC}\right)$, where $n_{\MM, \FF, \CC}$ is the number of triads with $(\MM, \FF, \CC)$ from a case-triad study, to formulate the log-linear model.
-We can write the equation
+For our log-linear model in \cref{eq:loglin}, we must also formulate an expression for $\Pr(\DD = 1 \mid \MM, \FF, \CC)$, which encompasses how the variant allele could influence the child's risk for disease.
+Based on our discussion in \cref{sec:studies}, we can introduce child and maternal effects by using the multiplicative model
 \begin{equation*}
-    \ln\left[\E\left(n_{\MM, \FF, \CC}\right)\right] = \gamma_{k},
+    \Pr(\DD = 1 \mid \MM, \FF, \CC) = \kappa R^{\CC} S^{\MM},
 \end{equation*}
-to model the counts when we only consider a mating type, with $\gamma_{k}$ depending on the total sample size and the value in the respective mating type's column in \cref{tab:mt}, where $k \in \{1, \ldots, 9\}$ depends on $(\MM, \FF)$.
-Of course, this model alone is not very informative as is, hence we can include additional parameters to represent various effects.
-For example, we can include child and maternal effects by using the model
-\begin{equation*}
-    \ln\left[\E\left(n_{\MM, \FF, \CC}\right)\right] = \gamma_{k} + r \CC + s \MM,
-\end{equation*}
-where $R$ and $S$ are parameters representing the child and maternal effects, respectively.
-Notice that in this model, the maternal and child effects are multiplicative, as we multiply the expected counts by $R = e^r$ for each copy of the variant allele the child has, and likewise by $S = e^s$ based on $\MM$.
-This multiplicative model is convenient as the values $e^r$ and $e^s$ can be interpreted as the relative risk of disease caused by the child and mother's genotypes, respectively.
+where $\kappa$ is the baseline probability of disease when $\MM = \CC = 0$ (and is uninformative), and $R$ and $S$ can be interpreted as the relative risk parameters representing the child and maternal effects, respectively.
+This multiplicative model is necessary for us to conveniently estimate the $R$ and $S$ relative risk parameters with the log-linear model, since substituting this into \cref{eq:loglin} gives
+\begin{equation}\label{eq:simpleloglin}
+    \ln\left(\pi_{\MM, \FF, \CC}\right) = \ln(\kappa/\alpha) + \ln\left(\Pr(\CC \mid \MM, \FF)\right) + \ln\left(\Pr(\MM, \FF)\right) + r \CC + s \MM,
+\end{equation}
+where $r = \ln(R)$ and $s = \ln(S)$ are parameters to be estimated by the model.
 While other models for these effects can be created, such as a model for a recessive variant allele, where risk of disease is only modified when the appropriate individual has $2$ copies of the variant allele, for the sake of this thesis, we will focus on the multiplicative model only.
+We provide the multinomial distribution from which \cref{eq:simpleloglin} arises under the mating symmetry model in \cref{tab:simpleloglin} as an example of what the log-linear model represents.
+% Please add the following required packages to your document preamble:
+% \usepackage{graphicx}
+\begin{table}[htb]
+\centering
+\caption{Multinomial distribution for the MS model with maternal and child effects.}
+\label{tab:simpleloglin}
+\begin{tabular}{lll}
+\hline
+\multicolumn{2}{l}{\begin{tabular}[c]{@{}l@{}}Mating type:\\ $(\MM, \FF, \CC)$\end{tabular}} & $\Pr(\MM, \FF, \CC \mid \DD)$ \\ \hline
+$0$: &           &                               \\
+     & $(2,2,2)$ & $\kappa\mu_0R^2S^2/\alpha$    \\
+$1$: &           &                               \\
+     & $(2,1,2)$ & $\kappa\mu_1R^2S^2/(2\alpha)$ \\
+     & $(2,1,1)$ & $\kappa\mu_1RS^2/(2\alpha)$   \\
+     & $(1,2,2)$ & $\kappa\mu_1R^2S/(2\alpha)$   \\
+     & $(1,2,1)$ & $\kappa\mu_1RS/(2\alpha)$     \\
+$2$: &           &                               \\
+     & $(2,0,1)$ & $\kappa\mu_2RS^2/\alpha$      \\
+     & $(0,2,1)$ & $\kappa\mu_2R/\alpha$         \\
+$3$: &           &                               \\
+     & $(1,1,2)$ & $\kappa\mu_3R^2S/(4\alpha)$   \\
+     & $(1,1,1)$ & $\kappa\mu_3RS/(2\alpha)$     \\
+     & $(1,1,0)$ & $\kappa\mu_3S/(4\alpha)$      \\
+$4$: &           &                               \\
+     & $(1,0,1)$ & $\kappa\mu_4RS/(2\alpha)$     \\
+     & $(1,0,0)$ & $\kappa\mu_4S/(2\alpha)$      \\
+     & $(0,1,1)$ & $\kappa\mu_4R/(2\alpha)$      \\
+     & $(0,1,0)$ & $\kappa\mu_4/(2\alpha)$       \\
+$5$: &           &                               \\
+     & $(0,0,0)$ & $\kappa\mu_5/\alpha$          \\ \hline
+\end{tabular}%
+\end{table}
 
 \subsection{Extensions to the model}
 
 The log-linear model allows us to make several modifications to the study design and/or the model relatively intuitively.
 For example, we could extend the model to account for maternal and paternal imprinting (also called parent-of-origin effects), where risk of disease is conditional on the parent contributing the variant allele.
-Imprinting is known to impact the expression of various alleles, which is suspected to play a role in the development of orofacial clefts, another congenital disease \cite{Garl+20}.
+Imprinting is known to impact the expression of various alleles, which is suspected to play a role in the development of orofacial clefts, another congenital disease \cite{Garl+20, Rase+25}.
 We can write the imprinting model by taking
 \begin{equation*}
-    \ln\left[\E\left(n_{\MM, \FF, \CC, \Op}\right)\right] = \gamma_{k} + r \CC + s \MM + i_{\MM} I_{\text{\{M-derived\}}} + i_{\FF} I_{\text{\{F-derived\}}},
+    \ln\left(\pi_{\MM, \FF, \CC, \Op}\right) = \ln(\kappa/\alpha) + \ln\left(\Pr(\CC \mid \MM, \FF)\right) + \ln\left(\Pr(\MM, \FF)\right) + r \CC + s \MM + i_{\MM} I_{\text{\{M-derived\}}} + i_{\FF} I_{\text{\{F-derived\}}},
 \end{equation*}
 where $\Op$ is a categorical variable representing the originator(s) of the child's variant allele(s), and $I_{\text{M-derived}}$ and $I_{\text{F-derived}}$ are dummy variables which are $1$ if the child inherited a variant allele from the mother or father, respectively, and $0$ otherwise.
 The model is not statistically identifiable when child effects and both imprinting effects are included, as $\CC = I_{\text{\{M-derived\}}} + I_{\text{\{F-derived\}}}$, hence $r, i_{\MM}$, and $i_{\FF}$ are collinear.
+To address this, we impose that in any of these models, at most two of $R, I_{\MM}$, and $I_{\FF}$ may be estimated simultaneously.
 We can use $I_{\MM} = e^{i_{\MM}}$ and $I_{\FF} = e^{i_{\FF}}$ to represent the relative risk of disease from maternal and paternal imprinting, respectively.
 Knowing $(\MM, \FF, \CC)$ is sufficient to determine $\Op$ in all circumstances except when $\MM = \FF = \CC = 1$, in which case the counts for this category contain both maternally and paternally inherited variant alleles.
-Since we parent-of-origin is often not reported in case-triad studies, determining the number of these counts which are maternally and paternally inherited becomes a missing data problem.
+Since an allele's parent-of-origin is often not reported in case-triad studies, determining the number of these counts which are maternally and paternally inherited becomes a missing data problem.
 Weinberg et al. \cite{Wein+98} use the Expectation-Maximization (EM) algorithm to impute these missing counts, which we summarize as follows:
 \begin{enumerate}
     \item Set an initial value for $m_p$, the proportion of $(\MM, \FF, \CC) = (1, 1, 1)$ counts which are maternally inherited.  An intuitive initial value would be $m_p = 0.5$.
-    \item Take $n_{1,1,1}\cdot m_p$ and $n_{1,1,1}\cdot (1 - m_p)$ as the initial estimates for the counts of maternally and paternally inherited $(\MM, \FF, \CC) = (1, 1, 1)$ counts (Estimation).
+    \item Letting $n_{1,1,1}$ be the observed number of $(\MM,\FF,\CC) = (1,1,1)$ triads in our study, take $n_{1,1,1}\cdot m_p$ and $n_{1,1,1}\cdot (1 - m_p)$ as the initial estimates for the counts of maternally and paternally inherited $(\MM, \FF, \CC) = (1, 1, 1)$ counts (Estimation).
     \item Fit the log-linear model to obtain the maximum likelihood estimates of the imprinting parameters, $\hat{I}_{\MM}$ and $\hat{I}_{\FF}$ (Maximization).
     \item Obtain the next iteration of $m_p$ by computing $\hat{I}_{\MM}/\left(\hat{I}_{\MM} + \hat{I}_{\FF}\right)$.
-    \item Repeat steps 2-4 until $m_p$ converges.
+    \item Repeat steps 2--4 until $m_p$ converges.
 \end{enumerate}
-In simulations of the model, this process is not sensitive to initial values of $m_p$ and usually converges within $12$ iterations \cite{Wein+98}.
-To address this, we impose that in any of these models, at most two of $R, I_{\MM}$, and $I_{\FF}$ may be estimated.
+In simulations of the model, this process was not sensitive to initial values of $m_p$ and usually converged within $12$ iterations \cite{Wein+98}.
 If we are only modelling one of the imprinting parameters, we only need modify this procedure by setting the other parameter to $1$, as we are assuming that it contributes no risk for disease.
 In performing this procedure, we cannot treat these estimated counts as truly observed values, and must base our likelihood calculations on the likelihood of the observed, non-imputed data.
 We further detail how this was implemented in \texttt{TriLLIEM} in \cref{chap:methods}.
 
-Another extension that arises for the log-linear model are gene-environment interactions.
-Recalling the example of PKU, where the mother's genetic condition affects the child's risk of disease, it was hypothesized that maternal PKU led to these outcomes for the child since the mother's diet contained phenylalanine, an amino acid which PKU impedes the breakdown of, before and during pregnancy.
+Another extension that arises for the log-linear model are gene-environment interactions \cite{Huds19}.
+Recalling the example of PKU, where the mother's genetic condition affects the child's risk of disease, it was hypothesized that maternal PKU led to these outcomes for the child since the mother's diet contained phenylalanine, an amino acid which PKU impedes the breakdown of, before and during pregnancy \cite{Lee+05}.
 It then becomes an important research question to assess whether maternal exposure to phenylalanine during pregnancy AND maternal PKU status are the true cause of this increased risk.
-We can model this by including an interaction term between the maternal genotype and the environmental exposure, which we can write as
+With the addition of environmental exposure status, $\EE$, in the data, we must modify our multinomial probability by taking
+\begin{align*}
+    \Pr(\MM, \FF, \CC, \EE \mid \DD = 1) &= \frac{\Pr(\DD = 1 \mid \MM, \FF, \CC, \EE) \Pr(\CC \mid \MM, \FF, \EE) \Pr(\MM, \FF, \EE)}{\Pr(\DD = 1)} \\
+                                         &= \frac{\Pr(\DD = 1 \mid \MM, \FF, \CC, \EE) \Pr(\CC \mid \MM, \FF) \Pr(\MM, \FF, \EE)}{\Pr(\DD = 1)}.
+\end{align*}
+We must make the assumption that $\CC$ and $\EE$ are conditionally independent given $(\MM, \FF)$ in order to have $\Pr(\CC \mid \MM, \FF, \EE) = \Pr(\CC \mid \MM, \FF)$ in the above equation \cite{WeinUmba00}.
+In practice, this is often the case as we examine environmental interactions with parents, with exposure having occured while the child was in the womb (such as with maternal PKU).
+We use $\Pr(\MM, \FF, \EE)$ as mating type parameters could vary between the exposed and unexposed sub-populations.
+We model an interaction term between the maternal genotype and the environmental exposure (alongside child and maternal effects) in the log-linear model by taking
 \begin{equation*}
-    \ln\left[\E\left(n_{\MM, \FF, \CC, \EE}\right)\right] = \gamma_{k, \EE} + r \CC + s \MM + v \EE\cdot \MM,
+    \ln\left(\pi_{\MM, \FF, \CC, \EE}\right) = \ln(\kappa/\alpha) + \ln\left(\Pr(\CC \mid \MM, \FF)\right) + \ln\left(\Pr(\MM, \FF \mid \EE = 0)\right) + \EE\ln\left(\delta_{\MM, \FF}\right) + r \CC + s \MM + v \EE\cdot \MM,
 \end{equation*}
-where $\EE$ is a binary variable representing the presence of the environmental exposure and $\gamma_{k, \EE}$ is a variable accounting for the number of exposed/unexposed individuals and the mating type proportion from \cref{tab:mt}.
-We can then interpret $V = e^v$ as the relative risk of disease from each copy of the variant allele in the mother when the environmental exposure is present.
-Note that the environmental interaction need not be with maternal effects, for example we could examine an imprinting by environment interactionn as well.
+where $\delta_{\MM, \FF}$ are multiplicative factors on the mating type parameters when $\EE = 1$.
+We can interpret $V = e^v$ as the relative risk of disease from each copy of the variant allele in the mother when the environmental exposure is present.
+Note that the environmental interaction need not be with maternal effects, for example we could examine an imprinting by environment interaction as well.
 The EM algorithm for imprinting would remain unchanged, only we would require a simultaneous EM algorithm for the $(\MM,\FF,\CC) = (1,1,1)$ counts when $E = 1$ based on the imprinting effect conditional on $E = 1$.
+Sampling environmental exposures opens the door to another potential method for population stratification to impact statistical conclusions, as exposure rates may vary between sub-populations (INSERT JEAN PAPER CITATION HERE).
 
-Lastly, the Weinberg group \cite{WeinUmba+05} extended the model to a hybrid model that includes control-dyads/-triads, where we genotype the parents of controls (and optionally, the controls themselves).
-These controls are necessary to model mating asymmetry \cite{WeinUmba+05}.
+Lastly, the Weinberg group \cite{WeinUmba05} extended the log-linear model to a hybrid model that includes control-dyads, where we genotype the parents of controls, as the child's genotype is uninformative \cite{WeinUmba05, Ains+11, HoweCord12}.
+To model control-dyads, we make a rare disease assumption, and hence
+\begin{align*}
+    \pi_{\MM, \FF} &= \Pr(\MM, \FF \mid \DD = 0) \approx \Pr(\MM, \FF).
+\end{align*}
 An example of such a hybrid model would be
 \begin{equation*}
-    \ln\left[\E\left(n_{\MM, \FF, \CC, \DD}\right)\right] = \gamma_{k, \DD} + r \CC \cdot \DD + s \MM \cdot \DD,
+    \ln\left(\pi_{\MM, \FF, \CC, \DD}\right) = \ln\left(\Pr(\MM, \FF)\right) + \ln(\kappa/\alpha) \cdot \DD + \ln\left(\Pr(\CC \mid \MM, \FF)\right) \cdot \DD + r \CC \cdot \DD + s \MM \cdot \DD,
 \end{equation*}
-where $\DD$ is a binary variable representing whether the child is a case or not, and $\gamma_{k, \DD}$ is a variable accounting for the fixed number of cases/controls and the mating type proportion from \cref{tab:mt}.
+where $\pi_{\MM, \FF, \CC, \DD} = \Pr(\MM, \FF, \CC \mid \DD)$, where $\CC$ is omitted when $\DD = 0$.
+The hybrid model is useful as it is necessary for us to model mating asymmetry \cite{WeinUmba05}.
+Using a mating type model that fails to account for mating asymmetry has been shown to lead to spurious conclusions about model effects \cite{Heal+10}.
+For example, using the parameterization of Bourgey et al.\ \cite{Bour+11} as seen in \cref{tab:mt}, if a population is under mating asymmetry with $C_1 = C_2 = C_4 = 1.15$ (biasing counts of the data towards triads with $\MM > \FF$), and we use a HWE or MS mating type model, we may incorrect conclude that the overrepresentation of cases whose mothers have more copies of the variant allele is due to maternal effects, when in reality, it is due to the distribution of the variant allele in mothers and fathers across the population.
+By including control-dyads, however, the model again becomes vulnerable to population stratification, for the same reasons as with case-control studies.
 
 All of these extensions can be simultaneously implemented in the log-linear model.
 For example, we can write a hybrid model for child, maternal, maternal gene-environment, and maternal imprinting effects as
 %%
-\begin{equation}\label{eq:exeq}
-    \ln\left[\E\left(n_{\MM, \FF, \CC, \Op, \EE, \DD}\right)\right] = \gamma_{k, \EE, \DD} + r \CC \cdot \DD + s \MM \cdot \DD + i_{\MM} I_{\text{\{M-derived\}}} \cdot \DD + v \EE \cdot \MM \cdot \DD,
-\end{equation}
-where $\gamma_{k, \EE, \DD}$ is a variable accounting for the number of exposed/unexposed cases/controls, as well as the mating type proportion from \cref{tab:mt}.
+\begin{multline}\label{eq:exeq}
+    \ln\left(\pi_{\MM, \FF, \CC, \Op, \EE, \DD}\right) = \ln\left(\Pr(\MM, \FF \mid \EE = 0)\right) + \EE\ln\left(\delta_{\MM, \FF}\right) + \ln(\kappa/\alpha) \cdot \DD + \ln\left(\Pr(\CC \mid \MM, \FF)\right) \cdot \DD\\
+    + r \CC \cdot \DD + s \MM \cdot \DD + i_{\MM} I_{\text{\{M-derived\}}} \cdot \DD + v \EE \cdot \MM \cdot \DD.
+\end{multline}
 
-Given any log-linear model equation, we can generate a multinomial distribution for $\Pr(\MM, \FF, \CC, \Op | \EE, \DD)$, which will be helpful for simulating data sets in \cref{chap:simstudy}.
-We give an abbreviated example of this probability distribution for the model in \cref{eq:exeq} in \cref{tab:exprob}.
+We give an abbreviated example of the multinomial distribution for the model in \cref{eq:exeq} in \cref{tab:exprob}.
 
 % Please add the following required packages to your document preamble:
 % \usepackage{booktabs}
 % \usepackage{graphicx}
 \begin{table}[htb]
 \centering
-\caption{Examples of probabilities in the multinomial distributions for $\Pr(\MM, \FF, \CC, \Op | \EE, \DD)$ based on the model in \cref{eq:exeq}.}
+\caption{Examples of probabilities in the multinomial distributions for $\Pr(\MM, \FF, \CC, \Op, \EE \mid \DD)$ based on the model in \cref{eq:exeq}.}
 \label{tab:exprob}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}llllllll@{}}
 \toprule
-            &                   &       &     &     & \multicolumn{3}{c}{Probability under...}                     \\ \cmidrule(l){6-8} 
+            &                   &       &     &     & \multicolumn{3}{c}{$\Pr(\MM, \FF, \CC, \Op, \EE \mid \DD)$}                     \\ \cmidrule(l){6-8} 
 Mating type & $(\MM, \FF, \CC)$ & $\Op$ & $E$ & $D$ & HWE             & MS         & MaS                           \\ \midrule
-$0$ & $(2,2,2)$ & $\MM, \FF$ & $1$ & $1$ & $p^4R^2S^2V^2I_{\MM}$      & $\mu_0R^2S^2V^2I_{\MM}$ & $\mu_0R^2S^2V^2I_{\MM}$    \\
-$1$ & $(2,1,2)$ & $\MM, \FF$ & $1$ & $1$ & $p^3(1-p)R^2S^2V^2I_{\MM}$ & $\mu_1R^2S^2V^2I_{\MM}$ & $\mu_1C_1R^2S^2V^2I_{\MM}$ \\
+$0$ & $(2,2,2)$ & $\MM, \FF$ & $1$ & $1$ & $\kappa p^4R^2S^2V^2I_{\MM}/\alpha$      & $\kappa\mu_0R^2S^2V^2I_{\MM}/\alpha$ & $\kappa\nu_0R^2S^2V^2I_{\MM}/\alpha$    \\
+$1$ & $(2,1,2)$ & $\MM, \FF$ & $1$ & $1$ & $\kappa p^3(1-p)R^2S^2V^2I_{\MM}/\alpha$ & $\kappa\mu_1R^2S^2V^2I_{\MM}/(2\alpha)$ & $\kappa\nu_1C_1R^2S^2V^2I_{\MM}/(2\alpha)$ \\
 \multicolumn{8}{c}{$\vdots$}                                                                                       \\
-$3$ & $(1,1,1)$ & $\MM$      & $1$ & $1$ & $p^2(1-p)^2RSVI_{\MM}$     & $\mu_3RSVI_{\MM}$       & $\mu_3RSVI_{\MM}$          \\
-$3$         & $(1,1,1)$         & $\FF$ & $1$ & $1$ & $p^2(1-p)^2RSV$ & $\mu_3RSV$ & $\mu_3RSV$                    \\
+$3$ & $(1,1,1)$ & $\MM$      & $1$ & $1$ & $\kappa p^2(1-p)^2RSVI_{\MM}/\alpha$     & $\kappa\nu_5RSVI_{\MM}/(4\alpha)$       & $\kappa\mu_3RSVI_{\MM}/(4\alpha)$          \\
+$3$         & $(1,1,1)$         & $\FF$ & $1$ & $1$ & $\kappa p^2(1-p)^2RSV/\alpha$ & $\kappa\nu_5RSV/(4\alpha)$ & $\kappa\mu_3RSV/(4\alpha)$                    \\
 \multicolumn{8}{c}{$\vdots$}                                                                                       \\
-$4$         & $(0,1,0)$         &       & $1$ & $1$ & $p(1-p)^3$      & $\mu_4$    & $\mu_4 \left(1 - C_4 \right)$ \\
+$4$         & $(0,1,0)$         &       & $1$ & $1$ & $\kappa p(1-p)^3/\alpha$      & $\kappa \nu_7/(2\alpha)$    & $\kappa\mu_4 \left(1 - C_4 \right)/(2\alpha)$ \\
 \multicolumn{8}{c}{$\vdots$}                                                                                       \\
-$2$ & $(2,0,1)$ & $\MM$      & $0$ & $1$ & $p^2(1-p)^2RS^2I_{\MM}$    & $\mu_2RS^2I_{\MM}$      & $\mu_2 C_2RS^2I_{\MM}$     \\
+$2$ & $(2,0,1)$ & $\MM$      & $0$ & $1$ & $p^2(1-p)^2RS^2I_{\MM}/\alpha$    & $\kappa\nu_3RS^2I_{\MM}/\alpha$      & $\kappa\mu_2 C_2RS^2I_{\MM}/\alpha$     \\
 \multicolumn{8}{c}{$\vdots$}                                                                                       \\
-$5$         & $(0,0,0)$         &       & $0$ & $0$ & $(1-p^4)$       & $\mu_5$    & $\mu_5$                       \\ \bottomrule
+$5$         & $(0,0,\textrm{--})$         &       & $0$ & $0$ & $(1-p^4)$       & $\mu_5$    & $\nu_8$                       \\ \bottomrule
 \end{tabular}%
 }
 \end{table}
