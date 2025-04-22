@@ -8,10 +8,12 @@ runEMIM(
   mtmodel = "MS",
   effects = c("C", "M"),
   peddat,
-  emimpath = "C:/Users/Kevin/emim-v3.22-windows-x86_64/",
+  emimpath = "~/EMIM/",
+  Einteraction = "M",
   includeIm = FALSE,
   includeIf = FALSE,
-  weinberg = FALSE
+  weinberg = FALSE,
+  includeE = FALSE
 )
 }
 \arguments{

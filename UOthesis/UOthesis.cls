@@ -79,7 +79,7 @@
 %% worse.
 \crefname{chapter}{Chapter}{Chapters}
 \Crefname{chapter}{Chapter}{Chapters}
-\crefname{section}{\S}{\S\S}
+\crefname{section}{Section}{Sections}
 \Crefname{section}{Section}{Sections}
 \crefname{equation}{Equation}{Equations}
 \Crefname{equation}{Equation}{Equations}

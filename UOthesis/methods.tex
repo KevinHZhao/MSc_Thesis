@@ -1,5 +1,162 @@
 \chapter{Computational methods}\label{chap:methods}
 
+In this chapter, we discuss the features and limitations of the currently available software packages for modelling case-triad data, Haplin and EMIM.
+We then introduce our own software package, \texttt{TriLLIEM}, which we designed to overcome these limitations.
+We show that \texttt{TriLLIEM}, EMIM, and Haplin produce essentially identical statistical inferences, to justify the validity of \texttt{TriLLIEM}'s results.
+
+\section{Modelling software}
+
+Methods of fitting the parameters in the multinomial and log-linear models that we describe in \cref{sec:loglin} have been described in several papers \cite{Wilc+98, Wein+98, Wein99, UmbaWein00, WeinUmba05, Ains+11}.
+Unfortunately, no official software for the log-linear model proposed by the Weinberg group was ever made.
+Instead, the Weinberg papers \cite{Wein+98, Wein99, UmbaWein00, WeinUmba05} used LEM \cite{Verm97} for their analyses.
+LEM was a DOS program released in 1997 that allowed users to fit their own log-linear models and run the EM algorithm, though it is now deprecated.
+Since then, two other programs, Haplin \cite{GjesLie06} and EMIM \cite{HoweCord12}, have been released as software for modelling gene disease associations.
+
+\subsection{Haplin}
+
+Gjessing et al.'s Haplin~\cite{GjesLie06}, released in 2006, is an R package that fits the log-linear model.
+It extends the model to allow for multiple alleles at a single locus, though for our work, we only examine its performance in the biallelic case.
+A major limitation of Haplin is that it only fits the model with HWE mating type frequencies (see \cref{tab:mt}).
+Haplin can model case-triad data with maternal effects, gene-environment interactions, and parent-of-origin effects simultaneously \cite{GjesLie06, Juge+12, Gjer+18}.
+It also allows for optional independent control triads (for the hybrid model) \cite{Juge+12}.
+Since Haplin cannot use a MaS mating type model, these controls only allow us to estimate main effects from environmental exposure \cite{Juge+12}.
+Haplin uses the \texttt{glm()} function in R \cite{R21} to find the maximum likelihood estimates of model parameters.
+The output of \texttt{glm()} is used to compute point estimates and confidence intervals for relative risks, as well as Wald-based p-values \cite{GjesLie06}.
+
+Haplin's implementation of environmental interactions uses a stratified approach through its \texttt{haplinStrat()} and \texttt{gxe} functions\cite{GjesLie06, Juge+12}.
+We briefly describe how Haplin performs this approach, though note many features are omitted as they are targetted for data with more than two alleles and/or more than two exposure states.
+\texttt{haplinStrat()} partitions the data by $E$ and independently fits the log-linear model for each partitioned data set.
+This gives us results for the respective fitted log-linear models, as well as the model for the entire data set without environmental effects.
+\texttt{gxe()} accepts this output and performs a Wald chi-squared significance test for whether child, maternal, and/or imprinting effects differ between the two $E$ strata (when the respective effect is in the model).
+To perform this Wald test, suppose we wish to compare the estimates for some effect in the log-linear model (e.g., $r = \ln(R)$) across the $\EE=0, 1$ strata, which we label $\beta_{\EE=0}$ and $\beta_{\EE=1}$ respectively.
+As parameters in log-linear models, $\hat{\beta}_{\EE=0}$ and $\hat{\beta}_{\EE=0}$ asymptotically follow normal distributions with respective means $\beta_{\EE=0}, \beta_{\EE=1}$ and variances $\sigma_0^2, \sigma_1^2$.
+These distributions are not correlated as the environmental strata are independent.
+We are testing
+\begin{equation*}
+  H_0: \beta_{\EE=1} - \beta_{\EE=0} = 0, H_1: \beta_{\EE=1} - \beta_{\EE=0} \neq 0,
+\end{equation*}
+which has Wald test statistic $w = \frac{\left(\hat{\beta}_{\EE=1} - \hat{\beta}_{\EE=0}\right)^2}{\hat{\sigma_0}^2 + \hat{\sigma_1}^2}$, with this statistic asymptotically following a $\chi^2(1)$ distribution under the null hypothesis.
+Point estimates and standard deviations are extracted from the fitted models, allowing us to use $w$ for significance tests \cite{Gjer+18}.
+
+For parent-of-origin effects, Haplin uses a similar parameterization to the one described in Weinberg et al.\,\cite{Wein+98} that we describe in \cref{sec:extensions}.
+However, instead of allowing up to two of $\CC$, $I_{\MM}$, and $I_{\FF}$ to be estimated, Haplin does not fit child effects and always estimates both $I_{\MM}$ and $I_{\FF}$ when parent-of-origin effects are enabled \cite{Gjer+18}.
+Fitting both parent imprinting effects gives us information about the child's risk of disease given they have the minor allele conditional on the parent-of-origin, hence not having child effects is not a major drawback.
+However, not being able to fit just one type of imprinting effect could impact the model's power.
+Haplin uses the EM algorithm (described in \cref{sec:extensions}) to estimate parental transmission in the $(\MM, \FF, \CC) = (1,1,1)$ category, and also uses it to impute missing data (e.g., when we only have mother-child dyads without data for the father) \cite{Gjer+18}.
+Haplin can also perform parent-of-origin by environment interaction tests, which they perform by testing the null hypothesis $\ln\left(I_{\MM, \EE=0}\right) - \ln\left(I_{\FF, \EE=0}\right) = \ln\left(I_{\FF, \EE = 1}\right) - \ln\left(I_{\FF, \EE=1}\right)$, using a similar Wald test described in the previous paragraph.
+
+\subsection{EMIM}
+
+Howey and Cordell's EMIM~\cite{HoweCord12}, released in 2012, is a standalone FORTRAN program that fits triad data using the multinomial model.
+The software is available as precompiled binaries for Windows and Linux, or can be manually compiled from the source code.
+EMIM is run through the command line, and has no official interface with common statistical software like R~\cite{R21}, which limits its accessibility to end users who have less programming experience.
+However, EMIM's features are highly comprehensive, and being compiled from FORTRAN code makes it orders of magnitude faster than software written only in R \cite{HoweCord12}.
+
+EMIM has customizable flags that allow users to model child, maternal, and/or either parent-of-origin effect.
+It also automatically incorporates control triads using the hybrid multinomial model \cite{WeinUmba05}.
+A major advantage it has over Haplin is that users can choose to use the HWE, MS, or MaS mating type models, allowing users to model populations under mating asymmetry.
+The software produces a text file summarizing the multinomial model, including point estimates and standard errors for the model parameters, which users must parse manually.
+Instead of using the EM algorithm to impute missing parental transmission counts, EMIM uses a direct search algorithm (using the MAXFUN subroutine from S.A.G.E.~\cite{Sage21}) to find imputed counts that maximize the likelihood of the data \cite{HoweCord12}.
+EMIM does not have any features for including environmental interactions.
+Instead, users must manually implement their own stratified analysis, where the model is fit separately for each $\EE$ stratum (as Haplin does), and then perform the same Wald test for significance.
+
+\section{TriLLIEM}
+
+As we show later in this chapter, Haplin and EMIM produce identical estimates and p-values when applied to the same data sets (up to rounding error).
+However, it is clear that both have severe limitations.
+Haplin forcing the HWE assumption invalidates its inferences in populations with suspected mating asymmetry.
+EMIM's lack of accessibility, not just with the initial setup but also with having to manually implement environmental interactions, also leave much to be desired.
+Furthermore, the stratified approach to environmental interactions does not allow us to simultaneously estimate main effects (e.g., estimating $R$ and $V$ in a maternal gene-environment interaction model), and could have limitations on model power as each model parameter is fit twice.
+To address these limitations and make full use of the log-linear model, we developed the R package \texttt{TriLLIEM}.
+Like Haplin, \texttt{TriLLIEM} gives users access to modelling child and maternal effects in case-triad and control-triad data using the log-linear model in R directly.
+However, \texttt{TriLLIEM} also allows users to choose which mating type model to use (HWE, MS, or MaS), and allows users to customize how imprinting and child effects are fit (unlike Haplin's approach to parent-of-origin effects).
+Results from \texttt{TriLLIEM} are returned as \texttt{glm} objects in R, which many base R users would be comfortable with interpreting.
+
+\subsection{Parent-of-origin effects in TriLLIEM}
+
+\texttt{TriLLIEM}, like Haplin, uses an EM algorithm to model imprinting effects, where each iteration fits a generalized linear model to expected data (where the $(\MM, \FF, \CC) = (1,1,1)$ counts are split into two $(\MM, \FF, \CC, \Op)$ categories).
+However, a modification to the underlying framework of the \texttt{glm()} function had to be made.
+In a model without environmental exposures or controls, the observed data only has $15$ categories, but the expected data has $16$, two of which are derived from the $(\MM, \FF, \CC) = (1,1,1)$ category of the observed data.
+The \texttt{glm()} function in R automatically assumes the expected data as having been directly observed, and thus results in a model with overestimated power.
+
+Lang~\cite{Lang92} gives a method for finding the observed data's information and covariance matrices which we implemented in \texttt{TriLLIEM} so that the model uses the observed data for statistical inference, rather than the expected data.
+To summarize their method in the context of the log-linear model with imprinting, the EM algorithm estimates $X = (X_1, X_2, \ldots, X_{16})$, the complete counts for each $(\MM, \FF, \CC, \Op)$ category, using just the observed data $Y = (Y_1, Y_2, \ldots, Y_{15}) = y$.
+We know that in general, $Y = LX$, where $L$ is a $15 \times 16$ matrix where the main diagonal is $1$ up to and including the $9$th column, every element above the main diagonal starting from the $10$th column is also $1$, and all other elements are $0$.
+Note each column of $L$ contains one $1$, and each row contains one $1$ aside from the $9$th row, which contains two $1$'s.
+As expected, this gives $Y_1 = X_1, Y_2 = X_2, \ldots, Y_8 = X_8, Y_9 = X_9 + X_{10}, Y_{10} = X_{11}, \ldots, Y_{15} = X_{16}$, as it is the $9$th category of \cref{tab:simpleloglin} that represents the $(1,1,1)$ category.
+Lang~\cite{Lang92} showed that the observed information matrix, $I_Y$, is given by
+\begin{equation*}
+  I_Y = I_X - I_{X|LX = y},
+\end{equation*}
+where $I_X$ is the information matrix of the $16$-row expected data (which can be easily obtained from the unadjusted \texttt{glm()} function), and $I_{X|LX = y}$ is an adjustment matrix for the fact that we only observed $y$.
+This adjustment matrix can be expressed by taking $I_{X|LX = y} = Z^T \mathrm{Cov}(X | LX = y) Z$, where $Z$ is the known $16 \times p$ model matrix for the $p$ parameters in the log-linear model.
+The covariance matrix $\mathrm{Cov}(X | LX = y)$ is a $16 \times 16$ matrix whose elements represent the covariances between the elements of $X$ conditional on $LX = y$.
+$LX = y$ tells us the exact values of all elements of $X$ aside from $X_9, X_{10}$, which must satisfy $X_9 + X_{10} = y_9$, all conditional covariances are $0$ except for $\mathrm{Cov}(X_9, X_9), \mathrm{Cov}(X_9, X_{10})$, and $\mathrm{Cov}(X_{10}, X_{10})$.
+Since $X_9 = y_9 - X_{10}$, it is clear that $\mathrm{Cov}(X_9, X_9) = \mathrm{Cov}(X_{10}, X_{10}) = - \mathrm{Cov}(X_9, X_{10})=\theta$.
+To compute $\theta$, we take
+\begin{equation*}
+  \theta = \frac{y_9 \cdot \hat{x}_9 \cdot \hat{x}_{10}}{\left(\hat{x}_9 + \hat{x}_{10}\right)^2},
+\end{equation*}
+where $\hat{x}_9$ and $\hat{x}_{10}$ are the model's fitted counts for $X_9$ and $X_{10}$ from the EM algorithm \cite[eq.\,3.2]{Lang92}.
+Thus, the adjustment matrix is a $16 \times 16$ matrix that is zero everyone except for the $2\times2$ submatrix in the $9$th and $10$th rows and columns, whose diagonal elements are $\theta$ and whose off-diagonal elements are $-\theta$.
+Finally, computing $I_Y$ gives us the observed information matrix, which we can use to compute the model's $16\times16$ variance-covariance matrix by taking $I_Y^{-1}$.
+
+This approach is easily extended to the model with environmental exposures and/or control triads.
+Haplin also implements this correction in their log-linear model \cite[p.\,253]{Juge+12}.
+We note that unlike Haplin, \texttt{TriLLIEM} does not currently use the EM algorithm to impute missing data.
+
+\subsection{Environmental exposures in TriLLIEM}
+
+Like Haplin and EMIM's models, the log-linear model in \texttt{TriLLIEM} can analyze environmental interactions using a stratified approach.
+We allow users to do this easily by passing function arguments to the \texttt{TriLLIEM()} function indicating that we are using an exposure-based stratified model.
+To accomplish this, \texttt{TriLLIEM} fits an environmental interaction term for all the main effects in the model.
+For example, in a MS mating type model with child and maternal effects and environmental exposures, there are $8$ main effects ($6$ mating type parameters and $2$ genetic effects), and so the stratified model would also include $8$ environmental interaction terms.
+The $\EE:\MM$ interaction term in this model is equivalent to the maternal gene-environment interaction terms we obtain from the approaches to environmental interactions outlined previously for Haplin and EMIM.
+
+A weakness of the stratified approach is that we are forced to fit additional interaction terms which may not be of statistical or biological interest.
+In the example above, if we were only interested in maternal gene-environment interactions, the model would also estimate $\EE:\CC$, potentially reducing power.
+While this is impossible to do using the stratified approach, in our purely log-linear approach, this is as simple as removing the $\EE:\CC$ interaction in the model.
+Note that mating type by environment interaction terms should generally be included since they account for population stratification where exposure prevalence varies by sub-population \cite{UmbaWein00, Shin+10}.
+This non-stratified approach is not currently possible in EMIM or Haplin, and appears to currently be a method only currently available in \texttt{TriLLIEM}.
+
+\subsection{Simulating triad data in TriLLIEM}
+
+\texttt{TriLLIEM} also has a function for simulating triad data, which is highly customizable.
+Users may set the following parameters:
+\begin{itemize}
+  \item Study design parameters (number of trios, number of control trios),
+  \item Demographic parameters (minor allele frequency, proportion of cases/controls who are exposed, MaS coefficients),
+  \item Genetic main effects ($R$, $S$, $I_{\MM}$, $I_{\FF}$),
+  \item Gene-Environment interactions ($V$, effects undergoing environmental interaction, e.g., $M$ or $I_{\MM}$).
+\end{itemize}
+Currently, the simulation function assumes the HWE mating type model, with MaS coefficients ($C_1, C_2, C_4$) modifying the HWE frequencies based on the Bourgey et al.~\cite{Bour+11} parameterization for MaS described in \cref{tab:mt}.
+Using these parameters, the simulation function randomly determines the number of exposed and unexposed cases/controls to be generated based on the exposure proportions, and then samples the counts for each $(\MM, \FF, \CC)$ category from the appropriate multinomial distribution.
+Other parameters for simulating population stratification are also available, which we outline in \cref{sec:popstrat}.
+
+\section{Software comparison}
+
+We simulate a data set with $1000$ case-triads and $1000$ control-triads, minor allele frequency of $0.3$, environmental exposure prevalence of $0.3$, and with no MaS or genetic effects.
+To demonstrate that EMIM, Haplin, and \texttt{TriLLIEM} are consistent with one another, the results from each software when analyzing this data for various model parameterizations are compared.
+The simulated data set is summarized in \cref{tab:consistencydat}.
+We plot the point estimates and p-values for the relevant genetic effects and interactions in \cref{fig:consistency-est,fig:consistency-p}.
+
+From \cref{fig:consistency-est}, we can see that in all cases, \texttt{TriLLIEM}, EMIM, and Haplin produce point estimates that are essentially identical up to rouding error.
+A similar conclusion can be made based on the p-values for these estimates in \cref{fig:consistency-p}, with the exception of the estimates for $I_{\MM}$ and $I_{\FF}$ (shown in light blue and cyan respectively) in the second and third columns.
+While this could point to concerns in our method of modelling parent-of-origin effects, the deviation from the $y=x$ line is relatively minor, and so it is possible that this is simply due to rounding error in our estimation of the variance-covariance matrix.
+Overall, \cref{fig:consistency-est,fig:consistency-p} imply that \texttt{TriLLIEM}, EMIM, and Haplin are indeed capturing results from the same model, giving credence to the validity of \texttt{TriLLIEM}'s results.
+%%
+\input{tables/consistencydat}
+\newpage
+\begin{figure}[htb]
+  \caption{Point estimates of various effects from equivalent models in \texttt{TriLLIEM}, EMIM, and Haplin.  The line $y = x$ is plotted in red.  From top to bottom, the rows use a HWE, MS, and MaS mating type model.  From left to right the first $3$ columns represent models that use: child and maternal effects; Haplin's parent-of-origin parameterization and maternal effects; and child, maternal and maternal imprinting effects.  The fourth column represents results for \emph{only} the interaction term in two different stratified gene-environment interaction models: one where child and maternal effects and maternal gene-environment interactions are present; and another where child, maternal, and maternal imprinting effects and maternal imprinting by environment interactions are present.  Haplin is only present in the appropriate HWE models.\label{fig:consistency-est}}
+\includegraphics[width=\textwidth]{plots/consistency-est.pdf}
+\end{figure}
+\begin{figure}[htb]
+  \caption{Wald base p-values of various effects from equivalent models in \texttt{TriLLIEM}, EMIM, and Haplin.  THe line $y=x$ is plotted in red.  The plot layout follows the same row-column layout described in the caption of \cref{fig:consistency-est}.\label{fig:consistency-p}}
+\includegraphics[width=\textwidth]{plots/consistency-p.pdf}
+\end{figure}
+%%
+
 \vfill
 
 %%% Local Variables: 

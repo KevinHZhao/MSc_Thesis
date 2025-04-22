@@ -104,19 +104,19 @@ summ_haplin <- function(res, PoO = FALSE, includeE = FALSE){
     GEtest <- Haplin::gxe(res)
     resVec["M[E=1]"]=Haplin::haptable(res)[6,"RRm.est."] #RR for E=1, M=1
     resVec["M[E=0]"]=Haplin::haptable(res)[4,"RRm.est."]  #RR for E=0, M=1
-    resVec["M[E=1]/M[E=0]"]=resVec["M[E=1]"]/resVec["M[E=0]"]
+    resVec["E:M"]=resVec["M[E=1]"]/resVec["M[E=0]"]
     pvalVec["E:M"]=GEtest$gxe.test[3,"pval"] # pval for stratified test
     pvalVec["M"]=Haplin::haptable(res)[2,"RRm.p.value"] # pval for unstratified analysis
-    resVec["RRcm"] <- Haplin::haptable(res)[2,"RRcm.est."]
-    pvalVec["RRcm"] <- Haplin::haptable(res)[2,"RRcm.p.value"]
-    resVec["RRcf"] <- Haplin::haptable(res)[2,"RRcf.est."]
-    pvalVec["RRcf"] <- Haplin::haptable(res)[2,"RRcf.p.value"]
+    resVec["Im"] <- Haplin::haptable(res)[2,"RRcm.est."]
+    pvalVec["Im"] <- Haplin::haptable(res)[2,"RRcm.p.value"]
+    resVec["If"] <- Haplin::haptable(res)[2,"RRcf.est."]
+    pvalVec["If"] <- Haplin::haptable(res)[2,"RRcf.p.value"]
   }
   else if(includeE){
     GEtest <- Haplin::gxe(res)
     resVec["M[E=1]"]=Haplin::haptable(res)[6,"RRm.est."] #RR for E=1, M=1
     resVec["M[E=0]"]=Haplin::haptable(res)[4,"RRm.est."]  #RR for E=0, M=1
-    resVec["M[E=1]/M[E=0]"]=resVec["M[E=1]"]/resVec["M[E=0]"]
+    resVec["E:M"]=resVec["M[E=1]"]/resVec["M[E=0]"]
     pvalVec["E:M"]=GEtest$gxe.test[3,"pval"] # pval for stratified test
     pvalVec["M"]=Haplin::haptable(res)[2,"RRm.p.value"] # pval for unstratified analysis
     resVec["C"]=Haplin::haptable(res)[2,"RR.est."]
@@ -126,10 +126,10 @@ summ_haplin <- function(res, PoO = FALSE, includeE = FALSE){
     res <- Haplin::haptable(res)[2,]
     resVec["M"] <- res$RRm.est
     pvalVec["M"] <- res$RRm.p.value
-    resVec["RRcm"] <- res$RRcm.est
-    pvalVec["RRcm"] <- res$RRcm.p.value
-    resVec["RRcf"] <- res$RRcf.est
-    pvalVec["RRcf"] <- res$RRcf.p.value
+    resVec["Im"] <- res$RRcm.est
+    pvalVec["Im"] <- res$RRcm.p.value
+    resVec["If"] <- res$RRcf.est
+    pvalVec["If"] <- res$RRcf.p.value
   }
   else{
     res <- Haplin::haptable(res)[2,]
@@ -160,7 +160,7 @@ summ_emim <- function(res){
       resVec <- resVec[! names(resVec) == "M"]
       resVec["M[E=0]"] <- exp(res0$lnS1)
       resVec["M[E=1]"] <- exp(res1$lnS1)
-      resVec["M[E=1]/M[E=0]"] <- resVec["M[E=1]"] / resVec["M[E=0]"]
+      resVec["E:M"] <- resVec["M[E=1]"] / resVec["M[E=0]"]
 
       # Get a Wald-type GE test like Haplin
       z <- abs(res0$lnS1 - res1$lnS1) / sqrt(res0$sd_lnS1^2 + res1$sd_lnS1^2)
@@ -169,7 +169,7 @@ summ_emim <- function(res){
       resVec <- resVec[! names(resVec) == "Im"]
       resVec["Im[E=0]"] <- exp(res0$lnIm)
       resVec["Im[E=1]"] <- exp(res1$lnIm)
-      resVec["Im[E=1]/Im[E=0]"] <- resVec["Im[E=1]"] / resVec["Im[E=0]"]
+      resVec["E:Im"] <- resVec["Im[E=1]"] / resVec["Im[E=0]"]
 
       # Get a Wald-type GE test like Haplin
       z <- abs(res0$lnIm - res1$lnIm) / sqrt(res0$sd_lnIm^2 + res1$sd_lnIm^2)
@@ -178,7 +178,7 @@ summ_emim <- function(res){
       resVec <- resVec[! names(resVec) == "If"]
       resVec["If[E=0]"] <- exp(res0$lnIp)
       resVec["If[E=1]"] <- exp(res1$lnIp)
-      resVec["If[E=1]/If[E=0]"] <- resVec["If[E=1]"] / resVec["If[E=0]"]
+      resVec["E:If"] <- resVec["If[E=1]"] / resVec["If[E=0]"]
 
       # Get a Wald-type GE test like Haplin
       z <- abs(res0$lnIp - res1$lnIp) / sqrt(res0$sd_lnIp^2 + res1$sd_lnIp^2)

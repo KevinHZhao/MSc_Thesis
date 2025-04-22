@@ -24,7 +24,7 @@ set.seed(123)
 I've added the ability to include either $I_m$ or $I_f$ when simulating data through `simulateData()` (not both).  This requires the user to specify which, as well as the appropriate imprinting relative risk through the `Im` or `If` parameters.  The `datAll` part of the returned list now has an extra column to capture the inheritance information from the triple heterozygote cell.  For example,
 
 ```{r}
-data <- simulateData(includeIm = TRUE, Im = 5)
+data <- simulateData(Im = 5)
 print(data$dat4R)
 print(data$datAll)
 ```
@@ -32,7 +32,7 @@ print(data$datAll)
 This should also work for when controls and environmental data are included, for example
 
 ```{r}
-dataControl <- simulateData(includeIm = TRUE, Im = 5, includeControl = TRUE, prControl = 0.5)
+dataControl <- simulateData(Im = 5, includeControl = TRUE, prControl = 0.5)
 print(dataControl$dat4R)
 print(dataControl$datAll)
 ```

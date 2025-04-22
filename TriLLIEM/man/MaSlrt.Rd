@@ -7,8 +7,7 @@
 MaSlrt(dat)
 }
 \arguments{
-\item{dat}{A dataframe formatted with the same columns as \link{example_dat4R}
-Note that PED files can be converted into this format using the \code{\link[=planned]{planned()}} function.}
+\item{dat}{A dataframe formatted with the same columns as \link{example_dat4R}}
 }
 \value{
 A p-value for the Likelihood Ratio Test.

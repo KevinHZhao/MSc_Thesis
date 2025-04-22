@@ -65,12 +65,34 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
     stop("Cannot include maternal and paternal imprinting with child effects.")
   }
 
+  if(length(unique(dat$E)) < 2 && includeE){
+    stop("E column must have at least 2 distinct values.")
+  }
+  if(length(unique(dat$D)) < 2 && includeD){
+    stop("D column must have at least 2 distinct values.")
+  }
+
+  # Portion of model equation depends on mating type model
+  dat <- dat %>% dplyr::mutate(offset = dplyr::case_when(type == 9 ~ 2, .default = 1))
+  if (mtmodel == "HWE") {
+    dat$HWgeno <- dat$M + dat$F
+    mteffect <- "HWgeno"
+    modelformula <- "count~" # Must include intercept for HW model because of log(1-p) term
+  } else if (mtmodel == "MS") {
+    mteffect <- "as.factor(mt_MS)"
+    modelformula <- "count~-1+" # I think I can remove the intercept for MS model
+  } else if (mtmodel == "MaS") {
+    if (length(unique(dat$D)) == 1) {
+      stop("Only 1 phenotype in the phenotype column. Mating asymmetry models require
+            both cases and controls, and setting includeD to TRUE\n")
+    }
+    mteffect <- "as.factor(mt_MaS)"
+    modelformula <- "count~-1+" # I think I can remove intercept
+  }
+
   # Environmental effects
   Eeffects <- c()
   if(includeE){
-    if(length(unique(dat$E)) < 2){
-      stop("E column must have at least 2 distinct values.")
-    }
     ## If we want the same results as the stratified approach of emim and haplin, MUST include E:everything,
     ## otherwise, don't include by default to save on power
     if(Estrat){
@@ -92,9 +114,6 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
   # Hybrid model
   Deffects <- c()
   if(includeD){
-    if(length(unique(dat$D)) < 2){
-      stop("D column must have at least 2 distinct values.")
-    }
     dat <-
       dat %>%
       dplyr::mutate(C = C * D,
@@ -103,24 +122,6 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
   } else if (sum(dat$D == 0) != 0) {
     base::warning("Control trios detected but includeD set to FALSE.  Ignoring all control trios...\n")
     dat <- dat %>% dplyr::filter(D != 0)
-  }
-
-  # Portion of model equation depends on mating type model
-  dat <- dat %>% dplyr::mutate(offset = dplyr::case_when(type == 9 ~ 2, .default = 1))
-  if (mtmodel == "HWE") {
-    dat$HWgeno <- dat$M + dat$F
-    mteffect <- "HWgeno"
-    modelformula <- "count~" # Must include intercept for HW model because of log(1-p) term
-  } else if (mtmodel == "MS") {
-    mteffect <- "as.factor(mt_MS)"
-    modelformula <- "count~-1+" # I think I can remove the intercept for MS model
-  } else if (mtmodel == "MaS") {
-    if (length(unique(dat$D)) == 1) {
-      stop("Only 1 phenotype in the phenotype column. Mating asymmetry models require
-            both cases and controls, and setting includeD to TRUE\n")
-    }
-    mteffect <- "as.factor(mt_MaS)"
-    modelformula <- "count~-1+" # I think I can remove intercept
   }
 
   # Portion of model equation and offset depends on mating type model
@@ -208,8 +209,7 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
                               Mprop = c(Imhat/(Ifhat + Imhat),
                                         if (includeE) ImEhat*Imhat/(ImEhat*Imhat + IfEhat*Ifhat)),
                               includeE = includeE
-                              ) %>%
-        dplyr::mutate(HWgeno = M + F)
+                              )
       ## Use a proper deviance function for imprinting
       ## Check Haplin LogLik code
       ## Make conv criteria parameters

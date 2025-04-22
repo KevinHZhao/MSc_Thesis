@@ -7,7 +7,7 @@
 runHaplin(
   effects = c("C", "M"),
   dat,
-  haplinControls = FALSE,
+  includeD = FALSE,
   includeE = FALSE,
   PoO = FALSE,
   verbose = FALSE

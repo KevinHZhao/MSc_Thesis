@@ -22,19 +22,19 @@ library(Haplin)
 
 Basic case (already verified)
 ```{r}
-dat_no_imp <- simulateData(R = c(1,2,4), S = c(1,2,4), mtmodel = "HWE")
-TriLLIEM(mtmodel = "HW", dat = dat_no_imp$dat4R) %>% summ_trill(effects = c("C", "M"))
-runEMIM(mtmodel = "HW", peddat = dat_no_imp$dat4EMIM) %>% summ_emim()
+dat_no_imp <- simulateData(R = c(1,2,4), S = c(1,2,4))
+TriLLIEM(mtmodel = "HWE", dat = dat_no_imp$dat4R) %>% summary() %>% coef()
+TriLLIEM:::runEMIM(mtmodel = "HWE", peddat = dat_no_imp$dat4EMIM) %>% TriLLIEM:::summ_emim()
 f = file()
 sink(file=f)
 hap_res_no_imp <- suppressWarnings(
   suppressMessages(
-    runHaplin(effects = c("C", "M"), dat = dat_no_imp$dat4haplin)
+    TriLLIEM:::runHaplin(effects = c("C", "M"), dat = dat_no_imp$dat4haplin)
   )
 )
 sink()
 close(f)
-summ_haplin(hap_res_no_imp)
+TriLLIEM:::summ_haplin(hap_res_no_imp)
 ```
 
 Imprinting case
@@ -51,18 +51,8 @@ Imprinting case
 ## FIX TriLLIEM(mtmodel = "HW", dat = dat_imp$dat4R, includeI = TRUE, effects = "")
 ## DD = double dose
 ## ref = mult for multiplicative
-dat_imp <- simulateData(mtmodel = "HWE", includeIm = TRUE, Im = 2)
-TriLLIEM(mtmodel = "HW", dat = dat_imp$dat4R, includeI = TRUE) %>% summ_trill(effects = c("C", "M", "Im"))
-runEMIM(mtmodel = "HW", peddat = dat_imp$dat4EMIM,includeI = TRUE) %>% summ_emim(emim_res)
-f = file()
-sink(file=f)
-hap_res <- suppressWarnings(
-  suppressMessages(
-    runHaplin(effects = c("C", "M"), dat = dat_no_imp$dat4haplin)
-  )
-)
-sink()
-close(f)
-hap_res
+dat_imp <- simulateData(includeIm = TRUE, Im = 2)
+TriLLIEM(mtmodel = "HWE", dat = dat_imp$dat4R, includeI = TRUE) %>% summary %>% coef
+TriLLIEM:::runEMIM(mtmodel = "HWE", peddat = dat_imp$dat4EMIM,includeI = TRUE) %>% TriLLIEM:::summ_emim(emim_res)
 ```
 

@@ -11,6 +11,7 @@ TriLLIEM(
   PStest = FALSE,
   includeE = FALSE,
   Einteraction = "M",
+  Estrat = FALSE,
   includeD = FALSE,
   includeIm = FALSE,
   includeIf = FALSE,
@@ -39,13 +40,18 @@ in the model.  Example effects include:
 stratification test on the data.}
 
 \item{includeE}{A logical value indicating whether to include environment
-interaction effects.}
+interaction effects.  If set to "\code{FALSE}", any exposed counts in \code{dat} are
+combined with the respective unexposed count.}
 
 \item{Einteraction}{A string indicating what variable environmental effects
 interact with.  Can be "\code{Im}", "\code{If}", "\code{C}", or "\code{M}".}
 
+\item{Estrat}{A logical value indicating whether to use a stratified approach
+for environmental interactions equivalent to that of EMIM and/or Haplin.}
+
 \item{includeD}{A logical value indicating whether to use the hybrid
-model with controls.}
+model with controls.  If set to "\code{FALSE}", any control trios will be removed
+from the data set prior to analysis.}
 
 \item{includeIm}{A logical value indicating whether to include maternal
 imprinting in the model, equivalent to adding "\code{Im}" in the "\code{effects}" vector.}
@@ -69,5 +75,5 @@ Running a loglinear analysis of trio data.
 }
 \examples{
 res <- TriLLIEM(mtmodel = "HWE", effects = c("C", "M", "Im"), dat = example_dat4R)
-summ_trill(res)
+res \%>\% summary() \%>\% coef()
 }

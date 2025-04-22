@@ -20,8 +20,8 @@ To summarize an individual's genetic information at this gene of interest, or th
 
 As mentioned before, one's mother and father both contribute one copy of their genes to a child, which forms the basis of inheritance.
 We can quantify this with the assumption of Mendelian inheritance, based on the research of Gregor Mendel in 1865.
-To summarize Mendelian inheritance, since each parent has two copies of their genes (received from the respective grandparents of the child) but only one is inherited by the child, we assume both copies are equally likely to be transmitted to the offspring, and that the genes transmitted maternally and paternally are independent \cite{Stra99}.
-With this information, we may construct a probability distribution for a gene of an offspring based solely on the alleles of said gene in both parents.
+In Mendelian inheritance, since each parent has two copies of their genes (received from the respective grandparents of the child) but only one is inherited by the child, we assume both copies are equally likely to be transmitted to the offspring, and that the genes transmitted maternally and paternally are independent \cite{Stra99}.
+With this information, we may construct a probability distribution for a gene of an offspring based solely on parental alleles.
 
 Letting $\MM$, $\FF$, and $\CC$ represent the number of copies of an allele of interest a mother, father, and child have, respectively, we represent the marginal distribution of $\CC$ given $(\MM, \FF)$ in \cref{tab:Mendel}.
 For the remainder of this paper, we will employ this notation for $\MM$, $\FF$, and $\CC$.
@@ -45,22 +45,26 @@ For the remainder of this paper, we will employ this notation for $\MM$, $\FF$, 
 
 As discussed in \cref{chap:intro}, there is widespread academic interest in understanding how one's genes cause certain diseases.
 An intuitive method of gathering evidence of gene-disease associations would be through case-control studies, where we randomly sample a number of individuals with and without the disease from the population, and compare the distribution of the variant allele in both groups.
-However, case-control studies are susceptible to confounding from maternal effects and hidden population substructures (population stratification).
+However, case-control studies are susceptible to confounding from maternal effects and hidden population substructures (e.g.\,population stratification).
 Maternal effects, where the mother's genotype impacts the child's disease risk, has been observed empirically in congenital diseases associated with the fetal environment.
 For example, the genetic disorder phenylketonuria (PKU) in a pregnant mother can lead to heart disease in the child, hence there is a maternal effect where the variant of the allele coding for PKU in the mother increases the child's risk of disease \cite{Lee+05}.
 Another example would be spina bifida, a congenital disease associated with folate deficiency during pregnancy, where it was found that alongside the genes of the fetus, the mother's genes involved in the metabolic pathway for synthesizing folate affect risk of spina bifida in the child \cite{Hobbs+14}.
-Population stratification, on the other hand, occurs when when the population is composed of genetically distinct sub-populations, such as when there are groups descending from various ancestries or with various lifestyles based on culture \cite{Hell+17}.
-This may lead to spurious associations \cite{CardPalm03}, for example, if one sub-population has a higher disease prevalence than another while simultaneously having a larger prevalence for the variant allele, whereas a second sub-population has lower prevalences, the case group would oversample individuals from the former sub-population, while the control group would oversample individuals from the latter sub-population, leading to an incorrect conclusion that the larger prevalence of the variant allele in the case group causes the disease.
+Population stratification, on the other hand, occurs when when the population is composed of genetically distinct sub-populations, such as when there are groups descending from various ancestries \cite{Hell+17}.
+This leads to spurious associations \cite{CardPalm03} when one sub-population has a higher disease prevalence than another while simultaneously having a larger frequency for the minor allele.
+In the case-control study, the case group would oversample individuals from the former sub-population, while the control group would oversample individuals from the latter sub-population, leading to an incorrect conclusion that the larger prevalence of the variant allele in the case group causes the disease.
 While we may take maternal effects into account by genotyping mothers of cases and controls, accounting for population stratification requires more sophisticated methods, as we would need a method of ensuring that cases and controls are genetically similar.
 These considerations motivate the use of family-based/case-triad study designs, where we genotype cases and their two biological parents, allowing their parents to act as genetically similar controls.
-With this study design, the Weinberg group developed a log-linear approach \cite{Wilc+98, Wein+98, WeinUmba05} to analyzing this type of data, which has been refined to allow researchers to test for child and maternal effects, alongside various other genetically plausible factors.
+With this study design, the Weinberg group developed a log-linear approach \cite{Wein+98, WeinUmba05, Wilc+98} to analyze data.
+This approach has been extended to test for child and maternal effects, alongside various other genetically plausible factors.
 
 \section{The log-linear model} \label{sec:loglin}
 
-In the log-linear model, we model the multinomial probabilities of a triad in the population having genotypes $(\MM, \FF, \CC)$ given the child is a case using the data from a case triad study.
-We use the approximation of the multinomial distribution as a set of Poisson distributions, where, given $k$ independent poisson variables with means $\lambda_1, \ldots, \lambda_k$, the conditional distribution of the counts $Y_1, \ldots, Y_k$ given $\sum_{i=1}^k Y_i = Y_. = n$ will be
+Assume we genotype a sample of case-triads, where there are 15 $(\MM, \FF, \CC)$ categories.
+We model the probabilities for being in one of these $15$ categories using a multinomial distribution, which .
+We use the relationship between the multinomial distribution and the Poisson distributions when we condition on a fixed sample size $n$.
+Given $k$ independent Poisson variables with means $\lambda_1, \ldots, \lambda_k$, the conditional distribution of the counts $Y_1, \ldots, Y_k$ given $\sum_{i=1}^k Y_i = Y = n$ will be
 \begin{align*}
-    \Pr(Y_1 = n_1, \ldots, Y_k = n_k \mid Y_. = n) &= \frac{\Pr(Y_1 = n_1, \ldots, Y_k = n_k)}{\Pr(Y_. = n)}, \\
+    \Pr(Y_1 = n_1, \ldots, Y_k = n_k \mid Y = n) &= \frac{\Pr(Y_1 = n_1, \ldots, Y_k = n_k)}{\Pr(Y = n)}, \\
                                                    &= \frac{\prod_{i = 1}^n e^{-\lambda_i}\lambda_i^{n_i}/n_i!}{e^{-\sum_{i=1}^k \lambda_i}\left(\sum_{i=1}^k \lambda_i\right)^n/n!}, \\
                                                    &= \frac{n!}{\prod_{i=1}^k n_i!} \prod_{i=1}^k \left(\frac{\lambda_i}{\sum_{j=1}^k \lambda_j}\right)^{n_i},
 \end{align*}
@@ -68,19 +72,23 @@ which is a multinomial distribution of sample size $n$ and $k$ categories, with 
 We wish to model $\pi_{\MM, \FF, \CC} = \Pr(\MM, \FF, \CC \mid \DD = 1)$, where $\DD$ is a binary variable representing the child's disease status.
 We can write
 \begin{equation}\label{eq:bayes}
-    \Pr(\MM, \FF, \CC \mid \DD = 1) = \frac{\Pr(\DD = 1 \mid \MM, \FF, \CC) \Pr(\CC \mid \MM, \FF) \Pr(\MM, \FF)}{\Pr(\DD = 1)},
+    \Pr(\MM, \FF, \CC \mid \DD = 1) = \frac{\Pr(\DD = 1 \mid \MM, \FF, \CC) \Pr(\CC \mid \MM, \FF) \Pr(\MM, \FF)}{\Pr(\DD = 1)}.
 \end{equation}
-hence as a log-linear model, we can express this as
+Taking the natural logarithm of both sides, we can express this as a log-linear model,
 \begin{equation}\label{eq:loglin}
-    \ln(\pi_{\MM, \FF, \CC}) = \ln\left(\Pr(\DD = 1 \mid \MM, \FF, \CC)\right) + \ln\left(\Pr(\CC \mid \MM, \FF)\right) + \ln\left(\Pr(\MM, \FF)\right) - \ln(\alpha)
+    \ln(\pi_{\MM, \FF, \CC}) = \ln\left(\Pr(\DD = 1 \mid \MM, \FF, \CC)\right) + \ln\left(\Pr(\CC \mid \MM, \FF)\right) + \ln\left(\Pr(\MM, \FF)\right) - \ln(\alpha).
 \end{equation}
-The terms in this model are readily interpretable: $\Pr(\DD = 1 \mid \MM, \FF, \CC)$ is the probability of disease based on the trio's genotypes (whose expression is how we associate the variant allele with disease), $\Pr(\CC \mid \MM, \FF)$ is the Mendelian inheritance probabilities (see \cref{tab:Mendel}), and $\Pr(\MM, \FF)$ is the mating type probability for the mother and father.
-The final term, $\alpha = \Pr(\DD = 1)$, is the prevalence of disease, which cannot be estimated from case-triad data, hence this term is uninformative.
-To express the mating type probabilities, we must provide a mating type model which captures our assumptions about how the variant allele is distributed in the population, independent of disease status.
-This lets us assign a baseline probability for each $(\MM, \FF)$ pairing of occuring in the population.
-We outline three population mating type models, from weakest to strongest in terms of assumptions: Hardy-Weinberg equilibrium (HWE), Mating Symmetry (MS), and Mating Assymetry (MaS).
+The terms in this model are readily interpretable.
+$\Pr(\DD = 1 \mid \MM, \FF, \CC)$ is the probability of disease based on the trio's genotypes; we describe how to model this term in \cref{sec:diseasemodel}.
+$\Pr(\CC \mid \MM, \FF)$ is the Mendelian inheritance probabilities (given in \cref{tab:Mendel}).
+$\Pr(\MM, \FF)$ is the probability of parental genotypes, which we call mating type probability, whose distribution is given in \cref{sec:mt}.
+The final term, $\alpha = \Pr(\DD = 1)$, is the prevalence of disease.
 
 \subsection{Mating type models}\label{sec:mt}
+
+To express the mating type probabilities, we must provide a mating type model which captures our assumptions about how the variant allele is distributed in the population, independent of disease status.
+This lets us assign a baseline probability for each $(\MM, \FF)$ occuring in the population.
+We outline three population mating type models, from weakest to strongest in terms of assumptions: Hardy-Weinberg equilibrium (HWE), Mating Symmetry (MS), and Mating Assymetry (MaS).
 
 For the HWE model, since each generation of individuals pass on their alleles to the next generation, we expect that the population would converge to a specific distribution in genotypes based on the prevalence of the variant allele.
 Letting $p$ represent the prevalence of the variant allele, $1-p$ is the prevalence of non-variant alleles.
@@ -127,7 +135,7 @@ We summarize the proportions of every $(\MM, \FF)$ category under each mating ty
 \end{tabular}
 \end{table}
 
-\subsection{Expressing disease risk based on genotype}
+\subsection{Expressing disease risk based on genotype}\label{sec:diseasemodel}
 
 For our log-linear model in \cref{eq:loglin}, we must also formulate an expression for $\Pr(\DD = 1 \mid \MM, \FF, \CC)$, which encompasses how the variant allele could influence the child's risk for disease.
 Based on our discussion in \cref{sec:studies}, we can introduce child and maternal effects by using the multiplicative model
@@ -175,7 +183,7 @@ $5$: &           &                               \\
 \end{tabular}%
 \end{table}
 
-\subsection{Extensions to the model}
+\subsection{Extensions to the model}\label{sec:extensions}
 
 The log-linear model allows us to make several modifications to the study design and/or the model relatively intuitively.
 For example, we could extend the model to account for maternal and paternal imprinting (also called parent-of-origin effects), where risk of disease is conditional on the parent contributing the variant allele.
@@ -262,14 +270,14 @@ We give an abbreviated example of the multinomial distribution for the model in 
             &                   &       &     &     & \multicolumn{3}{c}{$\Pr(\MM, \FF, \CC, \Op, \EE \mid \DD)$}                     \\ \cmidrule(l){6-8} 
 Mating type & $(\MM, \FF, \CC)$ & $\Op$ & $E$ & $D$ & HWE             & MS         & MaS                           \\ \midrule
 $0$ & $(2,2,2)$ & $\MM, \FF$ & $1$ & $1$ & $\kappa p^4R^2S^2V^2I_{\MM}/\alpha$      & $\kappa\mu_0R^2S^2V^2I_{\MM}/\alpha$ & $\kappa\nu_0R^2S^2V^2I_{\MM}/\alpha$    \\
-$1$ & $(2,1,2)$ & $\MM, \FF$ & $1$ & $1$ & $\kappa p^3(1-p)R^2S^2V^2I_{\MM}/\alpha$ & $\kappa\mu_1R^2S^2V^2I_{\MM}/(2\alpha)$ & $\kappa\nu_1C_1R^2S^2V^2I_{\MM}/(2\alpha)$ \\
+$1$ & $(2,1,2)$ & $\MM, \FF$ & $1$ & $1$ & $\kappa p^3(1-p)R^2S^2V^2I_{\MM}/\alpha$ & $\kappa\mu_1R^2S^2V^2I_{\MM}/(2\alpha)$ & $\kappa\nu_1R^2S^2V^2I_{\MM}/(2\alpha)$ \\
 \multicolumn{8}{c}{$\vdots$}                                                                                       \\
-$3$ & $(1,1,1)$ & $\MM$      & $1$ & $1$ & $\kappa p^2(1-p)^2RSVI_{\MM}/\alpha$     & $\kappa\nu_5RSVI_{\MM}/(4\alpha)$       & $\kappa\mu_3RSVI_{\MM}/(4\alpha)$          \\
-$3$         & $(1,1,1)$         & $\FF$ & $1$ & $1$ & $\kappa p^2(1-p)^2RSV/\alpha$ & $\kappa\nu_5RSV/(4\alpha)$ & $\kappa\mu_3RSV/(4\alpha)$                    \\
+$3$ & $(1,1,1)$ & $\MM$      & $1$ & $1$ & $\kappa p^2(1-p)^2RSVI_{\MM}/\alpha$     & $\kappa\mu_3RSVI_{\MM}/(4\alpha)$       & $\kappa\nu_5RSVI_{\MM}/(4\alpha)$          \\
+$3$         & $(1,1,1)$         & $\FF$ & $1$ & $1$ & $\kappa p^2(1-p)^2RSV/\alpha$ & $\kappa\mu_3RSV/(4\alpha)$ & $\kappa\nu_5RSV/(4\alpha)$                    \\
 \multicolumn{8}{c}{$\vdots$}                                                                                       \\
-$4$         & $(0,1,0)$         &       & $1$ & $1$ & $\kappa p(1-p)^3/\alpha$      & $\kappa \nu_7/(2\alpha)$    & $\kappa\mu_4 \left(1 - C_4 \right)/(2\alpha)$ \\
+$4$         & $(0,1,0)$         &       & $1$ & $1$ & $\kappa p(1-p)^3/\alpha$      & $\kappa \mu_4/(2\alpha)$    & $\kappa\nu_7/(2\alpha)$ \\
 \multicolumn{8}{c}{$\vdots$}                                                                                       \\
-$2$ & $(2,0,1)$ & $\MM$      & $0$ & $1$ & $p^2(1-p)^2RS^2I_{\MM}/\alpha$    & $\kappa\nu_3RS^2I_{\MM}/\alpha$      & $\kappa\mu_2 C_2RS^2I_{\MM}/\alpha$     \\
+$2$ & $(2,0,1)$ & $\MM$      & $0$ & $1$ & $\kappa p^2(1-p)^2RS^2I_{\MM}/\alpha$    & $\kappa\mu_2RS^2I_{\MM}/\alpha$      & $\kappa\nu_3 RS^2I_{\MM}/\alpha$     \\
 \multicolumn{8}{c}{$\vdots$}                                                                                       \\
 $5$         & $(0,0,\textrm{--})$         &       & $0$ & $0$ & $(1-p^4)$       & $\mu_5$    & $\nu_8$                       \\ \bottomrule
 \end{tabular}%

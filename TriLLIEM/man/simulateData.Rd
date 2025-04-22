@@ -11,20 +11,19 @@ simulateData(
   S = c(1, 1, 1),
   V = c(1, 1, 1),
   mtCoef = c(1, 1, 1),
-  mtmodel = "MS",
   Im = 1,
   If = 1,
   includeE = FALSE,
   Einteraction = "M",
-  prE = 0,
+  propE = 0,
   includeControl = FALSE,
-  prControl = 0,
-  prE.control = prE,
+  nControl = 0,
+  propE.control = propE,
   includePopStrat = FALSE,
   numPop = 1,
   Fst = 0.005,
-  prCase.byPop = NULL,
-  prControl.byPop = NULL
+  prev.byPop = NULL,
+  prop.byPop = NULL
 )
 }
 \arguments{
@@ -43,9 +42,6 @@ for 0, 1, and 2 copies of the risk allele, respectively.}
 
 \item{mtCoef}{Mating type coefficients.}
 
-\item{mtmodel}{Mating type of the population, can be "\code{HWE}" for Hardy-Weinberg
-Equilibrium, "\code{MS}" for Mating Symmetry, and "\code{MaS}" for Mating Asymmetry.}
-
 \item{Im}{Maternal imprinting effect.}
 
 \item{If}{Paternal imprinting effect.}
@@ -56,20 +52,23 @@ should be included in the simulation.}
 \item{Einteraction}{A string indicating what variable environmental effects
 interact with.  Can be "\code{Im}", "\code{If}", "\code{C}", or "\code{M}".}
 
-\item{prE}{Probability of a trio to have the environmental effects.}
+\item{propE}{Proportion of case trios in the environmental exposure group by
+population, assumed equal to case population proportion.}
 
 \item{includeControl}{A logical value indicating whether controls should
 be included in the simulations.}
 
-\item{prControl}{Probability of a trio to be a control trio.}
+\item{nControl}{Number of control trios, must be less than ntrios.}
 
-\item{prE.control}{Probablity of a trio to be a control trio with the
-environmental effect.}
+\item{propE.control}{Proportion of control trios in the environmental exposure
+group by population, assumed equal to case population proportion.}
 
 \item{includePopStrat}{A logical value indicating whether to include
 population stratification in the simulation.}
 
-\item{prControl.byPop}{}
+\item{prev.byPop}{Prevalence of cases in each sub population.}
+
+\item{prop.byPop}{Proportion of each sub population, must sum to 1.}
 }
 \value{
 A data frame of the same format as \link{example_dat4R}
