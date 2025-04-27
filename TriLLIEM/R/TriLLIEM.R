@@ -108,7 +108,9 @@ TriLLIEM <- function(mtmodel = "MS", effects = c("C", "M"), dat, PStest = FALSE,
     }
   } else {
     # If includeE is FALSE, treat all counts as unexposed
-    dat <- dat %>% dplyr::mutate(E = 0)
+    dat <- dat %>%
+      summarize(count = sum(count), .by = c(-E, -count)) %>%
+      dplyr::mutate(E = 0)
   }
 
   # Hybrid model

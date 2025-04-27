@@ -1,71 +1,162 @@
 \chapter{Simulation study}\label{chap:simstudy}
 
-In this chapter...
+In this chapter, we use \texttt{TriLLIEM} to conduct several simulation studies.
+First, we validate the log-linear model's performance by simulating and analyzing data under a large variety of conditions using \texttt{TriLLIEM}, evaluating model power and Type 1 error rate.
+We then perform a similar study on data simulated with population stratification to verify whether the log-linear model produces spurious gene-environment interactions.
 
 \section{Model validation simulations}
+
 \subsection{Data simulation conditions}
 
-To test the model accuracy of the log-linear model in \texttt{TriLLIEM}, we simulated data under 84 conditions with just $2,000$ case trios, and again with $1,000$ case and $1,000$ control trios, with these conditions listed in \cref{tab:conditions}.
+Having shown that \texttt{TriLLIEM} is consistent with EMIM and Haplin in \cref{sec:compare}, we utilize its ability to easily simulate and analyze data to validate the log-linear model's performance.
+We specifically examine performance of \texttt{TriLLIEM}'s imprinting model, since it is more flexible than Haplin's.
+Another major point of interest is performance of the non-stratified gene-environment interaction model, which is not available in EMIM or Haplin.
+With these considerations in mind, we simulated data under $84$ distinct conditions, summarized in \cref{tab:summcond}.
+%%
+% Please add the following required packages to your document preamble:
+% \usepackage{booktabs}
+\begin{table}[htb]
+\centering
+\caption{Parameter values in our model validation simulation study.  Only $1$ of the main effects ($\Rp, \Sp, \Vp, I_{\MM}, I_{\FF}$) were non-null.  All mating asymmetry parameters were set to be equal.  In total, this comes out to $12$ conditions without exposures and $72$ conditions with exposures.  For an exact table of all conditions explored, see \cref{tab:conditions}.}
+\label{tab:summcond}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Parameter                                     & Assigned values    \\ \midrule \vspace{0.5em}
+$\Rp$                                           & $1, 1.15$          \\ \vspace{0.5em}
+$\Sp$                                           & $1$                \\ \vspace{0.5em}
+$\Vp$                                           & $1, 1.5, 1.6$      \\ \vspace{0.5em}
+$I_{\MM}$                                     & $1, 1.2, 1.4$      \\ \vspace{0.5em}
+$I_{\FF}$                                     & $1, 1.2, 1.4$      \\ \vspace{0.5em}
+\begin{tabular}[c]{@{}l@{}}Exposure frequency\\ (when applicable)\end{tabular}          & $0.3, 0.5$         \\ \vspace{0.5em}
+\begin{tabular}[c]{@{}l@{}}Mating asymmetry parameters\\ ($C_1, C_2, C_4$)\end{tabular} & $0.85, 1, 1.15$    \\ \vspace{0.5em}
+Environmental interaction parameter           & $I_{\FF}, I_{\MM}$ \\ \bottomrule
+\end{tabular}
+\end{table}
+%%
+For each condition, we simulated $2,000$ data sets with $2,000$ case trios to test the case-triad model, and another $2,000$ data sets with $1,000$ case and $1,000$ control trios to test the hybrid model.
 In every simulation, we set the minor allele frequency to be $0.3$.
-These conditions were chosen so that we could test \texttt{TriLLIEM} under a diverse set of populations, and see how it performs in comparison to \texttt{EMIM} and \texttt{Haplin}.
-More specifically, we looked at conditions where at most one of $\Rp$, $\Vp$ (if environmental exposures were included), $I_{\MM}$, or $I_{\CC}$ were non-null to verify our model performance in many simple cases.
-Most notably, we were able to simulate both parent-of-origin by environment interactions, and model them under a variety of mating type conditions using \texttt{TriLLIEM}, a task which would be limited to the HWE model for \texttt{Haplin}, or which would require manually written scripts for \texttt{EMIM}.
-We also considered several different cases for the mating asymmetry coefficients, $C_1$, $C_2$, and $C_4$ (see \cref{sec:mt}, UNWRITTEN SECTION IN BACKGROUND, WILL FILL IN), which were all set to be one of $0.85$ (more biological fathers having the allele), $1$ (mating symmetry), or $1.15$ (more biological mothers having the allele).
-We did not examine conditions where $\Sp \not= 1$ or where there were maternal gene-environment effects, as the performance of the log-linear model under these conditions have been thoroughly examined in \cite{Huds19}.
-
-\newpage
-\input{tables/conditions_table.tex}
-\newpage
+We considered several different cases for the mating asymmetry coefficients, $C_1$, $C_2$, and $C_4$ (see the Bourgey et al.\cite{Bour+11} column of \cref{sec:mt}), to compare model performance under varying mating asymmetry levels.
+Conditions where $\Sp \not= 1$ or where maternal gene-environment effects were not included, as the performance of the log-linear model under these conditions have been thoroughly examined by Hudson \cite{Huds19}.
 
 \subsection{Statistical analysis}
 
-For each row of \cref{tab:conditions}, we simulated $2,000$ data sets of only cases, and $2,000$ data sets of cases and controls.
-We then analyzed each data set using \texttt{TriLLIEM} under the HWE, MS, and MaS (when controls were avilable) models.
+We analyzed each data set using \texttt{TriLLIEM} under the HWE, MS, and MaS (when controls were avilable) mating type models.
 For the effects included in the model, we always had $\CC$ and $\MM$, as well as the appropriate environmental interaction term.
-$I_{\MM}$ and $I_{\FF}$ were included in the model if the conditions the data set was using had $I_{\MM} \not = 1$ or $I_{\FF} \not = 1$, respectively, \emph{OR} if they were the acting environmental interaction term was.
-In data sets with environmental exposures, we ran both the non-stratified model (where we do not include the $\EE:\MM$ term) and the stratified model (where we do include the $\EE:\MM$ term), in order to verify that our stratified results agreed with \texttt{EMIM}'s and to examine the effect this $\EE:\MM$ term has on model performance when imprinting effects are present.
-For example, for the data sets simulated from row $60$ of \cref{tab:conditions}, we had $\CC$, $\MM$, $I_{\MM}$, and $\EE:I_{\MM}$ in the non-stratified model, and $\CC$, $\MM$, $I_{\MM}$, $\EE:\MM$, and $\EE:I_{\MM}$ in the stratified model.
+$I_{\MM}$ and $I_{\FF}$ were included in the model if the conditions the data set was using had $I_{\MM} \not = 1$ or $I_{\FF} \not = 1$, respectively, \emph{OR} if they were the acting environmental interaction.
+Note that this means we do not consider cases where the model was improperly defined (e.g., using maternal imprinting by environment interactions when the data was simulated with paternal imprinting by environment interactions), as the purpose of this study is to validate the model's accuracy when correctly defined.
+In data sets with environmental exposures, we ran both the non-stratified model (where we do not include the $\EE:\MM$ term) and the stratified model (where we do include the $\EE:\MM$ term), in order to compare the accuracy of both methods.
+For example, one of our conditions had $\Rp=\Sp=I_{\MM}=I_{\FF}=1$, $\Vp = 1.6$, $C_1 = C_2 = C_4 = 1.15$, an environmental exposure proportion of $0.5$, and a maternal imprinting by environment interaction.
+To analyze the case-triad and hybrid data for this case, we took $\CC$, $\MM$, $I_{\MM}$, and $\EE:I_{\MM}$ as terms in the non-stratified model, and $\CC$, $\MM$, $I_{\MM}$, $\EE:\MM$, and $\EE:I_{\MM}$ as terms in the stratified model.
 
 From the results of our analyses, we computed the average relative bias of each term in the model across all $2,000$ simulations, as well as the rejection rates for each parameter at the $0.05$ significance level.
 We calculate the relative bias for each term in the model using the equation
 \begin{equation}
-  \text{Relative Bias} = \frac{\hat\theta - \theta}{\theta},
+  \text{Relative Bias} = \frac{\hat\beta - \beta}{\beta},
 \end{equation}
-where $\hat\theta$ is the estimated risk parameter, and $\theta$ is the true value of the risk parameter.
-We show these results for all the relevant parameters in \cref{tab:bias_noe_noc,tab:reject_noe_noc,tab:bias_noe_c,tab:reject_noe_c,tab:bias_eim_noc,tab:reject_eim_noc,tab:bias_eif_noc,tab:reject_eif_noc,tab:bias_eim_c,tab:reject_eim_c,tab:bias_eif_c,tab:bias_eif_c}.
+where $\hat\beta$ is the estimated risk parameter, and $\beta$ is the true value of the risk parameter used to simulate the data.
 
 \section{Simulation results}
-\subsection{Mating type selection}
-The mating asymmetry parameters have a major impact on the model's performance when we do not use the mating asymmetry model.
-For example, the results for rows with ID 1 and 5 in \cref{tab:bias_noe_noc,tab:bias_noe_c}, where the data is simulated under the null model but mating asymmetry is present, show that under the HWE and MS mating type models, $\MM$ is biased negatively and positively respectively, as this is the only way for the model to account for the additional counts in the where $\MM_A > \FF_A$ relative to $\MM_A < \FF_A$.
-This deviance from the true value is statistically significant, based on the high rejection rates for $\MM$ in these rows in \cref{tab:reject_noe_noc,tab:reject_noe_c}, however in the MaS model, the bias and rejection rates fall much lower in magnitude, going to the same scale as their counterparts in rows with ID 3 (null data with mating symmetry), emphasizing how undetected mating asymmetry can have major effects on the model's Type 1 error rate.
-This pattern in data with mating asymmetry appears to repeat itself in all our results, where $\MM$ is significantly biased away from its true value in the direction of the mating asymmetry parameters.
-The effects of mating asymmetry appear to only impact model performance on the maternal effects, for instance, comparing rows with ID 15, 19, and 23 in \cref{tab:reject_eim_noc,tab:reject_eim_c}, rows with different mating asymmetry parameter values where the data was simulated with $V = 1.5$ under a $\EE:I_{\MM}$ interaction, rejection rates for $\CC$, $\EE:\MM$ (in the stratified model), $\EE:I_{\MM}$, and $I_{\MM}$ all appear similar, aside from the specific case of the child and imprinting main effect when using the MS model while controls are present, where the presence of mating asymmetry seems to result in more false rejections for $\CC$ and $I_{\MM}$.
-This same pattern can be seen in the rows with ID 33, 37, and 41 in \cref{tab:reject_eif_noc,tab:reject_eif_c}, the $\EE:I_{\FF}$ interaction counterpart of the previous rows, including the larger number of false rejections for $I_{\FF}$ in the MS model when controls are present, though the rejection rate for $\CC$ now appears consistent.
-It is extremely puzzling why this exception occurs only when controls are present under a mating symmetry model, though it seems to occur consistently for several other similar conditions of our data when imprinting is included in the model.
-\subsection{Imprinting effects}
-Examining the ability of the log-linear model to correctly identify imprinting effects, we observe a good deal of power when the model is properly specified.
-For instance, the results for ID 11, where there is no mating asymmetry and $I_{\MM} = 1.4$, in \cref{tab:reject_noe_noc,tab:reject_noe_c} show that our power for $I_{\MM}$ is around 75\% for both the HWE and MS models without controls, and around 60\% for the HWE, MS, and MaS models with controls.
-These figures do drop to roughly 32\% and 22\% respectively when $I_{\MM} = 1.2$ (ID 8), though this is expected given how proportionally few counts in a data set would be informative towards imprinting.
-Now assessing how the model detects imprinting by environment interaction effects in \cref{tab:reject_eim_noc,tab:reject_eim_c,tab:reject_eif_noc,tab:reject_eif_c}, looking at the rows where our true effects are environment by imprinting or imprinting effects, we can conclude that the non-stratified model has substantially better power and fewer false positives than the stratified model when fitting imprinting, irrespective of mating type model, presence of mating asymmetry, or presence of controls.
-This is a major advantage that \texttt{TriLLIEM} has over \texttt{EMIM} and \texttt{Haplin}, as the latter can only fit stratified models when trying to model environmental interactions.
 
-\newpage
-\input{tables/bias_noe_noc}
-\input{tables/reject_noe_noc}
-\newpage
-\input{tables/bias_noe_c}
-\input{tables/reject_noe_c}
-\newpage
-\input{tables/bias_eim_noc}
-\input{tables/reject_eim_noc}
-\input{tables/bias_eif_noc}
-\input{tables/reject_eif_noc}
-\newpage
-\input{tables/bias_eim_c}
-\input{tables/reject_eim_c}
-\input{tables/bias_eif_c}
-\input{tables/reject_eif_c}
+In this section, we summarize major observations from the results of our simulation study.
+To view the complete results displaying the average biases and rejection rates, please see \cref{tab:bias_noe_noc,tab:reject_noe_noc,tab:bias_noe_c,tab:reject_noe_c,tab:bias_eim_noc,tab:reject_eim_noc,tab:bias_eif_noc,tab:reject_eif_noc,tab:bias_eim_c,tab:reject_eim_c,tab:bias_eif_c,tab:bias_eif_c}.
+
+\subsection{Mating type selection}
+
+Presence of mating asymmetry has a major impact on the model's performance when we do not use the mating asymmetry model.
+In our simulations with $C_1 = C_2 = C_4 = 0.85$, relative bias for $\MM$ when the mating type model assumed HWE or MS was observed to always be between $-0.22$ and $-0.2$ for the case-triad model, and between $-0.17$ and $-0.11$ when control-triads were present.
+Likewise, when $C_1 = C_2 = C_4 = 1.15$, this bias ranges between $0.25$ and $0.28$ for the case-triad model, and $0.11$ and $0.19$ for the hybrid model.
+This bias is due to the unaccounted mating asymmetry, as when using the MaS mating type model, the largest observed relative bias had magnitude $\sim 1\%$, and with the data simulated without mating asymmetry, the relative bias size for $\MM$ never exceeded $1\%$ in the both the HWE and MS mating type models.
+The deviance from the true value is statistically significant, as false rejection rates for $\MM$ when the mating type parameters are not $1$ in HWE and MS mating type models were always $> 15\%$, far exceeding our expected Type 1 error rate of $5\%$.
+
+Unaccounted mating asymmetry appears to always bias estimates of $\MM$, but it also appears to further impact models for imprinting by environment interactions when controls are present.
+An example of such conditions where this can be observed are when we compare data simulated with no effects and an exposure proportion of $0.3$.
+The results of models with $\CC, \MM, I_{\MM}, \EE:I_{\MM}$ as effects on data with these conditions have inflated rejection rates for $\CC$ and $I_{\MM}$ when there are control-triads under the HWE and MS mating type models (alongside the inflated rates for $\MM$ that we previously discussed).
+The rejection rates for these models are shown in \cref{fig:reject_mas_mimpE}.
+Type 1 error under the HWE and MS mating type models are $>18\%$ for data with simulated mating asymmetry.
+The inflated rates for $\CC$ and $I_{\MM}$ are less pronounced when analyzing the respective data without mating asymmetry, as the false rejection rates fall to $<9\%$ for both.
+With only case-triad data, we no longer see this inflation when mating asymmetry is present, despite the  model's genetic effects being the same.
+\begin{figure}
+  \caption{Average rejection rates for $\CC$ and $I_{\MM}$ when modelling $\CC, \MM, I_{\MM}, \EE:I_{\MM}$ in null data with various degrees of mating asymmetry.  The red line represents the desired Type 1 error rate of $5\%$.\label{fig:reject_mas_mimpE}}
+  \includegraphics[width=\textwidth]{plots/reject_mas_mimpE.pdf}
+\end{figure}
+\begin{figure}
+  \caption{Average rejection rates for $\CC$ and $I_{\FF}$ when modelling $\CC, \MM, I_{\FF}, \EE:I_{\FF}$ in null data with various degrees of mating asymmetry.  The red line represents the desired Type 1 error rate of $5\%$.\label{fig:reject_mas_fimpE}}
+  \includegraphics[width=\textwidth]{plots/reject_mas_fimpE.pdf}
+\end{figure}
+Interestingly, when interchanging maternal imprinting with paternal imprinting, the inflated rejection rates for $I_{\FF}$ remain, but $\CC$'s rejection rate now remains $<8\%$.
+We display this in \cref{fig:reject_mas_fimpE}.
+It is extremely puzzling why this exception occurs only when controls are present under a mating symmetry model, or why child effects are only affected when maternal imprinting is present rather than paternal.
+This is a pattern across other similar conditions of our data when imprinting is included in the model.
+
+We can conclude from these results that mating asymmetry does not just impact the model's performance in detecting maternal effects, which is well-known \cite{Bour+11}, but can also influence other genetic effects in the model when analyzing environmental interactions.
+
+\subsection{Stratified vs.\ non-stratified environmental interactions}
+
+Our simulations with environmental interactions were run using both the stratified and non-stratified approaches.
+While the stratified approach has been applied for modelling maternal gene-environment and parent-of-origin by environment interactions \cite{Huds19, Juge+12}, our non-stratified approach has not been previously assessed.
+We compare the two approaches' Type 1 error and power when detecting parent-of-origin by environment interactions to assess the validity of our non-stratified approach.
+The results for the maternal imprinting by environment and paternal imprinting by environment models are shown in \cref{fig:stratcomp_Im,fig:stratcomp_If}, respectively.
+
+\begin{figure}[p]
+  \caption{Comparison between rejection rates and relative biases of the non-stratified (unhatched) and stratified (hatched) models for maternal imprinting by environment interactions.  Data was simulated with other genetic risks set to $1$, no mating asymmetry, and analyzed using a HWE mating asymmetry model with $\CC, \MM, I_{\MM}, \EE:I_{\MM}$ as genetic effects (alongside $\EE:\CC, \EE:\MM$ under the stratified model).  The red line represents the desired Type 1 error rate of $5\%$.\label{fig:stratcomp_Im}}
+  \includegraphics[width=\textwidth]{plots/stratcomp_Im.pdf}
+\end{figure}
+\begin{figure}
+  \caption{Comparison between rejection rates and relative biases of the non-stratified (unhatched) and stratified (hatched) models for paternal imprinting by environment interactions.  Data was simulated with other genetic risks set to $1$, no mating asymmetry, and analyzed using a HWE mating asymmetry model with $\CC, \MM, I_{\MM}, \EE:I_{\FF}$ as genetic effects (alongside $\EE:\CC, \EE:\MM$ under the stratified model).  The red line represents the desired Type 1 error rate of $5\%$.\label{fig:stratcomp_If}}
+  \includegraphics[width=\textwidth]{plots/stratcomp_If.pdf}
+\end{figure}
+
+From these results, we see that the relative bias for $V$ under maternal/paternal imprinting by environment interactions is low in both stratified and unstratified models, not exceeding $1.5\%$.
+The Type 1 error rate is also low in both approaches, with it not exceeding $7\%$ in the stratified approach and $6\%$ in the unstratified approach.
+However, when examining power, we find that the unstratified model has substantially lower Type 2 error than the stratified model.
+For example, with $2,000$ case-triads simulated with $V = 1.5$ and a $30\%$ environmental exposure rate under maternal imprinting by environment interactions, the unstratified model had a power of $88\%$, while the stratified model had a power of $35\%$.
+We find similar observations with $1,000$ case-triads and control-triads under the same conditions, with a power of $69\%$ and $26\%$ for the unstratified and stratified models, respectively (the reduction in power is expected, as the number of informative case-triads is lower).
+This highlights a major advantage of \texttt{TriLLIEM}; it enables users to easily use the unstratified approach, which we show has better power than the stratified approach when modelling specific parent-of-origin by environment interactions.
+
+Haplin uses a modified version of the stratified approach when modelling parent-of-origin effects which has better power than the basic stratified approach \cite{Gjer+18}.
+However, it does not allow users to test $\EE:I_{\MM}$ or $\EE:I_{\FF}$ interactions individually, instead comparing the ratios of maternal and paternal imprinting in the $\EE$ strata.
+Child effects also cannot be tested for simultaneously, as this approach requires $I_{\MM}$ and $I_{\FF}$ to both be present.
+This highlights another advantage of the unstratified approach, which is its flexibility.
+While testing for environmental interactions, we may also concurrently include other genetic effects in the model and perform Wald tests.
+
+For example, we can test for child effects using a non-stratified model with maternal imprinting by environment interactions (using $\CC, \MM, I_{\MM}, \EE:I_{\MM}$ as effects), the results of which we show in \cref{fig:stratcomp_C}.
+We see that the relative error for $\CC$ in this approach is low, never exceeding $0.3\%$.
+In significance tests, we find that the Type 1 error rate is between $5\%--8\%$, which slightly exceeds our desired Type 1 error rate of $5\%$.
+For the power, we observe that for data simulated with $R = 1.15$, power is roughly $47\%$ when the exposure rate is $30\%$, and $40\%$ when the exposure rate is $50\%$.
+While certainly not ideal, results such as these could be informative towards model selection.
+These Type 1 and Type 2 error rates can be improved by removing insignificant terms from the model, such as the $\EE:I_{\MM}$ interaction or the $I_{\MM}$ term when appropriate.
+This can be done via a likelihood ratio test, which is not currently implemented in \texttt{TriLLIEM}, though it is planned as future work.
+
+\begin{figure}[htb]
+  \caption{Rejection rates and relative biases for $\CC$ in the non-stratified model for maternal imprinting by environment interactions.  Data was simulated with all genetic risks aside from $\CC$ set to $1$, no mating asymmetry, and analyzed using a HWE mating asymmetry model with $\CC, \MM, I_{\MM}, \EE:I_{\FF}$ as genetic effects.  The red line represents the desired Type 1 error rate of $5\%$.\label{fig:stratcomp_C}}
+  \includegraphics[width=\textwidth]{plots/stratcomp_C.pdf}
+\end{figure}
+
+\subsection{Imprinting effects}
+
+Examining the ability of the log-linear model to correctly identify imprinting effects, we find that the model's power for detecting these effects are fair.
+Similar to our previous assessment for child effects, we display results for modelling true imprinting effects under an imprinting by environment interaction model in \cref{fig:reject_imp}.
+Relative bias is low, being consistently $<1\%$, and power increases as the magnitude of $I_{\MM}$'s true value increases, with case-triad data with $30\%$ exposure rates having a power of $36\%$ when $I_{\MM} = 1.2$ and $79\%$ when $I_{\MM} = 1.4$.
+From the Type 1 error rates, we see that at a $30\%$ exposure rate, the false rejection rate for $I_{\MM}$ is $9\%$ with $2,000$ case-triads and $8\%$ with $1,000$ case-triads and $1,000$ control-triads.
+This false rejection rate is concerning, though again, can be reduced by again removing insignificant terms from the model, such as $\CC$ or $\MM$ when applicable.
+\clearpage
+\begin{figure}[htb!]
+  \caption{Rejection rates and relative biases for $I_{\MM}$ in our simulation study on true maternal imprinting.  Modelled genetic effects are $\CC, \MM, I_{\MM}$, and $\EE:I_{\MM}$, with a HWE mating type on data simulated without mating asymmetry.\label{fig:reject_imp}}
+\includegraphics[width=\textwidth]{plots/reject_imp.pdf}
+\end{figure}
+
+Another possible source of concern would be Type 1 error rates for imprinting when there is a true imprinting by environment interaction (but no main imprinting effect).
+We analyzed such data with $\CC, \MM, I_{\MM}$ as genetic effects, and $\EE:I_{\MM}$ as an interaction, with the results shown in \cref{fig:reject_impE}.
+
+\begin{figure}[htb!]
+  \caption{Rejection rates and relative biases for $I_{\MM}$ in our simulation study on true maternal imprinting by environment interactions.  Modelled genetic effects are $\CC, \MM, I_{\MM}$, and $\EE:I_{\MM}$, with a HWE mating type on data simulated without mating asymmetry.\label{fig:reject_impE}}
+  \includegraphics[width=\textwidth]{plots/reject_impE.pdf}
+\end{figure}
+
+From these results, we find that the relative bias never exceeds $0.6\%$ and both the Type 1 error rate and the relative bias do not appear to be influenced by the magnitude of the imprinting by environment interaction.
+The Type 1 error rate is again concerning, reaching nearly $10\%$ with $30\%$ exposure rates and $2,000$ case-triads, though this could again be attributed to the model analyzing too many terms concurrently.
+
+Given that there are relatively few categories of the data that are informative towards imprinting effects, we find that the model can accurately quantify these imprinting effects, though its Type 1 error rate for the significance of these effects requires users to be cautious when parameterizing their model.
 
 \section{Population stratification simulation}\label{sec:popstrat}
 
@@ -104,22 +195,23 @@ Likewise, we repeat for the other combinations of $D$ and $E$ in \cref{eq:popstr
   \Pr(X = i, \EE = 0 \mid D = 0) &= \frac{(1 - \alpha_i) (1 - \varepsilon_{i, 0}) \omega_i}{\sum_{j = 1}^2 (1 - \alpha_j) \omega_j }.\end{align}
 \end{subequations}
 
-In each sub-population, we set the minor allele to have no effect on one's disease risk (i.e. all effects were $1$), and set all mating asymmetry parameters to $1$, then sampled from the group based on the probabilities in row X of \cref{tab:probs} (TABLE NOT YET ADDED, WILL ADD SOON).
-We then took a multinomial sample in the $1,000$ cases, using the probabilities in \cref{eq:popstrat,eq:popstratex}, for the number of cases from population $1$ and have $\EE = 1$, population $2$ and $\EE = 0$, etc., and repeated this for the controls.
+In each sub-population, we set the minor allele to have no effect on one's disease risk (i.e. all effects were $1$), and set all mating asymmetry parameters to $1$, then sampled from the group using the HWE mating type and Mendelian inheritance probabilities in \cref{tab:mt,tab:Mendel}, respectively.
+We then took a multinomial sample in the $1,000$ cases, using the probabilities in \cref{eq:popstrat,eq:popstratex}, for the number of cases from population $1$ with $\EE = 1$, population $2$ with $\EE = 0$, etc., and repeated this for the controls.
 Then within each of these $8$ groups, we simulated the number of trios in each genotype category, and then combined the two sub-populations to form our final data set.
 $2,000$ data sets were simulated in this manner.
 We then ran \texttt{TriLLIEM} using the maternal environment interaction model and both imprinting by environment interaction models, with $\CC$ and $\MM$ always being included.
-This was repeated on the HWE, MS, and MaS models.
+This was repeated using the HWE, MS, and MaS mating type models.
 With this setup, we can examine how hidden population substructures affect the log-linear model's performance.
 
-The results from our stratified population simulation are shown in \cref{tab:bias_PS_c,tab:reject_PS_c}.
-From these tables, we can see that population stratification does indeed lead to a significant decrease in power for $\CC$ and $\MM$ across all environmental interaction models.
+The results from our population stratification simulation are shown in \cref{tab:bias_PS_c,tab:reject_PS_c}.
+From these tables, we see that population stratification does indeed lead to an increase in Type 1 error for $\CC$ and $\MM$ across all environmental interaction models, as well as larger relative biases in the range of $6--22\%$.
 For instance, the false positive rates for $\CC$ and $\MM$ are greater than $20\%$ for nearly all models, with the exception of $\CC$ in a paternal imprinting by environmental effect model, where instead, the paternal imprinting term is falsely accepted in over $20\%$ of the simulations.
-Oddly, despite the point estimates for the environmental interaction by imprinting terms having higher relative bias (as seen in \cref{tab:bias_tables_nonstrat}), their false positive rates are in the acceptable range of 0.05--0.06.
+However, examining the environmental interaction terms, we see that the false rejection rates do not exceed $7\%$, and the relative bias is roughly $4\%$.
+This seems to indicate that even under population stratification, the estimates and significance tests for environmental interactions are still valid, even though other genetic effects are inflated.
 
 We repeated this procedure but with only $2,000$ cases and no controls, to verify that the case trio model is indeed robust to population stratification.
 We show the results of the case-only model in \cref{tab:bias_PS_noc,tab:reject_PS_noc}.
-As expected, with only controls, the relative bias becomes much smaller in magnitude and the rejection rate approaches $0.05$.
+As expected, with only cases, the relative bias shrinks to $<0.5\%$ and the rejection rate is consistently near $0.05$.
 
 \newpage
 \input{tables/bias_PS_c.tex}

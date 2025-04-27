@@ -23,7 +23,7 @@ Since Haplin cannot use a MaS mating type model, these controls only allow us to
 Haplin uses the \texttt{glm()} function in R \cite{R21} to find the maximum likelihood estimates of model parameters.
 The output of \texttt{glm()} is used to compute point estimates and confidence intervals for relative risks, as well as Wald-based p-values \cite{GjesLie06}.
 
-Haplin's implementation of environmental interactions uses a stratified approach through its \texttt{haplinStrat()} and \texttt{gxe} functions\cite{GjesLie06, Juge+12}.
+Haplin's implementation of environmental interactions uses a stratified approach through its \texttt{haplinStrat()} and \texttt{gxe()} functions\cite{GjesLie06, Juge+12}.
 We briefly describe how Haplin performs this approach, though note many features are omitted as they are targetted for data with more than two alleles and/or more than two exposure states.
 \texttt{haplinStrat()} partitions the data by $E$ and independently fits the log-linear model for each partitioned data set.
 This gives us results for the respective fitted log-linear models, as well as the model for the entire data set without environmental effects.
@@ -35,7 +35,7 @@ We are testing
 \begin{equation*}
   H_0: \beta_{\EE=1} - \beta_{\EE=0} = 0, H_1: \beta_{\EE=1} - \beta_{\EE=0} \neq 0,
 \end{equation*}
-which has Wald test statistic $w = \frac{\left(\hat{\beta}_{\EE=1} - \hat{\beta}_{\EE=0}\right)^2}{\hat{\sigma_0}^2 + \hat{\sigma_1}^2}$, with this statistic asymptotically following a $\chi^2(1)$ distribution under the null hypothesis.
+which has Wald test statistic $w = \frac{\left(\hat{\beta}_{\EE=1} - \hat{\beta}_{\EE=0}\right)^2}{\hat{\sigma}_0^2 + \hat{\sigma}_1^2}$, with this statistic asymptotically following a $\chi^2(1)$ distribution under the null hypothesis.
 Point estimates and standard deviations are extracted from the fitted models, allowing us to use $w$ for significance tests \cite{Gjer+18}.
 
 For parent-of-origin effects, Haplin uses a similar parameterization to the one described in Weinberg et al.\,\cite{Wein+98} that we describe in \cref{sec:extensions}.
@@ -133,7 +133,7 @@ Currently, the simulation function assumes the HWE mating type model, with MaS c
 Using these parameters, the simulation function randomly determines the number of exposed and unexposed cases/controls to be generated based on the exposure proportions, and then samples the counts for each $(\MM, \FF, \CC)$ category from the appropriate multinomial distribution.
 Other parameters for simulating population stratification are also available, which we outline in \cref{sec:popstrat}.
 
-\section{Software comparison}
+\section{Software comparison}\label{sec:compare}
 
 We simulate a data set with $1000$ case-triads and $1000$ control-triads, minor allele frequency of $0.3$, environmental exposure prevalence of $0.3$, and with no MaS or genetic effects.
 To demonstrate that EMIM, Haplin, and \texttt{TriLLIEM} are consistent with one another, the results from each software when analyzing this data for various model parameterizations are compared.
