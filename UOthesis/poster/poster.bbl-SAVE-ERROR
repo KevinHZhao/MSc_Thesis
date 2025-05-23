@@ -1,0 +1,165 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global/global}
+    \entry{UmbaWein00}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=48a345ba6accd19129cfe8d80595d2a0}{%
+           family={Umbach},
+           familyi={U\bibinitperiod},
+           given={David\bibnamedelima M.},
+           giveni={D\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+        {{hash=6c8e26c35c8963d4c778cec96d4d2f78}{%
+           family={Weinberg},
+           familyi={W\bibinitperiod},
+           given={Clarice\bibnamedelima R.},
+           giveni={C\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier BV}%
+      }
+      \strng{namehash}{034b148bc119b14c68f1a1e776b743bc}
+      \strng{fullhash}{034b148bc119b14c68f1a1e776b743bc}
+      \strng{fullhashraw}{034b148bc119b14c68f1a1e776b743bc}
+      \strng{bibnamehash}{034b148bc119b14c68f1a1e776b743bc}
+      \strng{authorbibnamehash}{034b148bc119b14c68f1a1e776b743bc}
+      \strng{authornamehash}{034b148bc119b14c68f1a1e776b743bc}
+      \strng{authorfullhash}{034b148bc119b14c68f1a1e776b743bc}
+      \strng{authorfullhashraw}{034b148bc119b14c68f1a1e776b743bc}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{0002-9297}
+      \field{journaltitle}{The American Journal of Human Genetics}
+      \field{month}{1}
+      \field{number}{1}
+      \field{title}{The use of case-parent triads to study joint effects of genotype and exposure}
+      \field{volume}{66}
+      \field{year}{2000}
+      \field{pages}{251\bibrangedash 261}
+      \range{pages}{11}
+      \verb{doi}
+      \verb 10.1086/302707
+      \endverb
+      \verb{urlraw}
+      \verb http://dx.doi.org/10.1086/302707
+      \endverb
+      \verb{url}
+      \verb http://dx.doi.org/10.1086/302707
+      \endverb
+    \endentry
+    \entry{WeinUmba05}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=e3bfeee45ae95a2face5167583081724}{%
+           family={Weinberg},
+           familyi={W\bibinitperiod},
+           given={C.R.},
+           giveni={C\bibinitperiod}}}%
+        {{hash=53459d3471af495e2bf6b4a5a91014c4}{%
+           family={Umbach},
+           familyi={U\bibinitperiod},
+           given={D.M.},
+           giveni={D\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier BV}%
+      }
+      \strng{namehash}{71fb2c9dff8a6ee8fedb10caaa5dd28d}
+      \strng{fullhash}{71fb2c9dff8a6ee8fedb10caaa5dd28d}
+      \strng{fullhashraw}{71fb2c9dff8a6ee8fedb10caaa5dd28d}
+      \strng{bibnamehash}{71fb2c9dff8a6ee8fedb10caaa5dd28d}
+      \strng{authorbibnamehash}{71fb2c9dff8a6ee8fedb10caaa5dd28d}
+      \strng{authornamehash}{71fb2c9dff8a6ee8fedb10caaa5dd28d}
+      \strng{authorfullhash}{71fb2c9dff8a6ee8fedb10caaa5dd28d}
+      \strng{authorfullhashraw}{71fb2c9dff8a6ee8fedb10caaa5dd28d}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{0002-9297}
+      \field{journaltitle}{The American Journal of Human Genetics}
+      \field{month}{10}
+      \field{number}{4}
+      \field{title}{A hybrid design for studying genetic influences on risk of diseases with onset early in life}
+      \field{volume}{77}
+      \field{year}{2005}
+      \field{pages}{627\bibrangedash 636}
+      \range{pages}{10}
+      \verb{doi}
+      \verb 10.1086/496900
+      \endverb
+      \verb{urlraw}
+      \verb http://dx.doi.org/10.1086/496900
+      \endverb
+      \verb{url}
+      \verb http://dx.doi.org/10.1086/496900
+      \endverb
+    \endentry
+    \entry{Wein+98}{article}{}{}
+      \name{author}{3}{}{%
+        {{hash=e3bfeee45ae95a2face5167583081724}{%
+           family={Weinberg},
+           familyi={W\bibinitperiod},
+           given={C.R.},
+           giveni={C\bibinitperiod}}}%
+        {{hash=81f28eaf3c8e005d6bb9c27cb55f99cd}{%
+           family={Wilcox},
+           familyi={W\bibinitperiod},
+           given={A.J.},
+           giveni={A\bibinitperiod}}}%
+        {{hash=42b678467c9ad4c52834b0ffb17201cc}{%
+           family={Lie},
+           familyi={L\bibinitperiod},
+           given={R.T.},
+           giveni={R\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {en}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier BV}%
+      }
+      \strng{namehash}{ad88fcdbc79a80ab0a1c2adc9130a8d9}
+      \strng{fullhash}{ad88fcdbc79a80ab0a1c2adc9130a8d9}
+      \strng{fullhashraw}{ad88fcdbc79a80ab0a1c2adc9130a8d9}
+      \strng{bibnamehash}{ad88fcdbc79a80ab0a1c2adc9130a8d9}
+      \strng{authorbibnamehash}{ad88fcdbc79a80ab0a1c2adc9130a8d9}
+      \strng{authornamehash}{ad88fcdbc79a80ab0a1c2adc9130a8d9}
+      \strng{authorfullhash}{ad88fcdbc79a80ab0a1c2adc9130a8d9}
+      \strng{authorfullhashraw}{ad88fcdbc79a80ab0a1c2adc9130a8d9}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{We describe a log-linear method for analysis of case-parent-triad data, based on maximum likelihood with stratification on parental mating type. The method leads to estimates of association parameters, such as relative risks, for a single allele, and also to likelihood ratio chi2 tests (LRTs) of linkage disequilibrium. Hardy-Weinberg equilibrium need not be assumed. Our simulations suggest that the LRT has power similar to that of the chi2 ``score'' test proposed by Schaid and Sommer and that both can outperform the transmission/disequilibrium test (TDT), although the TDT can perform better under an additive model of inheritance. Because a restricted version of the LRT is asymptotically equivalent to the TDT, the proposed test can be regarded as a generalization of the TDT. The method that we describe generalizes easily to accommodate maternal effects on risk and, in fact, produces powerful and orthogonal tests of the contribution of fetal versus maternal genetic factors. We further generalize the model to allow for effects of parental imprinting. Imprinting effects can be fitted by a simple, iterative procedure that relies on the expectation-maximization algorithm and that uses standard statistical software for the maximization steps. Simulations reveal that LRT tests for detection of imprinting have very good operating characteristics. When a single allele is under study, the proposed method can yield powerful tests for detection of linkage disequilibrium and is applicable to a broader array of causal scenarios than is the TDT.}
+      \field{journaltitle}{Am. J. Hum. Genet.}
+      \field{month}{4}
+      \field{number}{4}
+      \field{title}{A log-linear approach to case-parent-triad data: assessing effects of disease genes that act either directly or through maternal effects and that may be subject to parental imprinting}
+      \field{volume}{62}
+      \field{year}{1998}
+      \field{pages}{969\bibrangedash 978}
+      \range{pages}{10}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

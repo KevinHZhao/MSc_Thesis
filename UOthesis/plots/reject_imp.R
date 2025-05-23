@@ -14,7 +14,7 @@ conditions <- expand.grid(
   mtCoef = c(0.85, 1, 1.15),
   Im = c(1, 1.2, 1.4),
   If = c(1, 1.2, 1.4),
-  includeE = c(FALSE, TRUE),
+  includeE = TRUE,
   Einteraction = c("Im", "If"),
   ntrios = 2000,
   propE = c(0.3, 0.5),
@@ -23,7 +23,6 @@ conditions <- expand.grid(
   stringsAsFactors = FALSE
 ) %>%
   filter(
-    !(!includeE & !(Einteraction == "Im" & V == 1 & propE == 0.3)),
     (R == 1) + (S == 1) + (V == 1) + (Im == 1) + (If == 1) >= 4,
     !(If != 1 & (Im != 1 | Einteraction == "Im")),
     !(Im != 1 & Einteraction == "If")
@@ -40,13 +39,14 @@ reject_table <- get_trill_reject_table(trill_res, conditions) %>%
 
 pdf("reject_imp.pdf", width = 14, height = 6)
 reject_table %>%
-  filter(R == 1, S == 1, V == 1, If.T == 1, !is.na(Im), strat == "nostrat", mtCoef == 1, mt == "HWE", includeE) %>%
+  filter(R == 1, S == 1, V == 1, If.T == 1, !is.na(Im), strat %in% c("noE", "nostrat"), mtCoef == 1, mt == "HWE", includeE) %>%
   arrange(rowid) %>%
-  select(Im.T, Im, includeE, propE, includeControl, rowid) %>%
-  left_join(bias_table %>% filter(strat == "nostrat", mt == "HWE") %>% select(rowid, includeControl, Im), by = c("rowid", "includeControl"), suffix = c(".Rejection rate", ".Relative bias")) %>%
+  select(Im.T, Im, includeE, propE, includeControl, rowid, strat) %>%
+  left_join(bias_table %>% filter(strat %in% c("noE", "nostrat"), mt == "HWE") %>% select(rowid, strat, includeControl, Im), by = c("rowid", "strat", "includeControl"), suffix = c(".Rejection rate", ".Relative bias")) %>%
   rename(TVAL = Im.T) %>%
   pivot_longer(cols = starts_with("Im."), values_to = "value", names_to = "type", names_prefix = "Im.") %>%
-  mutate(propE = factor(propE * includeE, levels = c(0, 0.3, 0.5), labels = c("No exposures", "30% exposures", "50% exposures")),
+  filter(!(propE == 0.5 & strat == "noE")) %>%
+  mutate(propE = factor(propE * (strat != "noE"), levels = c(0, 0.3, 0.5), labels = c("No E interaction in model", "30% E frequency", "50% E frequency")),
          TVAL = factor(TVAL, levels = c(1, 1.2, 1.4)),
          includeControl = factor(includeControl, levels = c(FALSE, TRUE), labels = c("Case-triad data only", "Case-triad & control-triad data"))) %>%
   ggplot() +
@@ -74,7 +74,7 @@ reject_table %>%
   select(V, Im, propE, includeControl, rowid) %>%
   left_join(bias_table %>% filter(strat == "nostrat", mt == "HWE") %>% select(rowid, includeControl, Im), by = c("rowid", "includeControl"), suffix = c(".Rejection rate", ".Relative bias")) %>%
   pivot_longer(cols = starts_with("Im."), values_to = "value", names_to = "type", names_prefix = "Im.") %>%
-  mutate(propE = factor(propE, levels = c(0.3, 0.5), labels = c("30% exposures", "50% exposures")),
+  mutate(propE = factor(propE, levels = c(0.3, 0.5), labels = c("30% E frequency", "50% E frequency")),
          V = factor(V, levels = c(1, 1.5, 1.6)),
          includeControl = factor(includeControl, levels = c(FALSE, TRUE), labels = c("Case-triad data only", "Case-triad & control-triad data"))) %>%
   ggplot() +
@@ -94,3 +94,4 @@ reject_table %>%
   ) +
   geom_hline(data = . %>% filter(type == "Rejection rate"), aes(yintercept = 0.05), colour = "red", alpha = 0.75)
 dev.off()
+

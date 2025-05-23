@@ -68,6 +68,15 @@ get_trill_table <- function(res, conditions){
           with(conditions[i,],
                rbind(
                  get_bias(
+                   results = res[[j]][[i]]$noE,
+                   C = R,
+                   M = S,
+                   V = V,
+                   Im = Im,
+                   If = If,
+                   Einteraction = Einteraction
+                 ),
+                 get_bias(
                    results = res[[j]][[i]]$strat,
                    C = R,
                    M = S,
@@ -87,7 +96,7 @@ get_trill_table <- function(res, conditions){
                  )
                ) %>%
                  as.data.frame(check.names = FALSE) %>%
-                 mutate(strat = if (nrow(.) < 2) "nostrat" else c("strat", "nostrat"),
+                 mutate(strat = if (nrow(.) < 3) NULL else c("noE", "strat", "nostrat"),
                         includeControl = includeControl,
                         rowid = rowid)
                )

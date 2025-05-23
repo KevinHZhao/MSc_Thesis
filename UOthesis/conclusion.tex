@@ -1,6 +1,109 @@
-\chapter{Conclusion}\label{chap:conclusion}
+\chapter{Discussion \& Conclusion}\label{chap:conclusion}
+
+In this thesis, we introduced our software package, \textbf{TriLLIEM}, for fitting the Weinberg et al.~\cite{Wein+98} log-linear model, compared it to existing software, and used \textbf{TriLLIEM} to assess the log-linear model in circumstances that have not been thoroughly studied before.
+We designed \textbf{TriLLIEM} to fill the gaps in software packages, thereby providing users with an accessible method of fitting log-linear models to genotype data on triads.
+
+In \cref{chap:background}, we introduced the genetic background required for modelling genotype data on trios.
+We described how the categories corresponding to maternal, paternal, and child genotype values could be modelled with a multinomial distribution with hyperparameters corresponding to genetic and environmental effects.
+This also motivated the log-linear model, which allows the probabilities of the multinomial distribution to be captured by a Poisson generalized linear model.
+We then discussed the genetic factors that could contribute to disease risk, such as maternal effects, imprinting, and gene-environment interactions, and we showed how they are modelled.
+
+In \cref{chap:methods}, we outlined the features of existing software packages for multinomial (\textbf{EMIM}) and log-linear (\textbf{Haplin}) modelling.
+We provided details on the use of \textbf{TriLLIEM} to simulate and model triad data.
+Using simulated data with various effect sizes, we compared estimates between \textbf{EMIM} and \textbf{Haplin} to ensure agreement when it was expected.
+The differences in functionality between \textbf{EMIM}, \textbf{Haplin}, and \textbf{TriLLIEM} are summarized in \cref{tab:features}.
+
+\begin{table}[htb]
+\centering
+\caption{Comparison of features between \textbf{Haplin}, \textbf{EMIM}, and \textbf{TriLLIEM}.}
+\label{tab:features}
+\begin{tblr}{
+  colspec={Q[3.1cm] Q[3.7cm] Q[3.7cm] Q[3.7cm]},
+  row{1} = {font=\bfseries},
+  rowsep=2pt,
+  column{1} = {font=\bfseries},
+}
+\toprule
+Functionality & Haplin & EMIM & TriLLIEM \\
+\midrule
+Availability &
+R package, available on CRAN &
+Standalone FORTRAN package, compiled from source or Windows/Linux binaries &
+R package, available via GitHub \\
+
+Underlying probability model &
+Poisson log-linear model &
+Multinomial model &
+Poisson log-linear model \\
+
+\raggedright Mating type models &
+HWE only &
+HWE, MS, MaS &
+HWE, MS, MaS \\
+
+\raggedright Main genetic effects & \vspace{-1em}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=0pt]
+    \item Maternal effects
+    \item Child effects
+\end{itemize} & \vspace{-1em}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=0pt]
+    \item Maternal effects
+    \item Child effects
+\end{itemize} & \vspace{-1em}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=0pt]
+    \item Maternal effects
+    \item Child effects
+\end{itemize} \\
+
+Parent-of-origin effects & \vspace{-1em}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=0pt]
+    \item Parent-of-origin effects (modified parameterization)
+\end{itemize} & \vspace{-1em}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=0pt]
+    \item Maternal imprinting effect
+    \item Paternal imprinting effect
+\end{itemize} & \vspace{-1em}
+\begin{itemize}[leftmargin=*, noitemsep, topsep=0pt]
+    \item Maternal imprinting effect
+    \item Paternal imprinting effect
+\end{itemize} \\
+
+Gene-environment interactions &
+Stratified approach implemented in the software &
+Not implemented, user may code the stratified approach themselves &
+Both stratified and non-stratified approaches are implemented \\
+\bottomrule
+\end{tblr}
+\end{table}
+
+The main analysis in this thesis was in \cref{chap:simstudy}, where we conducted two simulation studies using \textbf{TriLLIEM}.
+The first was to examine the log-linear model's performance when modelling single populations simulated under many different scenarios (e.g.\ mating asymmetry, true genetic effects), and to compare the stratified and non-stratified approaches to environmental interactions.
+The second was to examine the log-linear model's Type 1 error when modelling gene-environment interactions when population stratification is present.
+These specific simulations were chosen as they act as extensions to the findings from other researchers.
+For instance, imprinting effects were considered in the original Weinberg model \cite{Wein+98}, and further studied in Ainsworth et al.\ \cite{Ains+11}, but work on imprinting by environment interactions is limited to the rigid parameterization used in \textbf{Haplin} \cite{Gjer+18}.
+A goal we had with this work was to exploit the flexibility of generalized linear models to explore gene-environment interactions.
+
+From our first simulation study, we confirmed that mating asymmetry results in a biased maternal effect estimator when the HWE or MS mating type model is erroneously assumed.
+Furthermore, we observed spurious significance for other parameters (e.g.\ child effects when modelling maternal imprinting by environment interactions) when control triads were present and the data were simulated under mating asymmetry.
+We also showed that the stratified approach results in a substantial loss of power for imprinting by environment interactions compared to the non-stratified approach.
+
+From our second simulation study, we found that Type 1 error rates for the main genetic effects were inflated under all mating type models when data were simulated under population stratification with both case- and control-triads when estimating gene-environment interactions.
+These interaction terms, however, had Type 1 error rates in the range of $5.5\%$ to $6.7\%$, which is only slightly inflated from the desired $5\%$ rate, and in some cases is within simulation error.
+We also found that when the data included only case triads, population stratification did not affect the Type 1 error rates of any of the modelled genetic factors.
+These findings corroborated those found by Shin et al.\ \cite{Shin+10}.
+
+There are several future goals we have in mind for improving \textbf{TriLLIEM}.
+First, we will allow users to include data with missing counts, and use the EM algorithm to estimate the missing counts to perform the appropriate significance tests, as is possible in \textbf{Haplin} \cite{GjesLie06}.
+For instance, there could be genotype failure during data collection that results in the father's genotype being unknown.
+Since this is already a feature in \textbf{Haplin} and \textbf{EMIM}, allowing sporadic missing genotype data in \textbf{TriLLIEM} will increase its utility.
+We will also implement significance tests beyond the Wald test for individual parameters in the model, such as the likelihood ratio test for comparing nested models.
+Although the likelihood is provided by the \texttt{glm()} function, which is used for estimation of genetic effects, when the EM algorithm is required (imprinting, missing genotype data), the likelihood returned by the \texttt{glm()} function in \textsf{R} is not correct.
+Several optimizations could be made in \textbf{TriLLIEM}, such as its implementation of the EM algorithm, which runs significantly slower than \textbf{Haplin}'s, and pales in speed compared to \textbf{EMIM}'s direct search.
+This can be improved by refactoring some of the relevant code to use a compiled C++ library rather than relying purely on R.
+Lastly, we hope to add more features that make \textbf{TriLLIEM} an effective option for users from non-statistical backgrounds, such as functions that automate model selection or provide clear interpretations of the statistical tests and results that \textbf{TriLLIEM} outputs.
 
 \vfill
+\cleardoublepage
 
 %%% Local Variables: 
 %%% mode: latex

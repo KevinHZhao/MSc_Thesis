@@ -10,7 +10,7 @@ conditions <- expand.grid(
   mtCoef = c(0.85, 1, 1.15),
   Im = c(1, 1.2, 1.4),
   If = c(1, 1.2, 1.4),
-  includeE = c(FALSE, TRUE),
+  includeE = TRUE,
   Einteraction = c("Im", "If"),
   ntrios = 2000,
   propE = c(0.3, 0.5),
@@ -19,11 +19,11 @@ conditions <- expand.grid(
   stringsAsFactors = FALSE
 ) %>%
   filter(
-    !(!includeE & !(Einteraction == "Im" & V == 1 & propE == 0.3)),
     (R == 1) + (S == 1) + (V == 1) + (Im == 1) + (If == 1) >= 4,
     !(If != 1 & (Im != 1 | Einteraction == "Im")),
     !(Im != 1 & Einteraction == "If")
   ) %>%
+  select(-includeE) %>%
   rowid_to_column("rowid") %>%
   mutate(rowid = (rowid - 1) %% (nrow(.)/2) + 1)
 
@@ -31,13 +31,11 @@ sink(paste0("conditions_table.tex"))
 cat(
   kbl(conditions %>%
         filter(!includeControl) %>%
-        mutate(Einteraction = replace(Einteraction, !includeE, ""), propE = replace(propE, !includeE, "")) %>%
-        mutate(includeE = ifelse(includeE, "Y", "N"),
-               Einteraction = ifelse(Einteraction == "If", "$I_{\\FF}$", "$I_{\\MM}$")) %>%
-        select(rowid, R, S, V, mtCoef, Im, If, includeE, propE, Einteraction),
+        mutate(Einteraction = ifelse(Einteraction == "If", "$I_{\\FF}$", "$I_{\\MM}$")) %>%
+        select(rowid, R, S, V, mtCoef, Im, If, propE, Einteraction),
       format = "latex",
       align = "l",
-      col.names = c("ID", "$\\Rp$", "$\\Sp$", "$\\Vp$", "$C_i$", "$I_{\\MM}$", "$I_{\\FF}$", "$\\EE$", "$\\varepsilon$", "Interaction"),
+      col.names = c("ID", "$R$", "$S$", "$V$", "$C_i$", "$I_{\\MM}$", "$I_{\\FF}$", "$\\varepsilon$", "Interaction"),
       caption = "Conditions used for simulating data in our simulation study.",
       digits = 5,
       label = "conditions",

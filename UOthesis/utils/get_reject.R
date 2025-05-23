@@ -61,9 +61,9 @@ get_trill_reject_table <- function(res, conditions){
         FUN = function(a, b){
           with(
             conditions[a,],
-            rbind(get_reject(res[[b]][[a]]$strat), get_reject(res[[b]][[a]]$nostrat)) %>%
+            rbind(get_reject(res[[b]][[a]]$noE), get_reject(res[[b]][[a]]$strat), get_reject(res[[b]][[a]]$nostrat)) %>%
               as.data.frame() %>%
-              mutate(strat = if (nrow(.) < 2) "nostrat" else c("strat", "nostrat"),
+              mutate(strat = if (nrow(.) < 3) NULL else c("noE", "strat", "nostrat"),
                      includeControl = includeControl,
                      rowid = rowid
               )

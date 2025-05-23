@@ -1,0 +1,140 @@
+\usepackage{sfmath}
+
+% Calculate the new pagewidth and height.
+\ifdefined\posterbleed
+	\newdimen\paperwidthplusbleed
+	\newdimen\paperheightplusbleed
+	\paperwidthplusbleed=\paperwidth
+	\paperheightplusbleed=\paperheight
+	\advance\paperwidthplusbleed by \posterbleed
+	\advance\paperwidthplusbleed by \posterbleed
+	\advance\paperheightplusbleed by \posterbleed
+	\advance\paperheightplusbleed by \posterbleed
+	
+	\geometry{paperwidth=\paperwidthplusbleed,paperheight=\paperheightplusbleed}
+\else
+	\def\posterbleed{0mm}
+\fi
+
+\ifx\posterfaculty\undefined
+	\def\posterfaculty{default}
+\fi
+
+\renewcommand{\familydefault}{\sfdefault}
+\definecolorstyle{Canada}{
+	% Define default colours
+	% uOttawa official
+	\definecolor{garnet}{cmyk}{0.09 1.00 0.73 0.35}
+	\definecolor{grey}{cmyk}{0.52 0.51 0.55 0.09}
+	\definecolor{polargrey}{cmyk}{0.04 0.03 0.03 0.00}
+	\definecolor{lightgrey}{cmyk}{0.32 0.31 0.35 0.00}
+	\definecolor{charcoalgrey}{cmyk}{0.32 0.31 0.35 0.80}
+	\definecolor{uottawadefault}{cmyk}{0.09 1.00 0.73 0.35}
+	% uOttawa faculty colours
+	\definecolor{uottawaarts}{cmyk}{0.00 0.00 0.00 0.00}
+	\definecolor{uottawacivillawandcommonlaw}{cmyk}{0.24 0.98 0.78 0.14}
+	\definecolor{uottawaengineering}{cmyk}{0.06 0.88 1.00 0.01}
+	\definecolor{uottawaeducation}{cmyk}{0.65 0.36 0.14 0.00}
+	\definecolor{uottawagraduateandpostdoctoralstudies}{cmyk}{0.70 0.63 0.60 0.53}
+	\definecolor{uottawahealthsciences}{cmyk}{0.32 0.13 1.00 0.00}
+	\definecolor{uottawatelferschoolofmanagement}{cmyk}{0.09 0.100 0.73 0.35}
+	\definecolor{uottawamedicine}{cmyk}{0.87 0.96 0.40 0.44}
+	\definecolor{uottawascience}{cmyk}{0.01 0.11 1.00 0.00}
+	\definecolor{uottawasocialsciences}{cmyk}{1.00 0.03 0.50 0.05}
+}{
+	% Background Colours
+	\colorlet{backgroundcolor}{polargrey}
+	\colorlet{framecolor}{colorTwo}
+	% Title Colours
+	\colorlet{titlefgcolor}{white}
+	\colorlet{titlebgcolor}{lightgrey}
+	% Block Colours
+	\colorlet{blocktitlebgcolor}{charcoalgrey}
+	\colorlet{blocktitledepartmentcolor}{uottawa\posterfaculty}
+	\colorlet{blocktitlefgcolor}{white}
+	\colorlet{blockbodybgcolor}{white}
+	\colorlet{blockbodyfgcolor}{black}
+	% Innerblock Colours
+	\colorlet{innerblocktitlebgcolor}{charcoalgrey}
+	\colorlet{innerblocktitlefgcolor}{black}
+	\colorlet{innerblockbodybgcolor}{white}
+	\colorlet{innerblockbodyfgcolor}{black}
+	% Note colours
+	\colorlet{notefgcolor}{black}
+	\colorlet{notebgcolor}{charcoalgrey!70!white}
+	\colorlet{notefrcolor}{charcoalgrey}
+}
+
+\settitle{
+	\hspace{-\posterbleed}
+    \centering
+	\vbox{
+		\vspace{2em}
+		\vspace{\posterbleed}
+		\begin{minipage}{0.85\textwidth-\posterbleed-\posterbleed}
+			\centering
+			\color{titlefgcolor}
+			{\bfseries \Huge \sc \@title \par}
+			\vspace*{1em}
+			{\huge \@author \par}
+			\vspace*{1em}
+			{\LARGE \@institute}
+		\end{minipage}
+		\begin{minipage}{0.11\textwidth-\posterbleed-\posterbleed}
+			\centering
+			\@titlegraphic
+		\end{minipage}
+	}
+}
+
+\definetitlestyle{PrimaryColourHeader}{
+	width=\paperwidth, roundedcorners=0, linewidth=0pt, innersep=1.5cm,
+	titletotopverticalspace=0mm, titletoblockverticalspace=20mm,
+	titlegraphictotitledistance=10pt
+}{
+\draw[draw=none, fill=titlebgcolor]%
+(\titleposleft,\titlepostop) rectangle (\titleposright,\titleposbottom); %
+\draw[draw=none, fill=garnet]%
+(\titleposleft,\titlepostop)+(0,-10mm-\posterbleed) rectangle (\titleposright,\titlepostop); %
+\draw[draw=none, fill=garnet]%
+(\titleposleft,\titlepostop)+(\posterbleed,-25mm-\posterbleed) rectangle (0.6667*\titleposleft + 0.33333*\titleposright + \posterbleed,\titlepostop-\posterbleed) node[pos=0.5,text=white,font=\bfseries] {\Large Université d'Ottawa \color{lightgrey}| \color{white} University of Ottawa}; %
+\draw[draw=none, fill=garnet]%
+(\titleposleft,\titlepostop)+(0,-25mm-\posterbleed) rectangle (\titleposleft+\posterbleed,\titlepostop); %
+}
+
+
+\defineblockstyle{Block}{
+	titlewidthscale=1, bodywidthscale=1, titleleft,
+	titleoffsetx=0pt, titleoffsety=0pt, bodyoffsetx=0pt, bodyoffsety=0pt,
+	bodyverticalshift=0pt, roundedcorners=0, linewidth=0pt, titleinnersep=1cm,
+	bodyinnersep=1cm
+}{
+\ifBlockHasTitle%
+\draw[draw=none, fill=blocktitledepartmentcolor] (blocktitle.south west) rectangle (blocktitle.north east);
+\edef\thewordarts{arts}\ifx\thewordarts\posterfaculty
+	\draw[lightgrey,line width=0.25pt] (blockbody.north west)+(0.25pt,0.25pt) rectangle (blocktitle.north east)+(0pt,-0.25pt);
+\fi
+\draw[draw=none, fill=blocktitlebgcolor]
+(blocktitle.south west)+(5mm,0) rectangle (blocktitle.north east);
+\fi%
+\draw[draw=none, fill=blockbodybgcolor] (blockbody.north west) rectangle (blockbody.south east);
+}
+
+\definebackgroundstyle{BottomVerticalGradation}{
+	\draw[line width=0pt, fill=backgroundcolor] (bottomleft) rectangle (topright);
+	\draw[draw=none, line width=0pt, fill=titlebgcolor] (bottomleft) rectangle ($(bottomleft)+(\textwidth,2cm+\posterbleed)$);
+	\draw[draw=none, line width=0pt, fill=blocktitledepartmentcolor] ($(bottomleft)+(0.76\textwidth-1.5*\posterbleed,0)$) -- ($(bottomleft)+(\textwidth,0)$) -- ($(bottomleft)+(\textwidth,2cm+\posterbleed)$) -- ($(bottomleft)+(0.79\textwidth,2cm+\posterbleed)$) to[in=20,out=235] cycle;
+}
+\definelayouttheme{uOttawa}{
+	%	\usecolorstyle[colorPalette=GrayOrangeBlue]{Canada}
+	\usecolorstyle{Canada}
+	\usebackgroundstyle{BottomVerticalGradation}
+	\usetitlestyle{PrimaryColourHeader}
+	\useblockstyle{Block}
+	\useinnerblockstyle{Table}
+	\usenotestyle{Default}
+}
+
+\usetheme{uOttawa}
+
+\tikzposterlatexaffectionproofoff

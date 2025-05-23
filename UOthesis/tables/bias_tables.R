@@ -22,7 +22,7 @@ conditions <- expand.grid(
   mutate(rowid = (rowid - 1) %% (nrow(.)/2) + 1)
 trill_PS_results <- readRDS("../data/TriLLIEM_res_PS.RDS")
 
-bias_table <- get_trill_table(trill_PS_results, conditions)
+bias_table <- get_trill_table(trill_PS_results, conditions) %>% mutate(strat = rep(c("strat", "nostrat"), 15))
 
 sink(paste0("bias_PS_c.tex"))
 cat(
@@ -30,14 +30,14 @@ cat(
       format = "latex",
       align = "l",
       col.names = c("$\\CC$", "$\\MM$", "$\\EE:\\MM$", "$\\EE:I_{\\MM}$", "$\\EE:I_{\\FF}$", "$I_{\\MM}$", "$I_{\\FF}$", "Mating type"),
-      caption = "Relative bias for various models in our simulation study on
-                    population stratification, where the data has both cases and controls.
-                    Given values are the average across over 2,000 simulations.",
+      caption = "Average relative biases across $2,000$ datasets for various models in our simulation study on
+                    population stratification, where the data has both cases and controls.",
       digits = 5,
       label = "bias_PS_c",
       escape = FALSE,
       booktabs = TRUE,
       linesep = c("", "", "\\addlinespace"),
+      caption.short = "Average relative biases for various gene-environment interaction models for hybrid data with population stratification.",
       position = "H") %>%
     kable_styling(latex_options="scale_down")#%>%
   #column_spec(column = c(2, 5, 6), width = c("1.5in", "0.8in", "0.6in"))
@@ -50,14 +50,14 @@ cat(
       format = "latex",
       align = "l",
       col.names = c("$\\CC$", "$\\MM$", "$\\EE:\\MM$", "$\\EE:I_{\\MM}$", "$\\EE:I_{\\FF}$", "$I_{\\MM}$", "$I_{\\FF}$", "Mating type"),
-      caption = "Relative bias for various models in our simulation study on
-                    population stratification, where the data only has cases.
-                    Given values are the average across over 2,000 simulations.",
+      caption = "Average relative biases across $2,000$ datasets for various models in our simulation study on
+                    population stratification, where the data only has cases.",
       digits = 5,
       label = "bias_PS_noc",
       escape = FALSE,
       booktabs = TRUE,
       linesep = c("", "", "\\addlinespace"),
+      caption.short = "Average relative biases for various gene-environment interaction models for case-triad data with population stratification.",
       position = "H") %>%
     kable_styling(latex_options="scale_down")#%>%
   #column_spec(column = c(2, 5, 6), width = c("1.5in", "0.8in", "0.6in"))

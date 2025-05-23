@@ -1,4 +1,10 @@
-The case-parents design, where an affected child and their parents are genotyped, allows for estimation of disease risk due to either the child or mother’s genes through log-linear modelling.  It is robust to the confounding effects of population subdivision, but cannot account for non-exchangeability of parental genotypes.  Factors such as gene-environment interactions and imprinting, where risk depends on which parent contributed a genetic factor, can also be estimated.  Existing analytical software are either deprecated (LEM) or unable to model all factors simultaneously (Haplin, EMIM).  We introduce \texttt{TriLLIEM}, an R package implementing the log-linear approach to address these limitations. The software includes options for gene by environment, imprinting by environment, and non-exchangeable parental genotypes if parents of controls are also available.  We use these features in a simulation study to assess the accuracy of \texttt{TriLLIEM} and to analyze how population stratification affects imprinting by environment interactions.
+The case-parents design, where an affected child and their parents are genotyped, allows for estimation of disease risk due to either the child's or mother’s genes through log-linear modelling.
+It is robust to the confounding effects of population subdivision, but cannot account for non-exchangeability of parental genotypes.
+Factors such as gene-environment interactions and imprinting, where risk depends on which parent contributed a genetic factor, can also be estimated.
+Existing analytical software are either deprecated (LEM) or use a restrictive model (\textbf{Haplin}, \textbf{EMIM}).
+We introduce \textbf{TriLLIEM}, an R package implementing the log-linear approach to address these limitations.
+The software includes options for gene-environment interactions, imprinting by environment interactions, and non-exchangeable parental genotypes if parents of controls are also available.
+We use these features in a simulation study to assess the accuracy of \textbf{TriLLIEM} and to show how population stratification confounds the model for gene-environment interactions when control-triads are included.
 
 %%% Local Variables:
 %%% mode: latex

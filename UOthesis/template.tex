@@ -3,7 +3,7 @@
 % of your PDF document.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{filecontents*}{\jobname.xmpdata}
-  \Title{TriLLIEM: Triad Log-Linear modelling of Imprinting, Environmental interactions, and Maternal effects}
+                                \Title{\textbf{TriLLIEM}: Triad Log-Linear modelling of Imprinting, Environmental interactions, and Maternal effects}
   \Author{Kevin Zhao}
   \Org{University of Ottawa}
   \Language{en-CA}
@@ -143,7 +143,7 @@
 % thesis.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[12pt,Nomencl,Makeindex]{UOthesis}
+\documentclass[12pt,Nomencl]{UOthesis}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load the packages that you may need and that have not been loaded yet.
@@ -163,9 +163,13 @@
 \usepackage{shadow}
 \usepackage[all]{xy}
 \usepackage{url}
-\usepackage{booktabs}
+\usepackage{tabularray}
+\UseTblrLibrary{booktabs}
+\usepackage{enumitem}
 \usepackage{float}
 \usepackage{longtable}
+\usepackage{cite}
+\usepackage{amsmath}
 \LTcapwidth=\textwidth
 \usepackage[doublespacing]{setspace}
 
@@ -222,7 +226,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setUOname{Kevin Zhao}                              % Name of the candidate
 \setUOcpryear{2025}                                    % Year of graduation
-\setUOtitle{TriLLIEM: Triad Log-Linear modelling of Imprinting, Environmental interactions, and Maternal effects}  % Title of the thesis
+\setUOtitle{\textbf{TriLLIEM}: Triad Log-Linear modelling of Imprinting, Environmental interactions, and Maternal effects}  % Title of the thesis
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Some of the variables that you may need to redefine.  Comment out
@@ -261,9 +265,9 @@
 \newcommand{\EE}{{\rm E}}
 \newcommand{\DD}{{\rm D}}
 \newcommand{\MAF}{{\rm MAF}}
-\newcommand{\Rp}{{\rm R}}
-\newcommand{\Sp}{{\rm S}}
-\newcommand{\Vp}{{\rm V}}
+%\newcommand{\Rp}{{\rm R}}
+%\newcommand{\Sp}{{\rm S}}
+%\newcommand{\Vp}{{\rm V}}
 \newcommand{\Op}{{\rm O}}
 
 \DeclareMathOperator{\Per}{Per}

@@ -6,58 +6,26 @@ df <-
   readRDS("../data/consistencydat.RDS")$dat4R %>%
   select(mt_MS, M, F, C, E, D, count)
 
-n <- nrow(df)
-half <- ceiling(n / 2)
-df1 <- df[1:half, ]
-df2 <- df[(half+1):n, ]
+sink("consistencydat.tex")
+df %>%
+  pivot_wider(names_from = E, values_from = count, names_prefix = "E=") %>%
+  pivot_wider(names_from = D, values_from = c("E=0","E=1"), names_prefix = "D=") %>%
+  select(mt_MS, M, F, C, "E=0_D=0", "E=1_D=0", "E=0_D=1", "E=1_D=1") %>%
+  kbl(
+    format = "latex",
+    align = "l",
+    col.names = c("Mating type", "$\\MM$", "$\\FF$", "$\\CC$", "$\\EE=0$", "$\\EE=1$", "$\\EE=0$", "$\\EE=1$"),
+    caption = "Simulated null data set for comparison between \\textbf{EMIM}, \\textbf{Haplin}, and \\textbf{TriLLIEM}.",
+    label = "consistencydat",
+    escape = FALSE,
+    booktabs = TRUE,
+    linesep = "",
+    position = "H"
+  ) %>%
+  add_header_above(
+    c(" " = 4, "$\\\\DD=0$" = 2, "$\\\\DD=1$" = 2),
+    escape = FALSE
+  ) %>%
+  cat()
+sink()
 
-tab1 <- kbl(df1,
-            format = "latex",
-            booktabs = TRUE,
-            row.names = FALSE,
-            align = "l",
-            col.names = c("Mating type", "$\\MM$", "$\\FF$", "$\\CC$", "$\\EE$", "$\\DD$", "count"),
-            escape = FALSE,
-            linesep = c(rep("", 14), "\\addlinespace"))
-
-tab2 <- kbl(df2,
-            format = "latex",
-            booktabs = TRUE,
-            row.names = FALSE,
-            align = "l",
-            col.names = c("Mating type", "$\\MM$", "$\\FF$", "$\\CC$", "$\\EE$", "$\\DD$", "count"),
-            escape = FALSE,
-            linesep = c(rep("", 14), "\\addlinespace"))
-
-tex_output <- paste0(
-  "\\begin{table}[htb]\n",
-  "\\centering\n",
-  "\\caption{Simulated null data set for comparison between EMIM, Haplin, and \\texttt{TriLLIEM}.}\n",
-  "\\label{tab:consistencydat}\n",
-  "\\begin{minipage}{0.48\\textwidth}\n",
-  tab1,
-  "\\end{minipage}\n",
-  "\\hfill\n",
-  "\\begin{minipage}{0.48\\textwidth}\n",
-  tab2,
-  "\\end{minipage}\n",
-  "\\end{table}"
-)
-
-writeLines(tex_output, "consistencydat.tex")
-
-# sink(paste0("consistencydat.tex"))
-#  %>%
-#   kbl(
-#     format = "latex",
-#     align = "l",
-#     col.names = c("Mating type", "$\\MM$", "$\\FF$", "$\\CC$", "$\\EE$", "$\\DD$", "count"),
-#     caption = "Simulated null data set for comparison between EMIM, Haplin, and \\texttt{TriLLIEM}.",
-#     label = "consistencydat",
-#     escape = FALSE,
-#     booktabs = TRUE,
-#     linesep = c(rep("", 14), "\\addlinespace"),
-#     position = "H"
-#   ) %>%
-#   cat()
-# sink()

@@ -1,0 +1,187 @@
+\documentclass[25pt]{tikzposter}
+\usepackage{pifont}
+\usepackage[backend=biber,style=vancouver]{biblatex}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{wrapfig}
+\addbibresource{./biblio.bib}
+\renewcommand\labelitemi{\ding{118}}
+\renewcommand\labelitemii{\ding{239}}
+
+\geometry{paperwidth=36in,paperheight=48in}
+\makeatletter
+\setlength{\TP@visibletextwidth}{\textwidth-2\TP@innermargin}
+\setlength{\TP@visibletextheight}{\textheight-2\TP@innermargin}
+
+\makeatother
+\def\posterfaculty{science}
+\def\posterbleed{3mm}
+\include{uottawa_poster}
+
+\AtBeginDocument{%
+    \begin{pgfonlayer}{backgroundlayer}
+        \node[
+            inner sep=4pt, anchor=south east, fill=white, draw=none,
+            rounded corners=5, fill opacity=0, text opacity=1
+        ] at (0.5\textwidth-18pt, -0.5\textheight+18pt)%18pt for bleed 3mm, 7 for no bleed
+	{\huge{\url{kzhao097@uottawa.ca}}};  %%% ADAPT FOOTNOTE HERE
+    \end{pgfonlayer}
+}
+
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\OO}{\mathcal{O}}
+
+\newcommand{\MM}{{\rm M}}
+\newcommand{\FF}{{\rm F}}
+\newcommand{\CC}{{\rm C}}
+\newcommand{\EE}{{\rm E}}
+\newcommand{\DD}{{\rm D}}
+\newcommand{\MAF}{{\rm MAF}}
+\newcommand{\Rp}{{\rm R}}
+\newcommand{\Sp}{{\rm S}}
+\newcommand{\Vp}{{\rm V}}
+\newcommand{\Op}{{\rm O}}
+
+\titlegraphic{\includegraphics[height=10em]{uottawa_VER_WHITE}}
+\title{\parbox{\linewidth}{\centering \textbf{TriLLIEM}: Triad Log-Linear modelling of Imprinting, Environmental interactions, and Maternal effects}}
+\author{Kevin H.\ Zhao and Kelly Burkett}
+\institute{Department of Mathematics and Statistics, University of Ottawa}
+
+\begin{document}
+\maketitle
+\begin{columns}
+	\column{0.3}
+	\block{Background}
+	{\Large
+		\begin{itemize}
+			\item The trio-based design is used to estimate disease risk in offspring based on the presence of a minor allele and environmental factors.
+			\item The Weinberg group~\cite{UmbaWein00,WeinUmba05,Wein+98} proposed a log-linear model to estimate risk from genetic effects.
+			\item These effects include:
+				\begin{itemize}
+					\item Child and maternal genetic effects
+					\item Parent-of-origin effects
+					\item Gene-environment interactions
+				\end{itemize}
+			\item The model depends on assumptions about the distribution of mother-father mating type pairs in the population.
+			\item No official software for their model was ever released.
+		\end{itemize}
+	}
+	\block{Motivation \& objectives}
+	{\Large
+		\begin{tikzpicture}[remember picture, overlay]
+			\node[anchor=north east]
+				at (1.05\linewidth, 0.0\linewidth)
+				{\begin{minipage}{0.28\linewidth}
+					\centering
+				\includegraphics[width=\linewidth]{plots/qr-code}
+
+				\vspace{-0.3em}
+				\small\itshape Visit our GitHub repo!
+			\end{minipage}
+			};
+	\end{tikzpicture} \vspace{-0.5em}
+		\begin{itemize}
+			\item \begin{minipage}[t]{0.7\linewidth} Existing software packages for trio-based designs have limited features, such as requiring a stratified approach to gene-environment interactions.\end{minipage} \\
+			\item We developed a new \textsf{R} package, \textbf{TriLLIEM}, which makes full use of the log-linear model.
+			\item We used \textbf{TriLLIEM} to conduct a simulation study assessing the model's ability to identify these effects.
+			\item We also used \textbf{TriLLIEM} to assess the model's performance when data is sampled from a simulated population with hidden substructures.
+		\end{itemize}
+	}
+	\block{Notation}
+	{\large
+		\renewcommand{\arraystretch}{1.2}
+		\centering
+		\begin{tabular}{p{1.8in}>{\raggedleft\arraybackslash}p{7.5in}}
+	\toprule
+	Genetic factor & Description \\
+	\midrule
+	$\CC$ & Risk from each copy of child's allele \\
+	$\MM$ & Risk from each copy of mother's allele \\
+	$I_{\MM}$ & Risk from child inheriting allele from mother \\
+	$I_{\FF}$ & Risk from child inheriting allele from father \\
+	$\EE:\MM$ & Risk from each copy of mother's allele conditional on environmental exposure \\
+	$\EE:I_{\MM}$ & Risk from child inheriting allele from mother conditional on environmental exposure \\
+	$\EE:I_{\FF}$ & Risk from child inheriting allele from father conditional on environmental exposure \\
+	\bottomrule
+\end{tabular}
+
+\vspace{2.35em}
+
+\begin{tabular}{p{1.8in}>{\raggedleft\arraybackslash}p{7.5in}} 
+	\toprule 
+	Mating type model & Description \\ 
+	\midrule 
+	HWE & Hardy-Weinberg equilibrium mating type model, parent genotypes are independent and a result of random draw of alleles from population. \\
+	MS & Mating symmetry mating type model, assumes mother-father mating type probabilities are interchangeable. \\ 
+	MaS & Mating asymmetry mating type model, probabilities of each mother-father mating type pair are independent. \\
+	\bottomrule
+	\end{tabular}
+	}
+
+	\column{0.7}
+	\block{Simulation study 1 --- Assessing effect estimation and power}
+	{\LARGE
+	\begin{itemize}
+		\item Under various true genetic effects, we simulated and analyzed $2,000$ data sets with $1,000$ case-triads and $1,000$ control-triads, and another $2,000$ data sets with only $2,000$ case-triads.
+		\item With $50\%$ case- and control-triads in a population under mating asymmetry, we observed high Type 1 error rates for child effects when modelling maternal imprinting by environment interactions compared to using the same sample size with $100\%$ case-triads (Left figure, top row).
+		\item The non-stratified (unhatched) approach that \textbf{TriLLIEM} permits has substantially greater power than the stratified (hatched) approach other packages use for gene-environment interactions (Right figure).
+	\end{itemize}\vspace{0.5em}
+	\begin{subcolumns}
+		\subcolumn{0.5}
+		\centering
+		\includegraphics[width=0.5\linewidth]{plots/reject_mas_mimpE.pdf}
+		\subcolumn{0.5}
+		\includegraphics[width=0.5\linewidth]{plots/stratcomp_Im.pdf}
+		\vspace{-3.405em}
+	\end{subcolumns}
+	}
+	\block{Simulation study 2 --- Effect of population stratification}
+	{\Large
+		\begin{minipage}{0.525\linewidth}
+\begin{tikzfigure}
+	\begin{tabular}{p{2in}p{2.25in}p{3in}p{2in}p{2in}}
+  \hline
+  Sub-population       & Minor allele frequency   & Environmental exposure rate & Disease prevalence & Population proportion \\ \hline
+$1$  & $20\%$ & $30\%$        & $10\%$    & $40\%$    \\
+$2$ & $40\%$ & $50\%$        & $20\%$    & $60\%$    \\ \hline
+\end{tabular}
+
+\vspace{0.5em}
+
+\end{tikzfigure}
+		\begin{itemize}
+		\item The population consisted of two hidden sub-populations with parameters given in the table above.
+		\item Simulations used one data set with $1,000$ case-triads and $1,000$ control-triads, and another with only $2,000$ case-triads.
+		\item The log-linear model was run on each data set with a variety of genetic effects in the model.
+		\item This was repeated $2,000$ times, and the average Type 1 error rates for the model parameters are given in the tables below for simulations with both case- and control-triads (top) and with only case-triads (bottom).
+		\end{itemize}
+	\end{minipage}
+	\begin{minipage}{0.45\linewidth}
+\input{tables/reject_PS_c.tex}
+
+\vspace{0.4em}
+
+\input{tables/reject_PS_noc.tex}
+\end{minipage}
+	\vspace{-0.5em}
+}
+
+	\block{Discussion}
+	{\LARGE
+	\begin{itemize}
+		\item Our package, \textbf{TriLLIEM}, is a complete implementation of the log-linear model, allowing researchers to no longer be restricted to the stratified approach for gene-environment interactions.
+		\item We verified that in populations with hidden sub-populations, the model performs well when given data with only case-triads, and only suffers small inflation in identifying gene-environment interactions when control-triads are included.
+	\end{itemize}
+	\vspace{-0.5em}
+}
+	\block{References}{
+	\printbibliography[heading=none]
+}
+
+\end{columns}
+\end{document}
